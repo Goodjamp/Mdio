@@ -1,0 +1,15 @@
+*.bin
+*.hex
+*.elf
+*.o
+debug
+release
+*.release
+*.debug
+*.autosave
+*debug
+*release
+builds
+*-Relese
+*-Debug
+*.pro.*

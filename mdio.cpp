@@ -95,7 +95,8 @@ void Mdio::updateConnectionStatusStr(void)
                                     + stopBitsList[connectStopBitsIndex]
                                     + " "
                                     + "Адр."
-                                    + QString::number(connectAddress)
+                                    + QString::number(connectAddress);
+    /*
                                     + "  "
                                     + "v."
                                     + QString::number(connectDeviceVersion)
@@ -103,7 +104,7 @@ void Mdio::updateConnectionStatusStr(void)
                                     + QString::number(connectDeviceConfDay) + "."
                                     + QString::number(connectDeviceConfMonth) + "."
                                     + QString::number(connectDeviceConfYear);
-
+*/
     ui->lConnectionSettings->setText(connectionSettingsStr);
 }
 

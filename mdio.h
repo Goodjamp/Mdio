@@ -15,10 +15,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
 QT_END_NAMESPACE
 
-#define DEFAULT_CONNECT_BR_INDEX           2
+#define DEFAULT_CONNECT_BR_INDEX           8
 #define DEFAULT_CONNECT_PARITY_INDEX       0
 #define DEFAULT_CONNECT_STOP_BITS_INDEX    0
-#define DEFAULT_CONNECT_ADDRESS            1
+#define DEFAULT_CONNECT_ADDRESS            254
 #define DEFAULT_CONNECT_VERSION            0
 #define DEFAULT_CONNECT_YEAR               0
 #define DEFAULT_CONNECT_MONTH              0

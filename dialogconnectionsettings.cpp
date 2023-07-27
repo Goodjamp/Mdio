@@ -20,7 +20,8 @@ DialogConnectionSettings::DialogConnectionSettings(QStringList comList,
     ui->cbBaudRate->addItems(brList);
     ui->cbParity->addItems(parityList);
     ui->cbStopBits->addItems(stopBitsList);
-    setWindowTitle("Налаштування підключення");
+
+    setWindowTitle("Параметри з'єднання з ПК");
     ui->leAddress->setValidator(new QRegExpValidator((QRegExp)"\\d{1,3}", this));
 
     using ::operator|;
@@ -44,10 +45,11 @@ void DialogConnectionSettings::on_pbApply_clicked()
 
     if (ui->leAddress->text().toUInt() > 255) {
         QMessageBox *errorAddressMessage = new QMessageBox(QMessageBox::Warning,
-                                                           "Помилка адресу",
+                                                           "Помилка адреси пристрою",
                                                            "Адреса пристрою має бути < 255",
                                                            QMessageBox::Ok,
                                                            this);
+        errorAddressMessage->setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
         errorAddressMessage->show();
     } else {
         settings[PORT] = ui->cbPort->currentIndex();

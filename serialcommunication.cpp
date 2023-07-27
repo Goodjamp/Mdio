@@ -71,19 +71,27 @@ bool SerialCommunication::closePort()
 bool SerialCommunication::writePort(QByteArray writeData)
 {
     if (port->isOpen() == false) {
-        qDebug()<<"Port close ";
+        qDebug()<<"Port close";
         return false;
     }
     if (writeData.size() == 0) {
         return true;
     }
-    const qint64 written = port->write(writeData);
-}
-
-bool SerialCommunication::readPort(QVector<char> readData)
-{
-    if (port->isOpen() == false) {
-        qDebug()<<"Port close ";
+    if (writeData.size() != port->write(writeData)) {
         return false;
     }
+    return true;
+}
+
+bool SerialCommunication::readPort(QByteArray writeData)
+{
+#define MAX_DATA_READ    256
+
+    if (port->isOpen() == false) {
+        qDebug()<<"Port close";
+        return false;
+    }
+    writeData = port->read(MAX_DATA_READ);
+
+    return true;
 }

@@ -1,6 +1,6 @@
-#include "modbus.h"
+#include "modbusrtumaster.h"
 
-Modbus::Modbus(QObject *parent) : QObject(parent)
+ModbusRtuMaster::ModbusRtuMaster(QObject *parent) : QObject(parent)
 {
 
 }

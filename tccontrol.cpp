@@ -6,6 +6,8 @@ TcControl::TcControl(QString name, QWidget *parent) :
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
+
+    ui->fBackGround->setStyleSheet("QFrame  {background-color:rgb(150, 200, 200);}");
     ui->lTc->setText(name);
 }
 

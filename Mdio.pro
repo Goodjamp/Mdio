@@ -21,6 +21,7 @@ SOURCES += \
     dialogconnectionsettings.cpp \
     main.cpp \
     mdio.cpp \
+    modbusrtumaster.cpp \
     serialcommunication.cpp \
     tccontrol.cpp
 
@@ -29,6 +30,7 @@ HEADERS += \
     communication.h \
     dialogconnectionsettings.h \
     mdio.h \
+    modbusrtumaster.h \
     serialcommunication.h \
     tccontrol.h
 

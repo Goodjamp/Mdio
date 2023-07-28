@@ -27,7 +27,7 @@ public:
     bool openPort(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits);
     bool closePort();
     bool writePort(QByteArray writeData);
-    bool readPort(QByteArray writeData);
+    bool readPort(QByteArray readData);
 
 private:
     QSerialPort *port;

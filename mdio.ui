@@ -292,7 +292,7 @@
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>TC</string>
+               <string>Телесигналізація</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -534,7 +534,7 @@
             <item>
              <widget class="QLabel" name="label_3">
               <property name="text">
-               <string>TК</string>
+               <string>Телекерування</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -712,7 +712,7 @@
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QPushButton" name="pbTsState2">
+             <widget class="QPushButton" name="pbTiState2">
               <property name="minimumSize">
                <size>
                 <width>100</width>
@@ -726,7 +726,10 @@
                </size>
               </property>
               <property name="text">
-               <string>____/_____</string>
+               <string/>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -788,7 +791,7 @@
              </widget>
             </item>
             <item row="4" column="1">
-             <widget class="QPushButton" name="pbTsState4">
+             <widget class="QPushButton" name="pbTiState4">
               <property name="minimumSize">
                <size>
                 <width>100</width>
@@ -802,12 +805,15 @@
                </size>
               </property>
               <property name="text">
-               <string>____/_____</string>
+               <string/>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QPushButton" name="pbTsState1">
+             <widget class="QPushButton" name="pbTiState1">
               <property name="minimumSize">
                <size>
                 <width>100</width>
@@ -821,12 +827,15 @@
                </size>
               </property>
               <property name="text">
-               <string>____/_____</string>
+               <string/>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QPushButton" name="pbTsState3">
+             <widget class="QPushButton" name="pbTiState3">
               <property name="minimumSize">
                <size>
                 <width>100</width>
@@ -840,7 +849,10 @@
                </size>
               </property>
               <property name="text">
-               <string>____/_____</string>
+               <string/>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1032,6 +1044,13 @@
         </property>
         <property name="text">
          <string>Відключити</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lDeviceMetaInfo">
+        <property name="text">
+         <string>v00000 00.00.0000</string>
         </property>
        </widget>
       </item>

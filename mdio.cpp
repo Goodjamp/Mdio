@@ -44,6 +44,7 @@ Mdio::Mdio(QWidget *parent)
     communicaiton = new Communication(5);
     initCustomUi();
     updateConnectionStatusStr();
+    updateDeviceMetaInfStr();
 
     //ui->pushButton->setText("RUN");
 }
@@ -106,6 +107,18 @@ void Mdio::updateConnectionStatusStr(void)
                                     + QString::number(connectDeviceConfYear);
 */
     ui->lConnectionSettings->setText(connectionSettingsStr);
+}
+
+void Mdio::updateDeviceMetaInfStr()
+{
+    QString metaInfStr = "v."
+                         + QString::number(connectDeviceVersion)
+                         + " "
+                         + QString::number(connectDeviceConfDay) + "."
+                         + QString::number(connectDeviceConfMonth) + "."
+                         + QString::number(connectDeviceConfYear);
+
+    ui->lDeviceMetaInfo->setText(metaInfStr);
 }
 
 void Mdio::applyConnectionSettings(QVector<int> connectionSettings)

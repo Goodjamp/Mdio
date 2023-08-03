@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>Resources/CompanyIcon.png</file>
+        <file>style.css</file>
+        <file>Resources/On_resize.png</file>
+        <file>Resources/Off_resize.png</file>
     </qresource>
 </RCC>

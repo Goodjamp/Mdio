@@ -42,6 +42,7 @@ public:
 private:
     void initCustomUi();
     void updateConnectionStatusStr();
+    void updateDeviceMetaInfStr();
 
 private slots:
 

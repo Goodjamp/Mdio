@@ -83,7 +83,7 @@ bool SerialCommunication::writePort(QByteArray writeData)
     return true;
 }
 
-bool SerialCommunication::readPort(QByteArray writeData)
+bool SerialCommunication::readPort(QByteArray *readBuff)
 {
 #define MAX_DATA_READ    256
 
@@ -91,7 +91,7 @@ bool SerialCommunication::readPort(QByteArray writeData)
         qDebug()<<"Port close";
         return false;
     }
-    writeData = port->read(MAX_DATA_READ);
+    *readBuff = port->read(MAX_DATA_READ);
 
     return true;
 }

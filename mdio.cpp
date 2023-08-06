@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <dialogconnectionsettings.h>
+#include <modbusrtumaster.h>
 
 #define TC_STATIC_NUMBER    2
 #define TC_PULS_NUMBER      1
@@ -31,7 +32,6 @@ void Mdio::initCustomUi()
     ui->cbBaudRate->addItems(brList);
     ui->cbStopBits->addItems(stopBitsList);
     ui->cbParity->addItems(parityList);
-
 }
 
 

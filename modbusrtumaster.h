@@ -5,9 +5,21 @@
 #include <QWidget>
 #include "stdint.h"
 #include <QWidget>
+#include <QByteArray>
 #include "serialcommunication.h"
 
-#define LITTE_TO_BIG_ENDIANS_U16(x)    (UINT16_MAX & ((x) >> 8 | (x) << 8))
+#define LITTE_TO_BIG_ENDIANS_U16(x)        (UINT16_MAX & ((x) >> 8 | (x) << 8))
+#define MODBUS_SLAVE_ADDRESS_POS           0
+#define MODBUS_FUNCTION_CODE_POS           1
+#define MODBUS_RX_BYTES_NUMBER_POS         2
+#define MODBUS_RX_BITS_PAYLOAD_POS         3
+#define MODBUS_TX_BYTES_NUMBER_POS         6
+
+/*
+ * The minimum size of the command to read the information from the slave.
+ * The minimum command size is reached if the requested 0 bits.
+ */
+#define MB_READ_MINIMUM_COMMAND_SIZE    5
 
 class ModbusRtuMaster : public SerialCommunication
 {
@@ -48,7 +60,7 @@ private:
         0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
         0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040 };
 
-    enum {
+    typedef enum {
         READ_COIL_STATUS = 1,
         READ_DISCRET_INPUTS = 2,
         READ_HOLDING_REGISTERS = 3,
@@ -59,7 +71,37 @@ private:
         PRESET_MULTIPLE_REGISTER = 16,
     } FunList;
 
+    typedef enum {
+        MB_OK,
+        MB_RX_SIZE_ERROR,
+        MB_CRC_ERROR,
+        MB_ADDRESS_ERROR,
+        MB_FUNCTION_ERROR,
+        MB_BYTES_NUMBER_ERROR,
+        MB_TARGET_FUNCTION_ERROR,
+        MB_SEND_ERROR,
+        MB_REPLY_ERROR,
+    } MbStatus;
+
     uint16_t crc(QByteArray buff);
+
+    /*
+     * This method is used to read bits and bytes from the slave over the next functions:
+     * - READ_COIL_STATUS
+     * - READ_DISCRET_INPUTS
+     * - READ_HOLDING_REGISTERS
+     * - READ_INPUT_REGISTERS
+     */
+    template <typename T>
+    MbStatus read(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                  uint16_t address, uint16_t number, QVector<T> *state,
+                  uint32_t timeoute);
+
+    MbStatus writeSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                 uint16_t address, uint16_t value, uint32_t timeoute);
+
+    MbStatus writeMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                   uint16_t address, QVector<uint16_t> value, uint32_t timeoute);
 
 public:
     explicit ModbusRtuMaster(QObject *parent = nullptr);
@@ -67,7 +109,7 @@ public:
     /*
      * Read
      */
-    void readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress, uint16_t coilsNumber); // F_1
+    void readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress, uint16_t coilsNumber, QByteArray *coilState, uint32_t timeoute); // F_1
     void readDiscreteInputs(); // F_2
     void readHoldingRegisters(); // F_3
     void readInputRegisters(); // F_4

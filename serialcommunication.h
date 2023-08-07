@@ -24,10 +24,10 @@ public:
     ~SerialCommunication(){};
 
     static QStringList getPortsList();
-    bool openPort(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits);
-    bool closePort();
-    bool writePort(QByteArray writeData);
-    bool readPort(QByteArray *readBuff);
+    bool open(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits);
+    bool close();
+    bool write(QByteArray writeData);
+    bool read(QByteArray *readBuff);
 
 private:
     QSerialPort *port;

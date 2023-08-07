@@ -10,14 +10,14 @@ ModbusRtuMaster::ModbusRtuMaster(QObject *parent) : SerialCommunication(parent)
 
 }
 
-uint16_t ModbusRtuMaster::crc(QByteArray buff)
+uint16_t ModbusRtuMaster::crc(QByteArray *buff)
 {
     uint8_t xorVal = 0;
     uint16_t rezCrc = 0xFFFF;
 
-    for (int k = 0; k <  buff.size(); k++)
+    for (int k = 0; k <  buff->size(); k++)
     {
-        xorVal = buff[k] ^ rezCrc;
+        xorVal = buff->at(k) ^ rezCrc;
         rezCrc >>= 8;
         rezCrc ^= this->crcTable[xorVal];
     }
@@ -25,22 +25,66 @@ uint16_t ModbusRtuMaster::crc(QByteArray buff)
     return rezCrc;
 }
 
-template <typename T>
-ModbusRtuMaster::MbStatus ModbusRtuMaster::read(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                                uint16_t address, uint16_t number, QVector<T> *state,
-                                                uint32_t timeoute)
+ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int timeoute,
+                                                        int targetSize, uint8_t slaveAddress,
+                                                        uint8_t function)
 {
-    QByteArray commandBuff;
     QByteArray tempReadBuff;
     uint16_t crcRx;
     uint16_t crcCalc;
+    QTime endReceiveTime = QTime::currentTime().addMSecs(timeoute);
+
+    rxData->clear();
+    while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
+        read(&tempReadBuff);
+        if (tempReadBuff.size() != 0){
+            rxData->append(tempReadBuff);
+            if (rxData->size() == targetSize) {
+                break;
+            }
+        }
+    }
+    if (rxData->size() != targetSize
+        || rxData->size() != MB_EXEPTION_REPLY_SIZE) {
+        return MB_RX_SIZE_ERROR;
+    }
+    crcRx = UINT16_MAX & (rxData->at(targetSize - 1) | rxData->at(targetSize - 1) << 8);
+    crcCalc = crc(rxData);
+    if (crcCalc == crcRx) {
+        return MB_CRC_ERROR;
+    }
+    if (rxData->at(MB_SLAVE_ADDRESS_POS) != static_cast<char>(slaveAddress)) {
+        return MB_ADDRESS_ERROR;
+    }
+    if (rxData->at(MB_FUNCTION_CODE_POS) != static_cast<char>(function)) {
+        /*
+         * If function wrong, it could be exeption reply, lets test it
+         */
+        if (rxData->at(MB_FUNCTION_CODE_POS) == static_cast<char>(MB_EXCEPTION_CODE(function))) {
+            return MB_RX_EXEPTION;
+        } else {
+            return MB_ADDRESS_ERROR;
+        }
+    }
+
+    return MB_OK;
+}
+
+template <typename T>
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                                            uint16_t address, uint16_t number, QVector<T> *state,
+                                                            uint32_t timeoute)
+{
+    QByteArray commandBuff;
+    uint16_t crcCalc;
     uint8_t payloadBytes;
     uint16_t rxSize;
+    ModbusRtuMaster::MbStatus result;
 
     /*
      * Clear input buffer
      */
-    readPort(&commandBuff);
+    read(&commandBuff);
     commandBuff.clear();
 
     /*
@@ -52,14 +96,14 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::read(uint8_t slaveAddress, ModbusRtuM
     commandBuff.push_back(static_cast<uint8_t>(address));
     commandBuff.push_back(static_cast<uint8_t>(number >> 8));
     commandBuff.push_back(static_cast<uint8_t>(number));
-    crcCalc = crc(commandBuff);
+    crcCalc = crc(&commandBuff);
     commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
 
     /*
      * Send command
      */
-    if (writePort(commandBuff) != true) {
+    if (write(commandBuff) != true) {
         return MB_SEND_ERROR;
     };
     commandBuff.clear();
@@ -81,93 +125,81 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::read(uint8_t slaveAddress, ModbusRtuM
     default:
         return MB_TARGET_FUNCTION_ERROR;
     }
-    rxSize = MB_READ_MINIMUM_COMMAND_SIZE + payloadBytes;
+    rxSize = MB_MINIMUM_COMMAND_SIZE + payloadBytes;
 
-    QTime endReceiveTime = QTime::currentTime().addMSecs(timeoute);
+    /*
+     * Receive reply
+     */
+    result = receiveReply(&commandBuff, timeoute, rxSize, slaveAddress, function);
+    if (result != MB_OK) {
+        return result;
+    }
 
-     while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
-        readPort(&tempReadBuff);
-        if (tempReadBuff.size() != 0){
-            commandBuff.append(tempReadBuff);
-            if (commandBuff.size() == rxSize) {
-                break;
+    /*
+     * Making specific tests for the received data
+     */
+    if (commandBuff[MB_RX_BYTES_NUMBER_POS] != static_cast<char>(payloadBytes)) {
+        return MB_BYTES_NUMBER_ERROR;
+    }
+
+    /*
+     * Deserializing payload depend pn the function
+     */
+    switch (function) {
+    case READ_COIL_STATUS:
+    case READ_DISCRET_INPUTS: {
+        uint16_t rest;
+        int payloadPos = MB_RX_BITS_PAYLOAD_POS;
+        /*
+         * Deserialiaze the binary information type
+         */
+        while (number) {
+            rest = (number > 8) ? 8 : number;
+            for (uint32_t k = 0; k < rest; k++) {
+                state->push_back(commandBuff[payloadPos] & 0x1 ? true : false);
+                commandBuff[payloadPos] = commandBuff[payloadPos] >> 1;
             }
+            payloadPos++;
+            number -= rest;
         }
-     }
-     if (commandBuff.size() != rxSize) {
-         return MB_RX_SIZE_ERROR;
-     }
-     crcRx = UINT16_MAX & (commandBuff[rxSize - 1] | commandBuff[rxSize - 1] << 8);
-     crcCalc = crc(commandBuff);
-     if (crcCalc == crcRx) {
-         return MB_CRC_ERROR;
-     }
-     if (commandBuff[MODBUS_SLAVE_ADDRESS_POS] != static_cast<char>(slaveAddress)) {
-         return MB_ADDRESS_ERROR;
-     }
-     if (commandBuff[MODBUS_FUNCTION_CODE_POS] != static_cast<char>(function)) {
-         return MB_FUNCTION_ERROR;
-     }
-     if (commandBuff[MODBUS_RX_BYTES_NUMBER_POS] != static_cast<char>(payloadBytes)) {
-         return MB_BYTES_NUMBER_ERROR;
-     }
+        break;
+    }
 
-     switch (function) {
-     case READ_COIL_STATUS:
-     case READ_DISCRET_INPUTS: {
-         uint16_t rest;
-         int payloadPos = MODBUS_RX_BITS_PAYLOAD_POS;
+    case READ_HOLDING_REGISTERS:
+    case READ_INPUT_REGISTERS: {
+        int payloadPos = MB_RX_BITS_PAYLOAD_POS;
+        uint16_t data = 0;
 
-         /*
-          * Deserialiaze the binary information type
-          */
-         while (number) {
-             rest = (number > 8) ? 8 : number;
-             for (uint32_t k = 0; k < rest; k++) {
-                 state->push_back(commandBuff[payloadPos] & 0x1 ? true : false);
-                 commandBuff[payloadPos] = commandBuff[payloadPos] >> 1;
-             }
-             payloadPos++;
-             number -= rest;
-         }
-         break;
-     }
-
-     case READ_HOLDING_REGISTERS:
-     case READ_INPUT_REGISTERS: {
-         int payloadPos = MODBUS_RX_BITS_PAYLOAD_POS;
-         uint16_t data = 0;
-
-         /*
-          * Deserialiaze the bytes information.
-          * Convert Big endians to Little endians
-          */
-         for (uint32_t k = 0; k < number; k++) {
-             data = (0xFF00 & (commandBuff[payloadPos++] << 8));
-             data |= (0xFF & commandBuff[payloadPos++]);
-             state->push_back(data);
-         }
-         break;
-     }
-
-     default:
-         return MB_TARGET_FUNCTION_ERROR;
-     }
-
-     return MB_OK;
+        /*
+         * Deserialiaze the bytes information.
+         * Convert Big endians to Little endians
+         */
+        for (uint32_t k = 0; k < number; k++) {
+            data = (0xFF00 & (commandBuff[payloadPos++] << 8));
+            data |= (0xFF & commandBuff[payloadPos++]);
+            state->push_back(data);
+        }
+        break;
+    }
+    default:
+        return MB_TARGET_FUNCTION_ERROR;
+    }
+    return MB_OK;
 }
 
-ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                             uint16_t address, uint16_t value, uint32_t timeoute)
+ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                                                    uint16_t address, uint16_t value, uint32_t timeoute)
 {
     QByteArray commandBuff;
     QByteArray replyBuff;
     QByteArray tempReadBuff;
     uint16_t crcCalc;
+    ModbusRtuMaster::MbStatus result;
+
     /*
-     * Clear input buffer
+     * Clear port
      */
-    readPort(&commandBuff);
+    read(&commandBuff);
     commandBuff.clear();
 
     /*
@@ -179,33 +211,23 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSingleRegister(uint8_t slaveAddr
     commandBuff.push_back(static_cast<uint8_t>(address));
     commandBuff.push_back(static_cast<uint8_t>(value >> 8));
     commandBuff.push_back(static_cast<uint8_t>(value));
-    crcCalc = crc(commandBuff);
+    crcCalc = crc(&commandBuff);
     commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
 
     /*
      * Send command
      */
-    if (writePort(commandBuff) != true) {
+    if (write(commandBuff) != true) {
         return MB_SEND_ERROR;
     };
 
     /*
      * Receive reply
      */
-
-    QTime endReceiveTime = QTime::currentTime().addMSecs(timeoute);
-    while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
-       readPort(&tempReadBuff);
-       if (tempReadBuff.size() != 0){
-           replyBuff.append(tempReadBuff);
-           if (replyBuff.size() == commandBuff.size()) {
-               break;
-           }
-       }
-    }
-    if (commandBuff.size() != replyBuff.size()) {
-        return MB_RX_SIZE_ERROR;
+    result = receiveReply(&replyBuff, timeoute, commandBuff.size(), slaveAddress, function);
+    if (result != MB_OK) {
+        return result;
     }
 
     if (commandBuff != replyBuff) {
@@ -215,18 +237,18 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSingleRegister(uint8_t slaveAddr
     return MB_OK;
 }
 
-ModbusRtuMaster::MbStatus ModbusRtuMaster::writeMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                               uint16_t address, QVector<uint16_t> value, uint32_t timeoute)
+ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                                                       uint16_t address, QVector<uint16_t> value, uint32_t timeoute)
 {
     QByteArray commandBuff;
     QByteArray tempReadBuff;
-    uint16_t crcRx;
     uint16_t crcCalc;
     uint16_t rxSize;
+
     /*
      * Clear input buffer
      */
-    readPort(&commandBuff);
+    read(&commandBuff);
     commandBuff.clear();
 
     /*
@@ -245,46 +267,24 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeMultipleRegisters(uint8_t slaveA
         commandBuff.push_back(static_cast<uint8_t>(data >> 8));
         commandBuff.push_back(static_cast<uint8_t>(data));
     }
-    crcCalc = crc(commandBuff);
+    crcCalc = crc(&commandBuff);
     commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
 
     /*
      * Send command
      */
-    if (writePort(commandBuff) != true) {
+    if (write(commandBuff) != true) {
         return MB_SEND_ERROR;
     };
 
     /*
-     * Receive reply
+     * The size of received data is static for the
      */
     rxSize = 8;
-    commandBuff.clear();
-    QTime endReceiveTime = QTime::currentTime().addMSecs(timeoute);
-    while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
-       readPort(&tempReadBuff);
-       if (tempReadBuff.size() != 0){
-           commandBuff.append(tempReadBuff);
-           if (commandBuff.size() == rxSize) {
-               break;
-           }
-       }
-    }
-    if (commandBuff.size() != rxSize) {
-        return MB_RX_SIZE_ERROR;
-    }
-    crcRx = UINT16_MAX & (commandBuff[rxSize - 1] | commandBuff[rxSize - 1] << 8);
-    crcCalc = crc(commandBuff);
-    if (crcCalc == crcRx) {
-        return MB_CRC_ERROR;
-    }
-    if (commandBuff[MODBUS_SLAVE_ADDRESS_POS] != static_cast<char>(slaveAddress)) {
-        return MB_ADDRESS_ERROR;
-    }
-    if (commandBuff[MODBUS_FUNCTION_CODE_POS] != static_cast<char>(function)) {
-        return MB_FUNCTION_ERROR;
-    }
 
-    return MB_OK;
+    /*
+     * Receive reply
+     */
+    return receiveReply(&commandBuff, timeoute, rxSize, slaveAddress, function);
 }

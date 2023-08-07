@@ -32,7 +32,7 @@ QStringList SerialCommunication::getPortsList()
     return portsList;
 }
 
-bool SerialCommunication::openPort(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits)
+bool SerialCommunication::open(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits)
 {
     QSerialPort::Parity targetParity;
     QSerialPort::StopBits targetStopBits;
@@ -60,7 +60,7 @@ bool SerialCommunication::openPort(QString name, int br, SerialPortParity parity
     return port->open(QIODevice::ReadWrite);
 }
 
-bool SerialCommunication::closePort()
+bool SerialCommunication::close()
 {
     if (port->isOpen()) {
         port->close();
@@ -68,7 +68,7 @@ bool SerialCommunication::closePort()
     return true;
 }
 
-bool SerialCommunication::writePort(QByteArray writeData)
+bool SerialCommunication::write(QByteArray writeData)
 {
     if (port->isOpen() == false) {
         qDebug()<<"Port close";
@@ -83,7 +83,7 @@ bool SerialCommunication::writePort(QByteArray writeData)
     return true;
 }
 
-bool SerialCommunication::readPort(QByteArray *readBuff)
+bool SerialCommunication::read(QByteArray *readBuff)
 {
 #define MAX_DATA_READ    256
 
@@ -91,6 +91,7 @@ bool SerialCommunication::readPort(QByteArray *readBuff)
         qDebug()<<"Port close";
         return false;
     }
+    readBuff->clear();
     *readBuff = port->read(MAX_DATA_READ);
 
     return true;

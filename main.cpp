@@ -5,9 +5,18 @@
 #include <QThread>
 #include <QObject>
 #include <QMetaType>
-#include "a.h"
 #include "communication.h"
 #include "QFile"
+#include "serialcommunication.h"
+#include "stdbool.h"
+#include "communication.h"
+
+Q_DECLARE_METATYPE(uint8_t);
+Q_DECLARE_METATYPE(uint16_t);
+Q_DECLARE_METATYPE(SerialCommunication::SerialPortParity);
+Q_DECLARE_METATYPE(SerialCommunication::SerialPortStopBits);
+Q_DECLARE_METATYPE(Communication::SlaveSettings);
+Q_DECLARE_METATYPE(Communication::SlaveState);
 
 int main(int argc, char *argv[])
 {

@@ -8,18 +8,24 @@
 #include <QByteArray>
 #include "serialcommunication.h"
 
-#define LITTE_TO_BIG_ENDIANS_U16(x)        (UINT16_MAX & ((x) >> 8 | (x) << 8))
-#define MODBUS_SLAVE_ADDRESS_POS           0
-#define MODBUS_FUNCTION_CODE_POS           1
-#define MODBUS_RX_BYTES_NUMBER_POS         2
-#define MODBUS_RX_BITS_PAYLOAD_POS         3
-#define MODBUS_TX_BYTES_NUMBER_POS         6
+#define LITTE_TO_BIG_ENDIANS_U16(x)    (UINT16_MAX & ((x) >> 8 | (x) << 8))
+#define MB_EXCEPTION_CODE(x)           (UINT8_MAX & ((uint8_t)(1 << 8) | (x)))
+#define MB_SLAVE_ADDRESS_POS           0
+#define MB_FUNCTION_CODE_POS           1
+#define MB_RX_BYTES_NUMBER_POS         2
+#define MB_RX_BITS_PAYLOAD_POS         3
+#define MB_TX_BYTES_NUMBER_POS         6
 
 /*
  * The minimum size of the command to read the information from the slave.
  * The minimum command size is reached if the requested 0 bits.
  */
-#define MB_READ_MINIMUM_COMMAND_SIZE    5
+#define MB_MINIMUM_COMMAND_SIZE        5
+
+/*
+ * The size of thE exeption reply
+ */
+#define MB_EXEPTION_REPLY_SIZE         5
 
 class ModbusRtuMaster : public SerialCommunication
 {
@@ -72,8 +78,9 @@ private:
     } FunList;
 
     typedef enum {
-        MB_OK,
-        MB_RX_SIZE_ERROR,
+        MB_RX_EXEPTION = 1,
+        MB_OK = 0,
+        MB_RX_SIZE_ERROR = -1,
         MB_CRC_ERROR,
         MB_ADDRESS_ERROR,
         MB_FUNCTION_ERROR,
@@ -83,7 +90,19 @@ private:
         MB_REPLY_ERROR,
     } MbStatus;
 
-    uint16_t crc(QByteArray buff);
+    uint16_t crc(QByteArray *buff);
+
+    /*
+     * Hight level read function:
+     * - read with timeoute
+     * - test size
+     * - test crc
+     * - test slave address
+     * - test target function
+     */
+    MbStatus receiveReply(QByteArray *rxData, int timeoute,
+                         int targetSize, uint8_t slaveAddress,
+                         uint8_t function);
 
     /*
      * This method is used to read bits and bytes from the slave over the next functions:
@@ -93,15 +112,15 @@ private:
      * - READ_INPUT_REGISTERS
      */
     template <typename T>
-    MbStatus read(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                  uint16_t address, uint16_t number, QVector<T> *state,
-                  uint32_t timeoute);
+    MbStatus readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                             uint16_t address, uint16_t number, QVector<T> *state,
+                             uint32_t timeoute);
 
-    MbStatus writeSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                 uint16_t address, uint16_t value, uint32_t timeoute);
+    MbStatus writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                      uint16_t address, uint16_t value, uint32_t timeoute);
 
-    MbStatus writeMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                   uint16_t address, QVector<uint16_t> value, uint32_t timeoute);
+    MbStatus writeSlaveMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                         uint16_t address, QVector<uint16_t> value, uint32_t timeoute);
 
 public:
     explicit ModbusRtuMaster(QObject *parent = nullptr);

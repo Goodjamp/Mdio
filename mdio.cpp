@@ -24,6 +24,17 @@ void Mdio::initCustomUi()
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
     /*
+     * Add TeleSignalisation configuration items
+     */
+
+    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+        tsSetings.append(new TsSettings(k + 1));
+        ui->vlTeleSignalSettings->addWidget(tsSetings[tsSetings.size() - 1]);
+    }
+    tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
+
+    /*
      *  Title bar: icon name
      */
     setWindowTitle("МДВВ-4-2 конфігуратор");

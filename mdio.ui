@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tSettings">
        <attribute name="title">
@@ -288,7 +288,7 @@
            </spacer>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="vlConnectionExternal_2">
+           <layout class="QVBoxLayout" name="vlTeleSignalSettings">
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
@@ -301,111 +301,6 @@
             </item>
             <item>
              <layout class="QGridLayout" name="glConnectionInternal_2">
-              <item row="4" column="1">
-               <widget class="QComboBox" name="cbTS4">
-                <property name="minimumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="lTS4">
-                <property name="minimumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>ТС4</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QComboBox" name="cbTS3">
-                <property name="minimumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="lTS2">
-                <property name="minimumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>ТС2</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="lTS1">
-                <property name="minimumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>ТС1</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="cbTS1">
-                <property name="minimumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="lBounceTimeoute">
                 <property name="minimumSize">
@@ -425,23 +320,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="cbTS2">
-                <property name="minimumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
+              <item row="0" column="2">
                <widget class="QComboBox" name="cbBounceTimeoute">
                 <property name="minimumSize">
                  <size>
@@ -457,39 +336,20 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="lTS3">
-                <property name="minimumSize">
+              <item row="0" column="1">
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
                  <size>
-                  <width>110</width>
-                  <height>25</height>
+                  <width>40</width>
+                  <height>20</height>
                  </size>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>110</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>ТС3</string>
-                </property>
-               </widget>
+               </spacer>
               </item>
              </layout>
-            </item>
-            <item>
-             <spacer name="verticalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </item>
@@ -983,7 +843,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Параметри з'єднання з ПК</string>
+         <string>Параметри з'єднання</string>
         </property>
        </widget>
       </item>

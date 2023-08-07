@@ -23,7 +23,8 @@ SOURCES += \
     mdio.cpp \
     modbusrtumaster.cpp \
     serialcommunication.cpp \
-    tccontrol.cpp
+    tccontrol.cpp \
+    tssettings.cpp
 
 HEADERS += \
     a.h \
@@ -32,12 +33,14 @@ HEADERS += \
     mdio.h \
     modbusrtumaster.h \
     serialcommunication.h \
-    tccontrol.h
+    tccontrol.h \
+    tssettings.h
 
 FORMS += \
     dialogconnectionsettings.ui \
     mdio.ui \
-    tccontrol.ui
+    tccontrol.ui \
+    tssettings.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -31,7 +31,12 @@ int main(int argc, char *argv[])
     QString qssStr = styleF.readAll();
     qApp->setStyleSheet(qssStr);
 
+    qRegisterMetaType<std::function<void(int)>>("std::function<void(int)>");
+    qRegisterMetaType<std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)>>
+          ("std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)>");
+    qRegisterMetaType<SerialCommunication::SerialPortParity>("SerialCommunication::SerialPortParity");
+    qRegisterMetaType<SerialCommunication::SerialPortStopBits>("SerialCommunication::SerialPortStopBits");
+
     w.show();
-    qRegisterMetaType< std::function<void(int)> >("std::function<void(int)>");
     return a.exec();
 }

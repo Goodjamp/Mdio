@@ -4,5 +4,7 @@
         <file>style.css</file>
         <file>Resources/On_resize.png</file>
         <file>Resources/Off_resize.png</file>
+        <file>Resources/On_resize_v2.png</file>
+        <file>Resources/Off_resize_v2.png</file>
     </qresource>
 </RCC>

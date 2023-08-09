@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <QWidget>
-#include "stdint.h"
+#include <stdint.h>
 #include <QWidget>
+#include <QMap>
 #include <QByteArray>
 #include "serialcommunication.h"
 
@@ -30,6 +31,20 @@
 class ModbusRtuMaster : public SerialCommunication
 {
     Q_OBJECT
+public:
+    typedef enum {
+        MB_RX_EXEPTION = 1,
+        MB_OK = 0,
+        MB_RX_SIZE_ERROR = -1,
+        MB_CRC_ERROR,
+        MB_ADDRESS_ERROR,
+        MB_FUNCTION_ERROR,
+        MB_BYTES_NUMBER_ERROR,
+        MB_TARGET_FUNCTION_ERROR,
+        MB_SEND_ERROR,
+        MB_REPLY_ERROR,
+    } MbStatus;
+
 private:
 
     static constexpr uint16_t crcTable[256] = {
@@ -77,18 +92,18 @@ private:
         PRESET_MULTIPLE_REGISTER = 16,
     } FunList;
 
-    typedef enum {
-        MB_RX_EXEPTION = 1,
-        MB_OK = 0,
-        MB_RX_SIZE_ERROR = -1,
-        MB_CRC_ERROR,
-        MB_ADDRESS_ERROR,
-        MB_FUNCTION_ERROR,
-        MB_BYTES_NUMBER_ERROR,
-        MB_TARGET_FUNCTION_ERROR,
-        MB_SEND_ERROR,
-        MB_REPLY_ERROR,
-    } MbStatus;
+    const QMap<MbStatus, QString> statusStr{
+        {MB_RX_EXEPTION, "MB_RX_EXEPTION"},
+        {MB_OK, "MB_OK"},
+        {MB_RX_SIZE_ERROR, "MB_RX_SIZE_ERROR"},
+        {MB_CRC_ERROR, "MB_CRC_ERROR"},
+        {MB_ADDRESS_ERROR, "MB_ADDRESS_ERROR"},
+        {MB_FUNCTION_ERROR, "MB_FUNCTION_ERROR"},
+        {MB_BYTES_NUMBER_ERROR, "MB_BYTES_NUMBER_ERROR"},
+        {MB_TARGET_FUNCTION_ERROR, "MB_TARGET_FUNCTION_ERROR"},
+        {MB_SEND_ERROR, "MB_SEND_ERROR"},
+        {MB_REPLY_ERROR, "MB_REPLY_ERROR"},
+    };
 
     uint16_t crc(QByteArray *buff);
 
@@ -113,7 +128,7 @@ private:
      */
     template <typename T>
     MbStatus readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                             uint16_t address, uint16_t number, QVector<T> *state,
+                             uint16_t address, uint16_t number, QVector<T> &state,
                              uint32_t timeoute);
 
     MbStatus writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
@@ -125,13 +140,22 @@ private:
 public:
     explicit ModbusRtuMaster(QObject *parent = nullptr);
 
+    QString getStatusString(ModbusRtuMaster::MbStatus status) {
+        if (statusStr.contains(status)) {
+            return statusStr.value(status);
+        }
+
+        return static_cast<QString>("Wrong status");
+    }
+
     /*
      * Read
      */
     void readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress, uint16_t coilsNumber, QByteArray *coilState, uint32_t timeoute); // F_1
     void readDiscreteInputs(); // F_2
     void readHoldingRegisters(); // F_3
-    void readInputRegisters(); // F_4
+    MbStatus readInputRegisters(uint8_t slaveAddress, uint16_t startAddress,
+                                uint16_t registersNumber, QVector<uint16_t> &regValue); // F_4
 
     /*
      * Write
@@ -139,7 +163,8 @@ public:
     void forceSingleCoil();  // F_5  0xFF00 - ON, 0x0000- OFF
     void presetSingleRegister(); // F_6
     void forceMultipleCoils(); // F_15
-    void presetMultipleCoils(); // F_16
+    MbStatus  presetMultipleRegister(uint8_t slaveAddress, uint16_t startAddress,
+                                     QVector<uint16_t> regValue); // F_16
 };
 
 #endif // MODBUSRTUMASTER_H

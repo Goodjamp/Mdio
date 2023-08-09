@@ -26,8 +26,8 @@ public:
     static QStringList getPortsList();
     bool open(QString name, int br, SerialPortParity parity, SerialPortStopBits stopBits);
     bool close();
-    bool write(QByteArray writeData);
-    bool read(QByteArray *readBuff);
+    bool write(QByteArray &writeData);
+    bool read(QByteArray &readBuff);
 
 private:
     QSerialPort *port;

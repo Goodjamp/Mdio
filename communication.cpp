@@ -1,8 +1,11 @@
 #include "communication.h"
 
-void Communication::connectSlaveSlot(std::function<void(bool result, int fwVersion,
-                                                        int yearConf, int monthConf, int dayConf)> cb,
-                                     QString port, int baudRate, int slaveAddress,
+void Communication::startCommunication(void)
+{
+    modbus = new ModbusRtuMaster();
+}
+
+void Communication::connectSlaveSlot(QString port, int baudRate,
                                      SerialCommunication::SerialPortParity parity,
                                      SerialCommunication::SerialPortStopBits stopBits)
 {
@@ -10,16 +13,11 @@ void Communication::connectSlaveSlot(std::function<void(bool result, int fwVersi
      * Open port
      */
     if(modbus->open(port, baudRate, parity, stopBits) == false) {
-        if (cb != NULL) {
-            cb(false, 0, 0, 0, 0);
-        }
+        emit connectSlaveReply(false);
         return;
     }
 
-    /*
-     * Read Meta information
-     */
-    cb(true, 0, 0, 0, 0);
+    emit connectSlaveReply(true);
 }
 
 void Communication::disconnectSlaveSlot()
@@ -27,20 +25,49 @@ void Communication::disconnectSlaveSlot()
     modbus->close();
 }
 
-void Communication::writeConfigurationSlot(std::function<void(bool result)> cb, SlaveSettings settings)
+void Communication::writeConfigurationSlot(int slaveAddress, SlaveSettings settings)
 {}
 
-void Communication::readConfigurationSlot(std::function<void(bool result, SlaveSettings settings)> cb)
+void Communication::readConfigurationSlot(int slaveAddress)
+{
+}
+
+void Communication::readMetaInformationSlot(int slaveAddress)
+{
+    QVector<uint16_t> readData;
+    ModbusRtuMaster::MbStatus result;
+
+    result = modbus->readInputRegisters(slaveAddress, 1000, 2, readData);
+
+    if (result != ModbusRtuMaster::MB_OK) {
+        qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
+        emit readMetaInformationReply(false, 0, 0, 0, 0);
+        return;
+    }
+
+    emit readMetaInformationReply(true, static_cast<int>(readData[0]), 0, 0, 0);
+}
+
+void Communication::applySlot(int slaveAddress)
+{
+    QVector<uint16_t> patload= {0x55FF};
+    ModbusRtuMaster::MbStatus result;
+
+    result = modbus->presetMultipleRegister(slaveAddress, 1011, patload);
+
+    if (result == ModbusRtuMaster::MB_OK) {
+        emit applyReply(true);
+    } else {
+        qDebug()<<"applySlot error:"<<modbus->getStatusString(result);
+        emit applyReply(true);
+    }
+}
+
+void Communication::reloadSlot(int slaveAddress)
 {}
 
-void Communication::applySlot(std::function<void(bool result)> cb)
+void Communication::readStateSlot(int slaveAddress)
 {}
 
-void Communication::reloadSlot(std::function<void(bool result)> cb)
-{}
-
-void Communication::readStateSlot(std::function<void(bool result, SlaveState state)> cb)
-{}
-
-void Communication::setTeleControlSlot(std::function<void(bool result)> cb, int index, bool enable)
+void Communication::setTeleControlSlot(int slaveAddress, int index, bool enable)
 {}

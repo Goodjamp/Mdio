@@ -7,30 +7,28 @@ QPushButton
     border-color: rgb(50,50,50);
 }
 */
-QPushButton#pbTiState1,
-QPushButton#pbTiState2,
-QPushButton#pbTiState3,
-QPushButton#pbTiState4,
+
 QPushButton#pbTcState
 {
+    border-style: outset;
     border-radius: 4px;
-    border-width: 2px;
-    border-color: rgb(50,50,50);
+    background-color:rgba(0, 0, 0, 0);
 }
 
+QPushButton#pbTsState
+{
+    border-style: outset;
+    border-radius: 4px;
+    background-color:rgb(150, 200, 200);
+}
 
-QPushButton#pbTiState1:checked,
-QPushButton#pbTiState2:checked,
-QPushButton#pbTiState3:checked,
-QPushButton#pbTiState4:checked,
+QPushButton#pbTsState:checked,
 QPushButton#pbTcState:checked {
-    image: url(:/Resources/On_resize.png);
+    image: url(:/Resources/On_resize_v2.png);
+    background-color:rgb(150, 255, 200);
 }
 
-QPushButton#pbTiState1,
-QPushButton#pbTiState2,
-QPushButton#pbTiState3,
-QPushButton#pbTiState4,
+QPushButton#pbTsState,
 QPushButton#pbTcState {
-    image: url(:/Resources/Off_resize.png);
+    image: url(:/Resources/Off_resize_v2.png);
 }

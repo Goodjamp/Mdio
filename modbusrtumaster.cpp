@@ -1,6 +1,10 @@
 #include <modbusrtumaster.h>
 #include <QtEndian>
 #include <QTime>
+#include <QThread>
+
+#define UINT8_TO_UINT16(L, M)      UINT16_MAX & ((0x00FF & (L)) | (0xFF00 & ((M) << 8)));
+#define MB_TRANSACTION_TIMEOUTE    500
 
 // definition (no value needed)
 const uint16_t ModbusRtuMaster::crcTable[256];
@@ -36,7 +40,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
 
     rxData->clear();
     while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
-        read(&tempReadBuff);
+        read(tempReadBuff);
         if (tempReadBuff.size() != 0){
             rxData->append(tempReadBuff);
             if (rxData->size() == targetSize) {
@@ -45,12 +49,18 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
         }
     }
     if (rxData->size() != targetSize
-        || rxData->size() != MB_EXEPTION_REPLY_SIZE) {
+        && rxData->size() != MB_EXEPTION_REPLY_SIZE) {
         return MB_RX_SIZE_ERROR;
     }
-    crcRx = UINT16_MAX & (rxData->at(targetSize - 1) | rxData->at(targetSize - 1) << 8);
+    crcRx = UINT8_TO_UINT16(rxData->at(rxData->size() - 2), rxData->at(rxData->size() - 1));
+
+    /*
+     * remove 2 last bytes (CRC), becouse we pass rxData to the crc calculation function
+     * and we don't need calculate crc from CRC bytes
+     */
+    rxData->remove(rxData->size() - 2, 2);
     crcCalc = crc(rxData);
-    if (crcCalc == crcRx) {
+    if (crcCalc != crcRx) {
         return MB_CRC_ERROR;
     }
     if (rxData->at(MB_SLAVE_ADDRESS_POS) != static_cast<char>(slaveAddress)) {
@@ -70,9 +80,17 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
     return MB_OK;
 }
 
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddress, uint16_t startAddress,
+                                                              uint16_t registersNumber, QVector<uint16_t> &regValue)
+{
+    return readSlaveGeneral<uint16_t>(slaveAddress, READ_INPUT_REGISTERS,
+                                      startAddress, registersNumber, regValue,
+                                      MB_TRANSACTION_TIMEOUTE);
+}
+
 template <typename T>
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                                            uint16_t address, uint16_t number, QVector<T> *state,
+                                                            uint16_t address, uint16_t number, QVector<T> &state,
                                                             uint32_t timeoute)
 {
     QByteArray commandBuff;
@@ -84,7 +102,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
     /*
      * Clear input buffer
      */
-    read(&commandBuff);
+    read(commandBuff);
     commandBuff.clear();
 
     /*
@@ -97,8 +115,8 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
     commandBuff.push_back(static_cast<uint8_t>(number >> 8));
     commandBuff.push_back(static_cast<uint8_t>(number));
     crcCalc = crc(&commandBuff);
-    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
+    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
 
     /*
      * Send command
@@ -156,7 +174,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
         while (number) {
             rest = (number > 8) ? 8 : number;
             for (uint32_t k = 0; k < rest; k++) {
-                state->push_back(commandBuff[payloadPos] & 0x1 ? true : false);
+                state.push_back(commandBuff[payloadPos] & 0x1 ? true : false);
                 commandBuff[payloadPos] = commandBuff[payloadPos] >> 1;
             }
             payloadPos++;
@@ -177,7 +195,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
         for (uint32_t k = 0; k < number; k++) {
             data = (0xFF00 & (commandBuff[payloadPos++] << 8));
             data |= (0xFF & commandBuff[payloadPos++]);
-            state->push_back(data);
+            state.push_back(data);
         }
         break;
     }
@@ -199,7 +217,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     /*
      * Clear port
      */
-    read(&commandBuff);
+    read(commandBuff);
     commandBuff.clear();
 
     /*
@@ -237,6 +255,14 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     return MB_OK;
 }
 
+ModbusRtuMaster::MbStatus ModbusRtuMaster::presetMultipleRegister(uint8_t slaveAddress, uint16_t startAddress,
+                                                                  QVector<uint16_t> regValue)
+{
+    return writeSlaveMultipleRegisters(slaveAddress, PRESET_MULTIPLE_REGISTER,
+                                       startAddress, regValue, MB_TRANSACTION_TIMEOUTE);
+
+}
+
 ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
                                                                        uint16_t address, QVector<uint16_t> value, uint32_t timeoute)
 {
@@ -248,7 +274,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t s
     /*
      * Clear input buffer
      */
-    read(&commandBuff);
+    read(commandBuff);
     commandBuff.clear();
 
     /*
@@ -268,8 +294,8 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t s
         commandBuff.push_back(static_cast<uint8_t>(data));
     }
     crcCalc = crc(&commandBuff);
-    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
+    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
 
     /*
      * Send command

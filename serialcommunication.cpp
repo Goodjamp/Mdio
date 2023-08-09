@@ -4,13 +4,15 @@
 #include <QDebug>
 #include <QMap>
 
-QMap<SerialCommunication::SerialPortParity, QSerialPort::Parity> parityLt{
+#define MAX_DATA_READ    256
+
+static QMap<SerialCommunication::SerialPortParity, QSerialPort::Parity> parityLUT{
     {SerialCommunication::NONE, QSerialPort::NoParity},
     {SerialCommunication::EVEN, QSerialPort::EvenParity},
     {SerialCommunication::ODD, QSerialPort::OddParity}
 };
 
-QMap<SerialCommunication::SerialPortStopBits, QSerialPort::StopBits> stopBitsLt{
+static QMap<SerialCommunication::SerialPortStopBits, QSerialPort::StopBits> stopBitsLUT{
     {SerialCommunication::ONE, QSerialPort::OneStop},
     {SerialCommunication::TWOO, QSerialPort::TwoStop}
 };
@@ -37,19 +39,20 @@ bool SerialCommunication::open(QString name, int br, SerialPortParity parity, Se
     QSerialPort::Parity targetParity;
     QSerialPort::StopBits targetStopBits;
 
-    if(parityLt.contains(parity)) {
-        targetParity = parityLt.take(parity);
+    if(parityLUT.contains(parity)) {
+        targetParity = parityLUT.value(parity);
     } else {
         qDebug()<<"Error parity value "<<parity;
         return false;
     }
 
-    if(stopBitsLt.contains(stopBits)) {
-        targetStopBits = stopBitsLt.take(stopBits);
+    if(stopBitsLUT.contains(stopBits)) {
+        targetStopBits = stopBitsLUT.value(stopBits);
     } else {
         qDebug()<<"Error stopBits value "<<stopBits;
         return false;
     }
+
 
     port->setParity(targetParity);
     port->setStopBits(targetStopBits);
@@ -57,6 +60,7 @@ bool SerialCommunication::open(QString name, int br, SerialPortParity parity, Se
     port->setBaudRate(br);
     port->setDataBits(QSerialPort::Data8);
     port->setFlowControl(QSerialPort::NoFlowControl);
+    port->setReadBufferSize(MAX_DATA_READ);
     return port->open(QIODevice::ReadWrite);
 }
 
@@ -68,7 +72,7 @@ bool SerialCommunication::close()
     return true;
 }
 
-bool SerialCommunication::write(QByteArray writeData)
+bool SerialCommunication::write(QByteArray &writeData)
 {
     if (port->isOpen() == false) {
         qDebug()<<"Port close";
@@ -80,19 +84,20 @@ bool SerialCommunication::write(QByteArray writeData)
     if (writeData.size() != port->write(writeData)) {
         return false;
     }
+    //port->flush();
+    port->waitForBytesWritten(5000);
     return true;
 }
 
-bool SerialCommunication::read(QByteArray *readBuff)
+bool SerialCommunication::read(QByteArray &readBuff)
 {
-#define MAX_DATA_READ    256
-
     if (port->isOpen() == false) {
         qDebug()<<"Port close";
         return false;
     }
-    readBuff->clear();
-    *readBuff = port->read(MAX_DATA_READ);
+    readBuff.clear();
+    port->waitForReadyRead(100);
+    readBuff = port->readAll();
 
     return true;
 }

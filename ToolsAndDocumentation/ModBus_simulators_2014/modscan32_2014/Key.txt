@@ -1,0 +1,11 @@
+ModScan 32 4.A00-04
+
+Platform: PC
+Vendor: WinTECH
+Verion: 4.A00-04 and higher
+
+Latest update: Friday, October 2, 2020
+
+Serial Number
+Show ModScan 32 Serial Number
+Name: DIGERATI Company: DIGERATI s/n: 8S6N7P55I45J8K65 

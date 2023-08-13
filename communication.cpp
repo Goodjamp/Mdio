@@ -37,7 +37,7 @@ void Communication::writeConfigurationSlot(int slaveAddress, SlaveConfiguration 
     uint16_t parity;
     uint16_t stopBits;
 
-    if ((parity = parityMbToSerilLUT.key(configuration.communication.parity, DEFAULT_KEY)) != DEFAULT_KEY
+    if ((parity = parityMbToSerialLUT.key(configuration.communication.parity, DEFAULT_KEY)) != DEFAULT_KEY
         && (stopBits = stopBitsMbToSerialLUT.key(configuration.communication.stopBits, DEFAULT_KEY)) != DEFAULT_KEY) {
         /*
          * Serialiase configuration to registers list
@@ -101,7 +101,7 @@ void Communication::readConfigurationSlot(int slaveAddress)
      */
     baseConfReg = ADDRESS_COMMUNICATION_BAUDRATE;
     registersNumbers = ADDRESS_TC_PULS_DURATION - ADDRESS_COMMUNICATION_BAUDRATE + 1;
-    result = modbus->readInputRegisters(slaveAddress, baseConfReg, registersNumbers, configReg);
+    result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, configReg);
     if (result == ModbusRtuMaster::MB_OK) {
 
         /*
@@ -109,12 +109,12 @@ void Communication::readConfigurationSlot(int slaveAddress)
          */
         parity = static_cast<int>(PARITY_MASK & (configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
         stopBits =  static_cast<int>(STOP_BITS_MASK & (configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] >> STOP_BITS_POS));
-        if (parityMbToSerilLUT.contains(parity) == true
+        if (parityMbToSerialLUT.contains(parity) == true
             && stopBitsMbToSerialLUT.contains(stopBits) == true) {
             /*
              * Deserialiase communication settings
              */
-            configuration.communication.parity = parityMbToSerilLUT.value(parity);
+            configuration.communication.parity = parityMbToSerialLUT.value(parity);
             configuration.communication.stopBits = stopBitsMbToSerialLUT.value(stopBits);
             configuration.communication.baudRate = configReg[ADDRESS_COMMUNICATION_BAUDRATE - baseConfReg];
             configuration.communication.silentInterval = configReg[ADDRESS_COMMUNICATION_SILENTS_INTERVAL - baseConfReg];

@@ -169,7 +169,7 @@ private:
      * The constructor of const non-POD members called
      * on the moment of creating  current class
      */
-    const QMap<int, SerialCommunication::SerialPortParity> parityMbToSerilLUT{
+    const QMap<int, SerialCommunication::SerialPortParity> parityMbToSerialLUT{
           {PARITY_NONE, SerialCommunication::NONE},
           {PARITY_EVEN, SerialCommunication::EVEN},
           {PARITY_ODD, SerialCommunication::ODD}

@@ -27,8 +27,15 @@ QT_END_NAMESPACE
 #define DEFAULT_CONNECT_YEAR               0
 #define DEFAULT_CONNECT_MONTH              0
 #define DEFAULT_CONNECT_DATE               0
-#define COMMUNICATION_COMPLETE_TIMEOUTE    2000
-
+#define COMMUNICATION_COMPLETE_TIMEOUTE    5000
+#define SILENT_INTERVAL_MIN_MS             0
+#define SILENT_INTERVAL_MAX_MS             100
+#define REPLAY_DELAY_MIN_MS                0
+#define REPLAY_DELAY_MAX_MS                100
+#define DEBOUNCE_INTARVAL_MIN_MS           20
+#define DEBOUNCE_INTARVAL_MAX_MS           100
+#define PULS_DURATION_MIN_MS               100
+#define PULS_DURATION_MMAX_MS              4000
 
 class Mdio : public QMainWindow
 {
@@ -54,10 +61,18 @@ private:
     void initCustomUi();
     void updateUiConnectionStatusStr(bool isConnect);
     void updateUiDeviceMetaInfStr(bool isConnect);
-    void updateUiConfiguration(void);
+    bool updateUiConfiguration(void);
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed);
 
+
+private slots:
+    void connectSlaveResult(bool result);
+    void readMetaInformationResult(bool result, int fwVersion,
+                                   int yearConf, int monthConf, int dayConf);
+    void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
+    void applyConnectionSettings(QVector<int>);
+    void reloadResult(bool result);
 
 private slots:
 
@@ -70,13 +85,6 @@ private slots:
     void on_pbReload_clicked();
 
     void on_pbReadSettings_clicked();
-
-    void connectSlaveResult(bool result);
-    void readMetaInformationResult(bool result, int fwVersion,
-                                   int yearConf, int monthConf, int dayConf);
-    void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
-    void applyConnectionSettings(QVector<int>);
-    void reloadResult(bool result);
 
 private:
     Ui::Mdio *ui;
@@ -101,6 +109,8 @@ private:
     uint connectDeviceConfYear = DEFAULT_CONNECT_YEAR;
     uint connectDeviceConfMonth = DEFAULT_CONNECT_MONTH;
     uint connectDeviceConfDay = DEFAULT_CONNECT_DATE;
+
+    Communication::SlaveConfiguration connectDeviceConf;
 
     uint configBr;
     uint configParity;
@@ -129,8 +139,22 @@ private:
             {0, SerialCommunication::ONE},
             {1, SerialCommunication::TWOO}
         };
-    QStringList brList = {"1200", "2400", "4800", "9600", "14400", "19200", "28800", "38400", "57600"};
-    QStringList parityList = {"None", "Even", "Odd"};
-    QStringList stopBitsList = {"1", "2"};
+    const QMap<int, QString> brValueToStrLUT = {
+        {2400, "2400"},
+        {4800, "4800"},
+        {9600, "9600"},
+        {19200, "19200"},
+        {38400, "38400"},
+        {57600, "57600"}
+    };
+    const QMap<int, QString>  paritySerialToStrLUT = {
+        {SerialCommunication::NONE, "None"},
+        {SerialCommunication::EVEN, "Even"},
+        {SerialCommunication::ODD, "Odd"}
+    };
+    const QMap<int, QString>  stopBitsSerialToStrLUT = {
+        {SerialCommunication::ONE, "1"},
+        {SerialCommunication::TWOO, "2"}
+    };
 };
 #endif // MDIO_H

@@ -72,26 +72,33 @@ Mdio::Mdio(QWidget *parent)
     communicaiton = new Communication();
 
     initCustomUi();
-    updateConnectionStatusStr(false);
-    updateDeviceMetaInfStr(false);
+    updateUiConnectionStatusStr(false);
+    updateUiDeviceMetaInfStr(false);
 
     connect(this, &Mdio::connectSlave, communicaiton, &Communication::connectSlaveSlot);
     connect(this, &Mdio::disconnectSlave, communicaiton, &Communication::disconnectSlaveSlot);
-    connect(this, &Mdio::writeConfiguration, communicaiton, &Communication::writeConfigurationSlot);
     connect(this, &Mdio::readConfiguration, communicaiton, &Communication::readConfigurationSlot);
-    connect(this, &Mdio::apply, communicaiton, &Communication::applySlot);
+    connect(this, &Mdio::apply, communicaiton, &Communication::reloadSlot);
     connect(this, &Mdio::reload, communicaiton, &Communication::reloadSlot);
     connect(this, &Mdio::readState, communicaiton, &Communication::readStateSlot);
     connect(this, &Mdio::setTeleControl, communicaiton, &Communication::setTeleControlSlot);
     connect(this, &Mdio::readMetaInformation, communicaiton, &Communication::readMetaInformationSlot);
 
     /*
-     * Reply sugnla/slot family
+     * Reply sugnal/slot family
      */
     connect(communicaiton, &Communication::connectSlaveReply, this, &Mdio::connectSlaveResult);
-    connect(communicaiton, &Communication::applyReply, this, &Mdio::restartResult);
+    connect(communicaiton, &Communication::reloadReply, this, &Mdio::reloadResult);
     connect(communicaiton, &Communication::readMetaInformationReply, this, &Mdio::readMetaInformationResult);
+    connect(communicaiton, &Communication::readConfigurationReply, this, &Mdio::readConfigurationResult);
 
+    /*
+     * Runing communication class on the dedicated thread.
+     * All internal variables (for example class serialCommunication and class modbus) should be
+     * created after start thread. For this the communicatin class has dedicated slot startCommunication.
+     * This slot connected to the *started* signal of the QThread class. The  *started* signal emit
+     * immidiatly after start thread.
+     */
     connect(commmunicationThread, &QThread::started, communicaiton, &Communication::startCommunication);
     /*
      * connect(worker, finished, thread, quit);
@@ -100,6 +107,7 @@ Mdio::Mdio(QWidget *parent)
      */
     communicaiton->moveToThread(commmunicationThread);
     commmunicationThread->start();
+    qDebug()<<"MDIO constructor";
 }
 
 Mdio::~Mdio()
@@ -107,7 +115,7 @@ Mdio::~Mdio()
     delete ui;
 }
 
-void Mdio::updateConnectionStatusStr(bool isConnect)
+void Mdio::updateUiConnectionStatusStr(bool isConnect)
 {
     QString connectionSettingsStr;
     if (isConnect == true) {
@@ -129,7 +137,7 @@ void Mdio::updateConnectionStatusStr(bool isConnect)
     ui->lConnectionSettings->setText(connectionSettingsStr);
 }
 
-void Mdio::updateDeviceMetaInfStr(bool isConnect)
+void Mdio::updateUiDeviceMetaInfStr(bool isConnect)
 {
     QString metaInfStr;
     if (isConnect == true) {
@@ -147,95 +155,157 @@ void Mdio::updateDeviceMetaInfStr(bool isConnect)
     ui->lDeviceMetaInfo->setText(metaInfStr);
 }
 
+void Mdio::updateUiConfiguration(void)
+{
+
+}
+
+void Mdio::errorMessage(QString headr, QString detailed)
+{
+    QMessageBox *errorAddressMessage = new QMessageBox(QMessageBox::Critical,
+                                                       headr,
+                                                       detailed,
+                                                       QMessageBox::Ok,
+                                                       this);
+    errorAddressMessage->setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
+    errorAddressMessage->show();
+}
+
 void Mdio::connectSlaveResult(bool result)
 {
-    if (result == false) {
-        QMessageBox *errorAddressMessage = new QMessageBox(QMessageBox::Critical,
-                                                           "Неможливо приєднатися",
-                                                           "Порт не доступний",
-                                                           QMessageBox::Ok,
-                                                           this);
-        errorAddressMessage->setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
-        errorAddressMessage->show();
-        updateConnectionStatusStr(false);
-        return;
-    }
-
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationSyncSem.release(1);
+    communicationResult = result;
     qDebug()<<"Connect rez:"<<result;
 }
 
 void Mdio::readMetaInformationResult(bool result, int fwVersion,
                                      int yearConf, int monthConf, int dayConf)
 {
-    qDebug()<<"Read meta information result: "<<result;
-    if (result == false) {
-        return;
-    }
-    connectDeviceVersion = fwVersion;
-    connectDeviceConfYear = yearConf;
-    connectDeviceConfMonth = monthConf;
-    connectDeviceConfDay = dayConf;
-
     /*
-     * Update string indication of the connection settings
+     * Release (give) semaphore to unblok code that waite to complete
      */
-    updateDeviceMetaInfStr(true);
+    communicationResult = result;
+    qDebug()<<"Read meta information result: "<<result;
+    if (result == true) {
+        connectDeviceVersion = fwVersion;
+        connectDeviceConfYear = yearConf;
+        connectDeviceConfMonth = monthConf;
+        connectDeviceConfDay = dayConf;
+    }
+    communicationSyncSem.release(1);
+}
+
+void  Mdio::readConfigurationResult(bool result, Communication::SlaveConfiguration configuration)
+{
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationResult = result;
+    qDebug()<<"readConfigurationResult result: "<<result;
+    if (result == true) {
+
+    }
+    communicationSyncSem.release(1);
 }
 
 
-void Mdio::restartResult(bool result)
+void Mdio::reloadResult(bool result)
 {
     qDebug()<<"Restart result: "<<result;
 }
 
 void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
 {
-    QMap<int, SerialCommunication::SerialPortParity> parityConvert{
-        {0, SerialCommunication::NONE},
-        {1, SerialCommunication::EVEN},
-        {2, SerialCommunication::ODD}
-    };
-    QMap<int, SerialCommunication::SerialPortStopBits> stopBitsConvert{
-        {0, SerialCommunication::ONE},
-        {1, SerialCommunication::TWOO}
-    };
     connectPortIndex = connectionSettings[DialogConnectionSettings::PORT];
     connectBrIndex = connectionSettings[DialogConnectionSettings::BR];
     connectParityIndex = connectionSettings[DialogConnectionSettings::PARITY];
     connectStopBitsIndex = connectionSettings[DialogConnectionSettings::STOP_BITS];
     connectSlaveAddress = connectionSettings[DialogConnectionSettings::ADDRESS];
+}
 
-    /*
-     * Open connection
-     */
-    SerialCommunication::SerialPortParity parity;
-    SerialCommunication::SerialPortStopBits stopBits;
-    QStringList comList = Communication::getPortsList();
-
-    if(parityConvert.contains(connectionSettings[DialogConnectionSettings::PARITY])) {
-        parity = parityConvert.value(connectionSettings[DialogConnectionSettings::PARITY]);
-    } else {
-        return;
+bool Mdio::processingCommunicatitonResult(QString headr, QString detailed)
+{
+    if (communicationSyncSem.tryAcquire(1, COMMUNICATION_COMPLETE_TIMEOUTE)
+        == false) {
+        errorMessage(headr, "Апаратний збій");
+        return false;
+    };
+    if (communicationResult == false) {
+        errorMessage(headr, detailed);
+        return false;
     }
 
-    if(stopBitsConvert.contains(connectionSettings[DialogConnectionSettings::STOP_BITS])) {
-        stopBits = stopBitsConvert.value(connectionSettings[DialogConnectionSettings::STOP_BITS]);
-    } else {
-        return;
-    }
-    emit connectSlave(comList[connectionSettings[DialogConnectionSettings::PORT]],
-                      brList[connectionSettings[DialogConnectionSettings::BR]].toInt(),
-                      parity,
-                      stopBits);
+    return true;
 }
 
 void Mdio::on_pbConnectionSettings_clicked()
 {
     QStringList comList = Communication::getPortsList();
     DialogConnectionSettings *dialogConnectionSettings = new DialogConnectionSettings(comList, brList, parityList, stopBitsList);
+    SerialCommunication::SerialPortParity parity;
+    SerialCommunication::SerialPortStopBits stopBits;
+
     dialogConnectionSettings->setModal(true);
     connect(dialogConnectionSettings, &DialogConnectionSettings::applySettings, this, &Mdio::applyConnectionSettings);
+    needConnectSlave = false;
     dialogConnectionSettings->show();
+
+    /*
+     * If user push
+     */
+    if (needConnectSlave ==false) {
+        return;
+    }
+
+    /*
+     * Open connection
+     */
+    if(parityUiToSerilaLUT.contains(connectParityIndex)) {
+        parity = parityUiToSerilaLUT.value(connectParityIndex);
+    } else {
+        return;
+    }
+
+    if(stopUiToSerilaLUT.contains(connectStopBitsIndex)) {
+        stopBits = stopUiToSerilaLUT.value(connectStopBitsIndex);
+    } else {
+        return;
+    }
+    emit connectSlave(comList[connectPortIndex],
+                      brList[connectBrIndex].toInt(),
+                      parity,
+                      stopBits);
+    /*
+     * Waite to complete connection
+     */
+    if (processingCommunicatitonResult("Неможливо приєднатися",
+                                        "Порт недоступний") == false) {
+        return;
+    }
+
+    /*
+     * Read meta information
+     */
+    emit readMetaInformation(connectSlaveAddress);
+    if (processingCommunicatitonResult("Неможливо приєднатися",
+                                       "Помилка считування метаінформації") == false) {
+        return;
+    }
+
+    /*
+     * Read configuration
+     */
+    emit readConfiguration(connectSlaveAddress);
+    if (processingCommunicatitonResult("Неможливо приєднатися",
+                                       "Помилка считування мета конфігурації") == false) {
+        return;
+    }
+
+    updateUiConnectionStatusStr(true);
+    updateUiDeviceMetaInfStr(true);
 }
 
 void Mdio::on_pbApplySettings_clicked()
@@ -250,7 +320,7 @@ void Mdio::on_pbDisconnect_clicked()
 
 void Mdio::on_pbReload_clicked()
 {
-    emit apply(connectSlaveAddress);
+    emit reload(connectSlaveAddress);
 }
 
 void Mdio::on_pbReadSettings_clicked()

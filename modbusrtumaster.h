@@ -138,6 +138,12 @@ private:
                                          uint16_t address, QVector<uint16_t> value, uint32_t timeoute);
 
 public:
+
+    typedef enum {
+        COIL_ON = 0xFF00,
+        COIL_OFF = 0x0000,
+    } CoilState;
+
     explicit ModbusRtuMaster(QObject *parent = nullptr);
 
     QString getStatusString(ModbusRtuMaster::MbStatus status) {
@@ -151,19 +157,27 @@ public:
     /*
      * Read
      */
-    void readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress, uint16_t coilsNumber, QByteArray *coilState, uint32_t timeoute); // F_1
-    void readDiscreteInputs(); // F_2
-    void readHoldingRegisters(); // F_3
-    MbStatus readInputRegisters(uint8_t slaveAddress, uint16_t startAddress,
+    MbStatus readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress,
+                            uint16_t coilsNumber, QVector<bool> &coilState); // F_1
+    MbStatus readDiscreteInputs(uint8_t slaveAddress, uint16_t coilAddress,
+                                uint16_t coilsNumber, QVector<bool> &coilState); // F_2
+    MbStatus readHoldingRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
+                                  uint16_t registersNumber, QVector<uint16_t> &regValue); // F_3
+    MbStatus readInputRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
                                 uint16_t registersNumber, QVector<uint16_t> &regValue); // F_4
-
     /*
      * Write
      */
-    void forceSingleCoil();  // F_5  0xFF00 - ON, 0x0000- OFF
-    void presetSingleRegister(); // F_6
-    void forceMultipleCoils(); // F_15
-    MbStatus  presetMultipleRegister(uint8_t slaveAddress, uint16_t startAddress,
+    MbStatus forceSingleCoil(uint8_t slaveAddress, uint16_t coilAddress,
+                             bool coilState);  // F_5  0xFF00 - ON, 0x0000- OFF
+    MbStatus presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,
+                                  uint16_t regValue); // F_6
+    /*
+     * Not implemented yet
+     */
+    MbStatus forceMultipleCoils(uint8_t slaveAddress, uint16_t coilAddress,
+                                uint16_t coilsNumber, QVector<bool> &coilState); // F_15
+    MbStatus  presetMultipleRegister(uint8_t slaveAddress, uint16_t regStartAddress,
                                      QVector<uint16_t> regValue); // F_16
 };
 

@@ -80,11 +80,35 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
     return MB_OK;
 }
 
-ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddress, uint16_t startAddress,
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress,
+                                                          uint16_t coilsNumber, QVector<bool> &coilState)
+{
+    return readSlaveGeneral<bool>(slaveAddress, READ_COIL_STATUS,
+                                  coilAddress, coilsNumber, coilState,
+                                  MB_TRANSACTION_TIMEOUTE);
+}
+
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readDiscreteInputs(uint8_t slaveAddress, uint16_t coilAddress,
+                            uint16_t coilsNumber, QVector<bool> &coilState)
+{
+    return readSlaveGeneral<bool>(slaveAddress, READ_DISCRET_INPUTS,
+                                  coilAddress, coilsNumber, coilState,
+                                  MB_TRANSACTION_TIMEOUTE);
+}
+
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readHoldingRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
+                                                                uint16_t registersNumber, QVector<uint16_t> &regValue)
+{
+    return readSlaveGeneral<uint16_t>(slaveAddress, READ_HOLDING_REGISTERS,
+                                      regStartAddress, registersNumber, regValue,
+                                      MB_TRANSACTION_TIMEOUTE);
+}
+
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
                                                               uint16_t registersNumber, QVector<uint16_t> &regValue)
 {
     return readSlaveGeneral<uint16_t>(slaveAddress, READ_INPUT_REGISTERS,
-                                      startAddress, registersNumber, regValue,
+                                      regStartAddress, registersNumber, regValue,
                                       MB_TRANSACTION_TIMEOUTE);
 }
 
@@ -205,12 +229,27 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
     return MB_OK;
 }
 
+ModbusRtuMaster::MbStatus ModbusRtuMaster::forceSingleCoil(uint8_t slaveAddress, uint16_t coilAddress,
+                                                           bool coilState)
+{
+    return writeSlaveSingleRegister(slaveAddress, FORCE_SINGLE_COIL, coilAddress,
+                                    coilState == true ? static_cast<uint16_t>(COIL_ON)
+                                                        : static_cast<uint16_t>(COIL_OFF),
+                                    MB_TRANSACTION_TIMEOUTE);
+}
+
+ModbusRtuMaster::MbStatus ModbusRtuMaster::presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,
+                                                                uint16_t regValue)
+{
+    return writeSlaveSingleRegister(slaveAddress, PRESET_SINGLE_REGISTER, regAddress,
+                                    regValue, MB_TRANSACTION_TIMEOUTE);
+}
+
 ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
                                                                     uint16_t address, uint16_t value, uint32_t timeoute)
 {
     QByteArray commandBuff;
     QByteArray replyBuff;
-    QByteArray tempReadBuff;
     uint16_t crcCalc;
     ModbusRtuMaster::MbStatus result;
 
@@ -255,11 +294,11 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     return MB_OK;
 }
 
-ModbusRtuMaster::MbStatus ModbusRtuMaster::presetMultipleRegister(uint8_t slaveAddress, uint16_t startAddress,
+ModbusRtuMaster::MbStatus ModbusRtuMaster::presetMultipleRegister(uint8_t slaveAddress, uint16_t regStartAddress,
                                                                   QVector<uint16_t> regValue)
 {
     return writeSlaveMultipleRegisters(slaveAddress, PRESET_MULTIPLE_REGISTER,
-                                       startAddress, regValue, MB_TRANSACTION_TIMEOUTE);
+                                       regStartAddress, regValue, MB_TRANSACTION_TIMEOUTE);
 
 }
 

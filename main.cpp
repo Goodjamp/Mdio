@@ -15,7 +15,7 @@ Q_DECLARE_METATYPE(uint8_t);
 Q_DECLARE_METATYPE(uint16_t);
 Q_DECLARE_METATYPE(SerialCommunication::SerialPortParity);
 Q_DECLARE_METATYPE(SerialCommunication::SerialPortStopBits);
-Q_DECLARE_METATYPE(Communication::SlaveSettings);
+Q_DECLARE_METATYPE(Communication::SlaveConfiguration);
 Q_DECLARE_METATYPE(Communication::SlaveState);
 
 int main(int argc, char *argv[])

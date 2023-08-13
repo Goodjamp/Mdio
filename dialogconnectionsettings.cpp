@@ -38,7 +38,6 @@ void DialogConnectionSettings::customClose()
     this->close();
 }
 
-
 void DialogConnectionSettings::on_pbApply_clicked()
 {
     QVector<int> settings(SETTINGS_CNT);

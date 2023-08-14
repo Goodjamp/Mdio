@@ -9,6 +9,7 @@
 #include <QSpacerItem>
 #include <QThread>
 #include <QSemaphore>
+#include <QTimer>
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"
@@ -35,6 +36,7 @@ QT_END_NAMESPACE
 #define DEBOUNCE_INTARVAL_MAX_MS           100
 #define PULS_DURATION_MIN_MS               100
 #define PULS_DURATION_MMAX_MS              4000
+#define READ_STATE_PERIOD_MS               1000
 
 #define VALUE_IN_RANGE(value, min, max)    (((value) >= (min)) && ((value) <= (max)))
 
@@ -58,7 +60,8 @@ signals:
                             Communication::SlaveConfiguration configuration);
     void reload(std::function<void(bool result)> cb,
                 int slaveAddress);
-    void readState(int slaveAddress);
+    void readState(std::function<void(bool result, Communication::SlaveState state)> cb,
+                   int slaveAddress);
     void setTeleControl(int slaveAddress, int index, bool enable);
     void readMetaInformation(std::function<void(bool result, int fwVersion)> cb,
                              int slaveAddress);
@@ -67,6 +70,7 @@ private:
     void initCustomUi();
     void updateUiConnectionStatusStr(bool isConnect);
     void updateUiDeviceMetaInfStr(bool isConnect);
+    void updateUiCommunicationStatisticStr(void);
     bool updateUiConfiguration(void);
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed);
@@ -79,10 +83,17 @@ private:
     void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
     void reloadResult(bool result);
     void writeConfigurationResult(bool result);
+    void readStateResult(bool result, Communication::SlaveState state);
 
 
 private slots:
+    /*
+     * The applyConnectionSettings is use settings set by the user over the dialog to
+     * connect to the slave readStateResult
+     */
     void applyConnectionSettings(QVector<int>);
+
+    void readSlaveState(void);
 
 private slots:
 
@@ -96,6 +107,19 @@ private slots:
 
     void on_pbReadSettings_clicked();
 
+/*
+ * The pair of the signal/slot updateUiStateSignal/updateUiStateSlot is used to
+ * pass the results of reading the state of slave from the CB
+ * function, called from the external thread to the Mdio thread.
+ */
+private:
+    signals:
+    void updateUiStateSignal(bool result, Communication::SlaveState state);
+
+private slots:
+    void updateUiStateSlot(bool result, Communication::SlaveState state);
+
+
 private:
     Ui::Mdio *ui;
     Communication *communicaiton;
@@ -108,6 +132,9 @@ private:
     QSpacerItem *tsLayoutSpacer;
     QSpacerItem *tsStatusLayoutSpacer;
     QThread *commmunicationThread;
+    QTimer *readStateTimer;
+    int stateRequestCnt;
+    int stateReplyCnt;
 
     bool needConnectSlave;
     uint connectPortIndex = 0;

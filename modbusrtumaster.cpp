@@ -156,7 +156,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
     switch (function) {
     case READ_COIL_STATUS:
     case READ_DISCRET_INPUTS:
-        payloadBytes = number/8 + number % 8;
+        payloadBytes = number/8 + ((number % 8) == 0 ? 0 : 1);
         break;
 
     case READ_HOLDING_REGISTERS:

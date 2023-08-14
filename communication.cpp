@@ -191,52 +191,60 @@ void Communication::reloadSlot(std::function<void(bool result)> cb,
     }
 }
 
-void Communication::readStateSlot(int slaveAddress)
+void Communication::readStateSlot(std::function<void(bool result, SlaveState state)> cb,
+                                  int slaveAddress)
 {
     QVector<bool> teleSignal;
+    QVector<bool> status;
     QVector<uint16_t> teleControl;
-    QVector<uint16_t> status;
     ModbusRtuMaster::MbStatus result;
     SlaveState state;
 
     /*
      * Read global status
      */
-    result = modbus->readInputRegisters(slaveAddress, ADDRESS_GLOBAL_STATUS, 1, status);
+    result = modbus->readDiscreteInputs(slaveAddress, ADDRESS_GLOBAL_STATUS, 3, status);
     if (result != ModbusRtuMaster::MB_OK) {
-        emit readStateReply(false, state);
+        CALL_CB(cb, false, state);
         qDebug()<<"readStateSlot read globalStatusReg error:"<<modbus->getStatusString(result);
         return;
     }
-    state.errorEeprom = (status[0] >> STATUS_EEPROM_ERROR_POS & 1) == 1;
-    state.error220 = (status[0] >> STATUS_220_POS & 1) == 1;
-    state.errorTransaction = (status[0] >> STATUS_TRANSACTION_ERROR_POS & 1) == 1;
+    state.error220 =  status[0];
+    state.errorEeprom = status[1];
+    state.errorTransaction =  status[2];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with
      * exception. So, in this case we can skip reading the tele-signal information
      */
-    if (state.errorEeprom == true) {
+    if (state.error220 == false) {
         /*
          * Read tele signal status
          */
-        result = modbus->readDiscreteInputs(slaveAddress, 1, TELESIGNAL_NUMBERS, teleSignal);
+        result = modbus->readDiscreteInputs(slaveAddress, ADDRESS_TS, TELESIGNAL_NUMBERS, teleSignal);
         if (result != ModbusRtuMaster::MB_OK) {
-            emit readStateReply(false, state);
+            CALL_CB(cb, false, state);
             qDebug()<<"readStateSlot read read signals error:"<<modbus->getStatusString(result);
             return;
         }
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             state.signalisation[k] = teleSignal[k];
         }
+    } else {
+        for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+            state.signalisation[k] = false;
+        }
     }
+
+    CALL_CB(cb, true, state);
+    return;
 
     /*
      * Read tele control state
      */
     result = modbus->readInputRegisters(slaveAddress, ADDRESS_TELE_CONTROL_BASE, TELECONTROL_TOTAL_NUMBERS, teleControl);
     if (result != ModbusRtuMaster::MB_OK) {
-        emit readStateReply(false, state);
+        CALL_CB(cb, false, state);
         qDebug()<<"readStateSlot read tele control error:"<<modbus->getStatusString(result);
         return;
     }
@@ -250,7 +258,7 @@ void Communication::readStateSlot(int slaveAddress)
         teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_1] = false;
     } else {
         qDebug()<<"readStateSlot puls telecontrol value error";
-        emit readStateReply(false, state);
+        CALL_CB(cb, false, state);
         return;
     }
     for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
@@ -262,11 +270,11 @@ void Communication::readStateSlot(int slaveAddress)
             teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_2 + k] = false;
         } else {
             qDebug()<<"readStateSlot telecontrol value error";
-            emit readStateReply(false, state);
+            CALL_CB(cb, false, state);
             return;
         }
     }
-    emit readStateReply(true, state);
+
 }
 
 void Communication::setTeleControlSlot(int slaveAddress, int index, bool enable)

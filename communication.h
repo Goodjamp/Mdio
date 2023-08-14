@@ -8,8 +8,6 @@
 #include "serialcommunication.h"
 #include "modbusrtumaster.h"
 
-#include "a.h"
-
 #define CB_WRAP_1(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1)
 #define CB_WRAP_2(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1, \
                                           std::placeholders::_2)
@@ -158,13 +156,9 @@ public:
  signals:
     void setTeleControlReply(bool result);
     void setTeleControlPulsSlot(bool result);
-    void readStateReply(bool result, SlaveState state);
-
 
 private:
     QThread *communicationThread;
-    int var1;
-    A *classA;
     ModbusRtuMaster *modbus;
 
     /*
@@ -206,7 +200,8 @@ public slots:
                                  int slaveAddress);
     void reloadSlot(std::function<void(bool result)> cb,
                     int slaveAddress);
-    void readStateSlot(int slaveAddress);
+    void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
+                       int slaveAddress);
     void setTeleControlSlot(int slaveAddress, int index, bool enable);
     void setTeleControlPulsSlot(int slaveAddress, bool enable);
 };

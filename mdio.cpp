@@ -69,6 +69,10 @@ void Mdio::initCustomUi()
     ui->cbBaudRate->addItems(brValueToStrLUT.values());
     ui->cbStopBits->addItems(stopBitsSerialToStrLUT.values());
     ui->cbParity->addItems(paritySerialToStrLUT.values());
+
+    ui->pbVoltageOnTcStatus->setEnabled(false);
+    ui->pbEepromStatus->setEnabled(false);
+    ui->pbTransactionStatus->setEnabled(false);
 }
 
 
@@ -80,6 +84,10 @@ Mdio::Mdio(QWidget *parent)
 
     commmunicationThread = new QThread();
     communicaiton = new Communication();
+    readStateTimer = new QTimer();
+    readStateTimer->setInterval(READ_STATE_PERIOD_MS);
+
+    connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
 
     initCustomUi();
     updateUiConnectionStatusStr(false);
@@ -111,6 +119,13 @@ Mdio::Mdio(QWidget *parent)
     commmunicationThread->start();
 
     communicationSyncSem.acquire();
+
+    /*
+     * The pair of the signal/slot updateUiStateSignal/updateUiStateSlot is used to
+     * pass the results of reading the state of slave from the CB
+     * function, called from the external thread to the Mdio thread.
+     */
+    connect(this, &Mdio::updateUiStateSignal, this, &Mdio::updateUiStateSlot);
 }
 
 Mdio::~Mdio()
@@ -369,6 +384,13 @@ void Mdio::on_pbConnectionSettings_clicked()
         return;
     }
 
+    /*
+     * Start timer to read the slave state
+     */
+    stateRequestCnt = 0;
+    stateReplyCnt = 0;
+    readStateTimer->start();
+
     updateUiConnectionStatusStr(true);
 }
 
@@ -437,7 +459,7 @@ void Mdio::on_pbApplySettings_clicked()
 void Mdio::on_pbDisconnect_clicked()
 {
     emit disconnectSlave();
-
+    readStateTimer->stop();
     updateUiConnectionStatusStr(false);
     updateUiDeviceMetaInfStr(false);
 }
@@ -467,4 +489,36 @@ void Mdio::on_pbReadSettings_clicked()
     }
 
     updateUiConfiguration();
+}
+
+void Mdio::updateUiCommunicationStatisticStr(void)
+{
+    ui->lCommunicationStatistic->setText(QString::number(stateRequestCnt) + "/" + QString::number(stateReplyCnt));
+}
+
+void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
+{
+    if (result == true) {
+        stateReplyCnt++;
+        updateUiCommunicationStatisticStr();
+        for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+            tsStatus[k]->setStatus(state.signalisation[k]);
+        }
+        ui->pbVoltageOnTcStatus->setChecked(state.error220);
+        ui->pbEepromStatus->setChecked(state.errorEeprom);
+        ui->pbTransactionStatus->setChecked(state.errorTransaction);
+    }
+}
+
+void Mdio::readStateResult(bool result, Communication::SlaveState state)
+{
+    qDebug()<<"readStateResult result: "<<result;
+    emit this->updateUiStateSlot(result, state);
+}
+
+void Mdio::readSlaveState(void)
+{
+    emit communicaiton->readStateSlot(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
+    stateRequestCnt++;
+    updateUiCommunicationStatisticStr();
 }

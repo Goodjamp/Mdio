@@ -8,6 +8,20 @@ QPushButton
 }
 */
 
+QPushButton#pbEepromStatus,
+QPushButton#pbTransactionStatus,
+QPushButton#pbVoltageOnTcStatus{
+    border-radius: 10px;
+    background-color:rgb(50, 250, 50);
+}
+
+QPushButton#pbEepromStatus:checked,
+QPushButton#pbTransactionStatus:checked,
+QPushButton#pbVoltageOnTcStatus:checked{
+    background-color:rgb(250, 50, 50);
+}
+
+
 QPushButton#pbTcState
 {
     border-style: outset;

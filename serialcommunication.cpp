@@ -85,7 +85,7 @@ bool SerialCommunication::write(QByteArray &writeData)
         return false;
     }
     //port->flush();
-    port->waitForBytesWritten(1000);
+    port->waitForBytesWritten(500);
     return true;
 }
 

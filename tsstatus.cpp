@@ -8,6 +8,7 @@ TsStatus::TsStatus(int index, QWidget *parent) :
     ui->setupUi(this);
 
     ui->lName->setText("ТС" + QString::number(index));
+    ui->pbTsState->setEnabled(false);
 }
 
 TsStatus::~TsStatus()

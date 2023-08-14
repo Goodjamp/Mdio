@@ -55,7 +55,7 @@ private:
          * settings registers
          */
         ADDRESS_VERSION_FW = 0x03E8,
-        ADDRESS_LAST_CONFIGURATION = 0x03E9,
+        ADDRESS_DATE_CONFIGURATION = 0x03E9,
 
         /*
          * Communication settings
@@ -128,6 +128,9 @@ public:
 
 public:
     typedef struct {
+        int day;
+        int month;
+        int year;
         struct {
             int baudRate;
             int silentInterval;
@@ -153,7 +156,6 @@ public:
     } SlaveState;
 
  signals:
-    void reloadReply(bool result);
     void setTeleControlReply(bool result);
     void setTeleControlPulsSlot(bool result);
     void readStateReply(bool result, SlaveState state);
@@ -195,14 +197,15 @@ public slots:
                           QString port, int baudRate,
                           SerialCommunication::SerialPortParity parity,
                           SerialCommunication::SerialPortStopBits stopBits);
-    void disconnectSlaveSlot();
+    void disconnectSlaveSlot(void);
     void writeConfigurationSlot(std::function<void(bool result)> cb,
                                 int slaveAddress, SlaveConfiguration configuration);
     void readConfigurationSlot(std::function<void(bool result, SlaveConfiguration settings)> cb,
                                int slaveAddress);
-    void readMetaInformationSlot(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+    void readMetaInformationSlot(std::function<void(bool result, int fwVersion)> cb,
                                  int slaveAddress);
-    void reloadSlot(int slaveAddress);
+    void reloadSlot(std::function<void(bool result)> cb,
+                    int slaveAddress);
     void readStateSlot(int slaveAddress);
     void setTeleControlSlot(int slaveAddress, int index, bool enable);
     void setTeleControlPulsSlot(int slaveAddress, bool enable);

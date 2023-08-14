@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QMap>
+#include <QDate>
 #include <QThread>
 #include <QMessageBox>
 #include <QValidator>
@@ -87,16 +88,11 @@ Mdio::Mdio(QWidget *parent)
     connect(this, &Mdio::connectSlave, communicaiton, &Communication::connectSlaveSlot);
     connect(this, &Mdio::disconnectSlave, communicaiton, &Communication::disconnectSlaveSlot);
     connect(this, &Mdio::readConfiguration, communicaiton, &Communication::readConfigurationSlot);
-    connect(this, &Mdio::apply, communicaiton, &Communication::reloadSlot);
+    connect(this, &Mdio::writeConfiguration, communicaiton, &Communication::writeConfigurationSlot);
     connect(this, &Mdio::reload, communicaiton, &Communication::reloadSlot);
     connect(this, &Mdio::readState, communicaiton, &Communication::readStateSlot);
     connect(this, &Mdio::setTeleControl, communicaiton, &Communication::setTeleControlSlot);
     connect(this, &Mdio::readMetaInformation, communicaiton, &Communication::readMetaInformationSlot);
-
-    /*
-     * Reply sugnal/slot family
-     */
-    connect(communicaiton, &Communication::reloadReply, this, &Mdio::reloadResult);
 
     /*
      * Runing communication class on the dedicated thread.
@@ -192,6 +188,14 @@ bool Mdio::updateUiConfiguration(void)
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
 
+    connectDeviceConfYear = connectDeviceConf.year;
+    connectDeviceConfMonth = connectDeviceConf.month;
+    connectDeviceConfDay = connectDeviceConf.day;
+
+    /*
+     * Update last configuration date information
+     */
+    updateUiDeviceMetaInfStr(true);
     return true;
 }
 
@@ -217,8 +221,7 @@ void Mdio::connectSlaveResult(bool result)
 
 }
 
-void Mdio::readMetaInformationResult(bool result, int fwVersion,
-                                     int yearConf, int monthConf, int dayConf)
+void Mdio::readMetaInformationResult(bool result, int fwVersion)
 {
     /*
      * Release (give) semaphore to unblok code that waite to complete
@@ -227,10 +230,17 @@ void Mdio::readMetaInformationResult(bool result, int fwVersion,
     qDebug()<<"Read meta information result: "<<result;
     if (result == true) {
         connectDeviceVersion = fwVersion;
-        connectDeviceConfYear = yearConf;
-        connectDeviceConfMonth = monthConf;
-        connectDeviceConfDay = dayConf;
     }
+    communicationSyncSem.release(1);
+}
+
+void  Mdio::writeConfigurationResult(bool result)
+{
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationResult = result;
+    qDebug()<<"writeConfigurationResult result: "<<result;
     communicationSyncSem.release(1);
 }
 
@@ -250,7 +260,15 @@ void  Mdio::readConfigurationResult(bool result, Communication::SlaveConfigurati
 
 void Mdio::reloadResult(bool result)
 {
-    qDebug()<<"Restart result: "<<result;
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationResult = result;
+    qDebug()<<"reloadResult result: "<<result;
+    if (result == true) {
+
+    }
+    communicationSyncSem.release(1);
 }
 
 void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
@@ -332,7 +350,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     /*
      * Read meta information
      */
-    emit readMetaInformation(CB_WRAP_5(Mdio, readMetaInformationResult), connectSlaveAddress);
+    emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка считування метаінформації") == false) {
         return;
@@ -352,27 +370,101 @@ void Mdio::on_pbConnectionSettings_clicked()
     }
 
     updateUiConnectionStatusStr(true);
-    updateUiDeviceMetaInfStr(true);
 }
 
 void Mdio::on_pbApplySettings_clicked()
 {
+    Communication::SlaveConfiguration configuration;
 
+    /*
+     * Read user configuration and serialiase it to the SlaveConfiguration
+     * structure
+     */
+
+    if (VALUE_IN_RANGE(ui->leReplyDelay->text().toUInt(),
+                       SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
+        errorMessage("Помилка конфігурації",
+                     "Час затримки відповіді повинено бути в діапазоні [" + QString::number(REPLAY_DELAY_MIN_MS)
+                     + "-" + QString::number(REPLAY_DELAY_MAX_MS) + "] мс");
+        return;
+    }
+
+    if (VALUE_IN_RANGE(ui->leSilentInterval->text().toUInt(),
+                       SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
+        errorMessage("Помилка конфігурації",
+                     "Інтервал тиші повинено бути в діапазоні [" + QString::number(SILENT_INTERVAL_MIN_MS)
+                     + "-" + QString::number(SILENT_INTERVAL_MAX_MS) + "] мс");
+        return;
+    }
+
+    if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toUInt(),
+                       DEBOUNCE_INTARVAL_MIN_MS, DEBOUNCE_INTARVAL_MAX_MS) == false ) {
+        errorMessage("Помилка конфігурації",
+                     "Тривалість брязкіту повинно бути в діапазоні [" + QString::number(DEBOUNCE_INTARVAL_MIN_MS)
+                     + "-" + QString::number(DEBOUNCE_INTARVAL_MAX_MS) + "] мс");
+        return;
+    }
+
+    if (VALUE_IN_RANGE(ui->lePulsDuration->text().toUInt(),
+                       PULS_DURATION_MIN_MS, PULS_DURATION_MMAX_MS) == false ) {
+        errorMessage("Помилка конфігурації",
+                     "Тривалість імпульсу ТК повинно бути в діапазоні [" + QString::number(PULS_DURATION_MIN_MS)
+                     + "-" + QString::number(PULS_DURATION_MMAX_MS) + "] мс");
+        return;
+    }
+
+    configuration.communication.baudRate = brValueToStrLUT.key(ui->cbBaudRate->currentText());
+    configuration.communication.parity = paritySerialToStrLUT.key(ui->cbParity->currentText());
+    configuration.communication.stopBits = stopBitsSerialToStrLUT.key(ui->cbStopBits->currentText());
+    configuration.communication.replyDelay = ui->leReplyDelay->text().toInt();
+    configuration.communication.silentInterval = ui->leSilentInterval->text().toInt();
+    configuration.signalisation.debounsInterval = ui->leDebounceInterval->text().toInt();
+    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+        configuration.signalisation.isInvers[k] = tsSetings[k]->isInvert();
+    }
+    configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
+    configuration.year = QDate::currentDate().year() - 2000;
+    configuration.month = QDate::currentDate().month();
+    configuration.day = QDate::currentDate().day();
+
+    emit writeConfiguration(CB_WRAP_1(Mdio, writeConfigurationResult), connectSlaveAddress, configuration);
+    if (processingCommunicatitonResult("Оновлення конфігурації",
+                                       "Помилка оновлення конфігурації") == false) {
+        return;
+    }
 }
 
 void Mdio::on_pbDisconnect_clicked()
 {
     emit disconnectSlave();
+
     updateUiConnectionStatusStr(false);
     updateUiDeviceMetaInfStr(false);
 }
 
 void Mdio::on_pbReload_clicked()
 {
-    emit reload(connectSlaveAddress);
+    /*
+     * Clear the semaphore
+     */
+    communicationSyncSem.tryAcquire(1);
+    emit reload(CB_WRAP_1(Mdio,reloadResult), connectSlaveAddress);
+    if (processingCommunicatitonResult("Перезавантаження пристрою",
+                                       "Помилка перезавантаження") == false) {
+        return;
+    }
 }
 
 void Mdio::on_pbReadSettings_clicked()
 {
+    /*
+     * Read configuration
+     */
+    emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
+    if (processingCommunicatitonResult("Зчитування конфігурації",
+                                       "Помилка считування мета конфігурації") == false) {
+        return;
+    }
 
+    updateUiConfiguration();
 }

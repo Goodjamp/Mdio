@@ -43,9 +43,16 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
         /*
          * Serialiase configuration to registers list
          */
-        baseConfReg = ADDRESS_COMMUNICATION_BAUDRATE;
-        registersNumbers = ADDRESS_TC_PULS_DURATION - ADDRESS_COMMUNICATION_BAUDRATE + 1;
+        baseConfReg = ADDRESS_DATE_CONFIGURATION;
+        registersNumbers = ADDRESS_TC_PULS_DURATION - baseConfReg + 1;
         configReg.resize(registersNumbers);
+
+        /*
+         * Serialiase date of configuration
+         */
+        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (DAY_CON_MASK & configuration.day) << DAY_CON_POS;
+        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (MONTH_CON_MASK & configuration.month) << MONTH_CON_POS;
+        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (YEAR_CON_MASK & configuration.year) << YEAR_CON_POS;
 
         /*
          * Serialiase communicaiotn settings
@@ -73,7 +80,7 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
          */
         configReg[ADDRESS_TC_PULS_DURATION - baseConfReg] = configuration.control.pulsDuration;
 
-        result = modbus->presetMultipleRegister(slaveAddress, ADDRESS_RESET, configReg);
+        result = modbus->presetMultipleRegister(slaveAddress, baseConfReg, configReg);
         if (result == ModbusRtuMaster::MB_OK) {
             resultWriteConfiguration = true;
         } else {
@@ -101,10 +108,16 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
     /*
      * Read reagisters range from the ADDRESS_COMMUNICATION_BAUDRATE to the ADDRESS_TC_PULS_DURATION
      */
-    baseConfReg = ADDRESS_COMMUNICATION_BAUDRATE;
-    registersNumbers = ADDRESS_TC_PULS_DURATION - ADDRESS_COMMUNICATION_BAUDRATE + 1;
+    baseConfReg = ADDRESS_DATE_CONFIGURATION;
+    registersNumbers = ADDRESS_TC_PULS_DURATION - baseConfReg + 1;
     result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, configReg);
     if (result == ModbusRtuMaster::MB_OK) {
+        /*
+         * Deserialiase configuration date
+         */
+        configuration.day = DAY_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> DAY_CON_POS);
+        configuration.month = MONTH_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> MONTH_CON_POS);
+        configuration.year = YEAR_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> YEAR_CON_POS);
 
         /*
          * Deserialiase configuration
@@ -145,30 +158,25 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
     CALL_CB(cb, resulReadConfiguration, configuration);
 }
 
-void Communication::readMetaInformationSlot(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+void Communication::readMetaInformationSlot(std::function<void(bool result, int fwVersion)> cb,
                                             int slaveAddress)
 {
     QVector<uint16_t> readData;
     ModbusRtuMaster::MbStatus result;
-    int dayConf;
-    int monthConf;
-    int yearConf;
 
-    result = modbus->readHoldingRegisters(slaveAddress, ADDRESS_VERSION_FW, 2, readData);
+    result = modbus->readHoldingRegisters(slaveAddress, ADDRESS_VERSION_FW, 1, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
-        CALL_CB(cb, false, 0, 0, 0, 0);
+        CALL_CB(cb, false, 0);
         return;
     }
-    dayConf = DAY_CON_MASK & (readData[1] >> DAY_CON_POS);
-    monthConf = MONTH_CON_MASK & (readData[1] >> MONTH_CON_POS);
-    yearConf = YEAR_CON_MASK & (readData[1] >> YEAR_CON_POS);
 
-    CALL_CB(cb, true, static_cast<int>(readData[0]), dayConf, monthConf, yearConf);
+    CALL_CB(cb, true, static_cast<int>(readData[0]));
 }
 
-void Communication::reloadSlot(int slaveAddress)
+void Communication::reloadSlot(std::function<void(bool result)> cb,
+                int slaveAddress)
 {
     QVector<uint16_t> registersList= {RESET_MAGIC_NUMBER};
     ModbusRtuMaster::MbStatus result;
@@ -176,10 +184,10 @@ void Communication::reloadSlot(int slaveAddress)
     result = modbus->presetMultipleRegister(slaveAddress, ADDRESS_RESET, registersList);
 
     if (result == ModbusRtuMaster::MB_OK) {
-        emit reloadReply(true);
+        CALL_CB(cb, true);
     } else {
         qDebug()<<"reloadSlot error:"<<modbus->getStatusString(result);
-        emit reloadReply(false);
+        CALL_CB(cb, false);
     }
 }
 

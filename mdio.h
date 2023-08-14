@@ -27,7 +27,7 @@ QT_END_NAMESPACE
 #define DEFAULT_CONNECT_YEAR               0
 #define DEFAULT_CONNECT_MONTH              0
 #define DEFAULT_CONNECT_DATE               0
-#define COMMUNICATION_COMPLETE_TIMEOUTE    5000
+#define COMMUNICATION_COMPLETE_TIMEOUTE    2000
 #define SILENT_INTERVAL_MIN_MS             0
 #define SILENT_INTERVAL_MAX_MS             100
 #define REPLAY_DELAY_MIN_MS                0
@@ -36,6 +36,8 @@ QT_END_NAMESPACE
 #define DEBOUNCE_INTARVAL_MAX_MS           100
 #define PULS_DURATION_MIN_MS               100
 #define PULS_DURATION_MMAX_MS              4000
+
+#define VALUE_IN_RANGE(value, min, max)    (((value) >= (min)) && ((value) <= (max)))
 
 class Mdio : public QMainWindow
 {
@@ -53,11 +55,13 @@ signals:
     void disconnectSlave();
     void readConfiguration(std::function<void(bool result, Communication::SlaveConfiguration settings)> cb,
                            int slaveAddress);
-    void apply(int slaveAddress, Communication::SlaveConfiguration configuration);
-    void reload(int slaveAddress);
+    void writeConfiguration(std::function<void(bool result)> cb, int slaveAddress,
+                            Communication::SlaveConfiguration configuration);
+    void reload(std::function<void(bool result)> cb,
+                int slaveAddress);
     void readState(int slaveAddress);
     void setTeleControl(int slaveAddress, int index, bool enable);
-    void readMetaInformation(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+    void readMetaInformation(std::function<void(bool result, int fwVersion)> cb,
                              int slaveAddress);
 
 private:
@@ -72,15 +76,14 @@ private:
      * The groupe of CB functin from the Communication class
      */
     void connectSlaveResult(bool result);
-    void readMetaInformationResult(bool result, int fwVersion,
-                                   int yearConf, int monthConf, int dayConf);
+    void readMetaInformationResult(bool result, int fwVersion);
     void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
+    void reloadResult(bool result);
+    void writeConfigurationResult(bool result);
 
 
 private slots:
-    //void connectSlaveResult(bool result);
     void applyConnectionSettings(QVector<int>);
-    void reloadResult(bool result);
 
 private slots:
 
@@ -123,19 +126,8 @@ private:
     uint configBr;
     uint configParity;
     uint configStop;
-
     QSemaphore communicationSyncSem{1};
     bool communicationResult;
-    /*
-    QSemaphore connecteSem{1};
-    QSemaphore readConfigurationSem{1};
-    QSemaphore writeConfigurationSem{1};
-    QSemaphore readMetaInformationSem{1};
-    QSemaphore readStatusSem{1};
-    QSemaphore setTeleCOntrolSem{1};
-    QSemaphore reloadSem{1};
-    */
-
 
     const QMap<int, SerialCommunication::SerialPortParity> parityUiToSerilaLUT{
             {0, SerialCommunication::NONE},
@@ -155,12 +147,12 @@ private:
         {38400, "38400"},
         {57600, "57600"}
     };
-    const QMap<int, QString>  paritySerialToStrLUT = {
+    const QMap<SerialCommunication::SerialPortParity, QString>  paritySerialToStrLUT = {
         {SerialCommunication::NONE, "None"},
         {SerialCommunication::EVEN, "Even"},
         {SerialCommunication::ODD, "Odd"}
     };
-    const QMap<int, QString>  stopBitsSerialToStrLUT = {
+    const QMap<SerialCommunication::SerialPortStopBits, QString>  stopBitsSerialToStrLUT = {
         {SerialCommunication::ONE, "1"},
         {SerialCommunication::TWOO, "2"}
     };

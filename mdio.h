@@ -9,7 +9,6 @@
 #include <QSpacerItem>
 #include <QThread>
 #include <QSemaphore>
-#include "a.h"
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"

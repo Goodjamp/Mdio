@@ -6,7 +6,8 @@ void Communication::startCommunication(void)
     modbus = new ModbusRtuMaster();
 }
 
-void Communication::connectSlaveSlot(QString port, int baudRate,
+void Communication::connectSlaveSlot(std::function<void(bool result)> cb,
+                                     QString port, int baudRate,
                                      SerialCommunication::SerialPortParity parity,
                                      SerialCommunication::SerialPortStopBits stopBits)
 {
@@ -14,11 +15,10 @@ void Communication::connectSlaveSlot(QString port, int baudRate,
      * Open port
      */
     if(modbus->open(port, baudRate, parity, stopBits) == false) {
-        emit connectSlaveReply(false);
+        CALL_CB(cb, true);
         return;
     }
-
-    emit connectSlaveReply(true);
+    CALL_CB(cb, true);
 }
 
 void Communication::disconnectSlaveSlot()
@@ -26,7 +26,8 @@ void Communication::disconnectSlaveSlot()
     modbus->close();
 }
 
-void Communication::writeConfigurationSlot(int slaveAddress, SlaveConfiguration configuration)
+void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
+                                           int slaveAddress, SlaveConfiguration configuration)
 {
 #define DEFAULT_KEY    0xFFFF
     QVector<uint16_t> configReg;
@@ -82,10 +83,11 @@ void Communication::writeConfigurationSlot(int slaveAddress, SlaveConfiguration 
         qDebug()<<"writeConfigurationSlot paity or stopBits error";
     }
 
-    emit writeConfigurationReply(resultWriteConfiguration);
+    CALL_CB(cb, resultWriteConfiguration);
 }
 
-void Communication::readConfigurationSlot(int slaveAddress)
+void Communication::readConfigurationSlot(std::function<void(bool result, SlaveConfiguration settings)> cb,
+                                          int slaveAddress)
 {
     QVector<uint16_t> configReg;
     ModbusRtuMaster::MbStatus result;
@@ -140,10 +142,11 @@ void Communication::readConfigurationSlot(int slaveAddress)
         qDebug()<<"readConfigurationSlot read configuration error:"<<modbus->getStatusString(result);
     }
 
-    emit readConfigurationReply(resulReadConfiguration, configuration);
+    CALL_CB(cb, resulReadConfiguration, configuration);
 }
 
-void Communication::readMetaInformationSlot(int slaveAddress)
+void Communication::readMetaInformationSlot(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+                                            int slaveAddress)
 {
     QVector<uint16_t> readData;
     ModbusRtuMaster::MbStatus result;
@@ -151,18 +154,18 @@ void Communication::readMetaInformationSlot(int slaveAddress)
     int monthConf;
     int yearConf;
 
-    result = modbus->readInputRegisters(slaveAddress, ADDRESS_VERSION_FW, 2, readData);
+    result = modbus->readHoldingRegisters(slaveAddress, ADDRESS_VERSION_FW, 2, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
-        emit readMetaInformationReply(false, 0, 0, 0, 0);
+        CALL_CB(cb, false, 0, 0, 0, 0);
         return;
     }
-    dayConf = DAY_CON_MASK & (readData[0] >> DAY_CON_POS);
-    monthConf = MONTH_CON_MASK & (readData[0] >> MONTH_CON_POS);
-    yearConf = YEAR_CON_MASK & (readData[0] >> YEAR_CON_POS);
+    dayConf = DAY_CON_MASK & (readData[1] >> DAY_CON_POS);
+    monthConf = MONTH_CON_MASK & (readData[1] >> MONTH_CON_POS);
+    yearConf = YEAR_CON_MASK & (readData[1] >> YEAR_CON_POS);
 
-    emit readMetaInformationReply(true, static_cast<int>(readData[0]), dayConf, monthConf, yearConf);
+    CALL_CB(cb, true, static_cast<int>(readData[0]), dayConf, monthConf, yearConf);
 }
 
 void Communication::reloadSlot(int slaveAddress)

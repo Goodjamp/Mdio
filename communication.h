@@ -10,6 +10,9 @@
 
 #include "a.h"
 
+#define CB_WRAP_1(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1)
+#define CB_WRAP_2(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1, \
+                                          std::placeholders::_2)
 #define CB_WRAP_5(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1, \
                                           std::placeholders::_2, \
                                           std::placeholders::_3, \
@@ -150,14 +153,11 @@ public:
     } SlaveState;
 
  signals:
-    void connectSlaveReply(bool result);
-    void writeConfigurationReply(bool result);
-    void readConfigurationReply(bool result, SlaveConfiguration settings);
-    void readMetaInformationReply(bool result, int fwVersion, int yearConf, int monthConf, int dayConf);
     void reloadReply(bool result);
-    void readStateReply(bool result, SlaveState state);
     void setTeleControlReply(bool result);
     void setTeleControlPulsSlot(bool result);
+    void readStateReply(bool result, SlaveState state);
+
 
 private:
     QThread *communicationThread;
@@ -191,13 +191,17 @@ public slots:
     /*
      * The groupe of slots to comunicate with device
      */
-    void connectSlaveSlot(QString port, int baudRate,
+    void connectSlaveSlot(std::function<void(bool result)> cb,
+                          QString port, int baudRate,
                           SerialCommunication::SerialPortParity parity,
                           SerialCommunication::SerialPortStopBits stopBits);
     void disconnectSlaveSlot();
-    void writeConfigurationSlot(int slaveAddress, SlaveConfiguration configuration);
-    void readConfigurationSlot(int slaveAddress);
-    void readMetaInformationSlot(int slaveAddress);
+    void writeConfigurationSlot(std::function<void(bool result)> cb,
+                                int slaveAddress, SlaveConfiguration configuration);
+    void readConfigurationSlot(std::function<void(bool result, SlaveConfiguration settings)> cb,
+                               int slaveAddress);
+    void readMetaInformationSlot(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+                                 int slaveAddress);
     void reloadSlot(int slaveAddress);
     void readStateSlot(int slaveAddress);
     void setTeleControlSlot(int slaveAddress, int index, bool enable);

@@ -46,16 +46,19 @@ public:
     ~Mdio();
 
 signals:
-    void connectSlave(QString port, int baudRate,
+    void connectSlave(std::function<void(bool result)> cb,
+                      QString port, int baudRate,
                       SerialCommunication::SerialPortParity parity,
                       SerialCommunication::SerialPortStopBits stopBits);
     void disconnectSlave();
-    void readConfiguration(int slaveAddress);
+    void readConfiguration(std::function<void(bool result, Communication::SlaveConfiguration settings)> cb,
+                           int slaveAddress);
     void apply(int slaveAddress, Communication::SlaveConfiguration configuration);
     void reload(int slaveAddress);
     void readState(int slaveAddress);
     void setTeleControl(int slaveAddress, int index, bool enable);
-    void readMetaInformation(int slaveAddress);
+    void readMetaInformation(std::function<void(bool result, int fwVersion, int yearConf, int monthConf, int dayConf)> cb,
+                             int slaveAddress);
 
 private:
     void initCustomUi();
@@ -65,12 +68,17 @@ private:
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed);
 
-
-private slots:
+    /*
+     * The groupe of CB functin from the Communication class
+     */
     void connectSlaveResult(bool result);
     void readMetaInformationResult(bool result, int fwVersion,
                                    int yearConf, int monthConf, int dayConf);
     void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
+
+
+private slots:
+    //void connectSlaveResult(bool result);
     void applyConnectionSettings(QVector<int>);
     void reloadResult(bool result);
 

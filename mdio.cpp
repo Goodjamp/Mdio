@@ -96,10 +96,7 @@ Mdio::Mdio(QWidget *parent)
     /*
      * Reply sugnal/slot family
      */
-    connect(communicaiton, &Communication::connectSlaveReply, this, &Mdio::connectSlaveResult);
     connect(communicaiton, &Communication::reloadReply, this, &Mdio::reloadResult);
-    connect(communicaiton, &Communication::readMetaInformationReply, this, &Mdio::readMetaInformationResult);
-    connect(communicaiton, &Communication::readConfigurationReply, this, &Mdio::readConfigurationResult);
 
     /*
      * Runing communication class on the dedicated thread.
@@ -214,9 +211,10 @@ void Mdio::connectSlaveResult(bool result)
     /*
      * Release (give) semaphore to unblok code that waite to complete
      */
-    communicationSyncSem.release(1);
     communicationResult = result;
     qDebug()<<"Connect rez:"<<result;
+    communicationSyncSem.release(1);
+
 }
 
 void Mdio::readMetaInformationResult(bool result, int fwVersion,
@@ -318,8 +316,8 @@ void Mdio::on_pbConnectionSettings_clicked()
     } else {
         return;
     }
-    qDebug()<<"Sem val "<<communicationSyncSem.available();
-    emit connectSlave(comList[connectPortIndex],
+    emit connectSlave(CB_WRAP_1(Mdio, connectSlaveResult),
+                      comList[connectPortIndex],
                       brValueToStrLUT.keys()[connectBrIndex],
                       parity,
                       stopBits);
@@ -334,7 +332,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     /*
      * Read meta information
      */
-    emit readMetaInformation(connectSlaveAddress);
+    emit readMetaInformation(CB_WRAP_5(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка считування метаінформації") == false) {
         return;
@@ -343,7 +341,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     /*
      * Read configuration
      */
-    emit readConfiguration(connectSlaveAddress);
+    emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка считування мета конфігурації") == false) {
         return;
@@ -365,6 +363,8 @@ void Mdio::on_pbApplySettings_clicked()
 void Mdio::on_pbDisconnect_clicked()
 {
     emit disconnectSlave();
+    updateUiConnectionStatusStr(false);
+    updateUiDeviceMetaInfStr(false);
 }
 
 void Mdio::on_pbReload_clicked()
@@ -374,5 +374,5 @@ void Mdio::on_pbReload_clicked()
 
 void Mdio::on_pbReadSettings_clicked()
 {
-    emit readMetaInformation(connectSlaveAddress);
+
 }

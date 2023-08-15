@@ -82,16 +82,17 @@ Mdio::Mdio(QWidget *parent)
 {
     ui->setupUi(this);
 
+
     commmunicationThread = new QThread();
     communicaiton = new Communication();
     readStateTimer = new QTimer();
     readStateTimer->setInterval(READ_STATE_PERIOD_MS);
 
     connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
-
+    resetSlaveInformation();
     initCustomUi();
-    updateUiConnectionStatusStr(false);
-    updateUiDeviceMetaInfStr(false);
+    updateUiConnectionStatusStr();
+    updateUiDeviceMetaInfStr();
 
     connect(this, &Mdio::connectSlave, communicaiton, &Communication::connectSlaveSlot);
     connect(this, &Mdio::disconnectSlave, communicaiton, &Communication::disconnectSlaveSlot);
@@ -133,12 +134,12 @@ Mdio::~Mdio()
     delete ui;
 }
 
-void Mdio::updateUiConnectionStatusStr(bool isConnect)
+void Mdio::updateUiConnectionStatusStr(void)
 {
     QString connectionSettingsStr;
+    QStringList comList = Communication::getPortsList();
 
-    if (isConnect == true) {
-        QStringList comList = Communication::getPortsList();
+    if (isSlaveConnect == true) {
         connectionSettingsStr = comList[connectPortIndex]
                                 + " "
                                 + brValueToStrLUT.values()[connectBrIndex]
@@ -150,25 +151,22 @@ void Mdio::updateUiConnectionStatusStr(bool isConnect)
                                 + "Адр."
                                 + QString::number(connectSlaveAddress);
     } else {
-        connectionSettingsStr = "Від'єднано";
+        connectionSettingsStr = "ВІД'ЄДНАНИЙ";
     }
 
     ui->lConnectionSettings->setText(connectionSettingsStr);
 }
 
-void Mdio::updateUiDeviceMetaInfStr(bool isConnect)
+void Mdio::updateUiDeviceMetaInfStr(void)
 {
     QString metaInfStr;
-    if (isConnect == true) {
-        metaInfStr = "v."
-                     + QString::number(connectDeviceVersion)
-                     + " "
-                     + QString::number(connectDeviceConfDay) + "."
-                     + QString::number(connectDeviceConfMonth) + "."
-                     + QString::number(connectDeviceConfYear);
-    } else {
-        metaInfStr = "v.0 0.0.0";
-    }
+
+    metaInfStr = "v"
+                 + QString::number(connectDeviceVersion)
+                 + "  Дата:"
+                 + QString::number(connectDeviceConfDay) + "."
+                 + QString::number(connectDeviceConfMonth) + "."
+                 + QString::number(connectDeviceConfYear);
 
 
     ui->lDeviceMetaInfo->setText(metaInfStr);
@@ -210,7 +208,7 @@ bool Mdio::updateUiConfiguration(void)
     /*
      * Update last configuration date information
      */
-    updateUiDeviceMetaInfStr(true);
+    updateUiDeviceMetaInfStr();
     return true;
 }
 
@@ -223,6 +221,20 @@ void Mdio::errorMessage(QString headr, QString detailed)
                                                        this);
     errorAddressMessage->setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
     errorAddressMessage->show();
+}
+
+void Mdio::resetSlaveInformation(void)
+{
+    connectPortIndex = 0;
+    connectBrIndex = DEFAULT_CONNECT_BR_INDEX;
+    connectParityIndex = DEFAULT_CONNECT_PARITY_INDEX;
+    connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
+    connectSlaveAddress = DEFAULT_CONNECT_SLAVE_ADDRESS;
+    connectDeviceVersion = DEFAULT_CONNECT_VERSION;
+    connectDeviceConfYear = DEFAULT_CONNECT_YEAR;
+    connectDeviceConfMonth = DEFAULT_CONNECT_MONTH;
+    connectDeviceConfDay = DEFAULT_CONNECT_DATE;
+    isSlaveConnect = false;
 }
 
 void Mdio::connectSlaveResult(bool result)
@@ -329,7 +341,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     dialogConnectionSettings.exec();
 
     /*
-     * If user push
+     * If user push botton *Close*, we don't need continue connection to slave
      */
     if (needConnectSlave ==false) {
         return;
@@ -367,7 +379,7 @@ void Mdio::on_pbConnectionSettings_clicked()
      */
     emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка считування метаінформації") == false) {
+                                       "Помилка зчитування метаінформації") == false) {
         return;
     }
 
@@ -391,7 +403,8 @@ void Mdio::on_pbConnectionSettings_clicked()
     stateReplyCnt = 0;
     readStateTimer->start();
 
-    updateUiConnectionStatusStr(true);
+    isSlaveConnect = true;
+    updateUiConnectionStatusStr();
 }
 
 void Mdio::on_pbApplySettings_clicked()
@@ -460,8 +473,9 @@ void Mdio::on_pbDisconnect_clicked()
 {
     emit disconnectSlave();
     readStateTimer->stop();
-    updateUiConnectionStatusStr(false);
-    updateUiDeviceMetaInfStr(false);
+    resetSlaveInformation();
+    updateUiConnectionStatusStr();
+    updateUiDeviceMetaInfStr();
 }
 
 void Mdio::on_pbReload_clicked()

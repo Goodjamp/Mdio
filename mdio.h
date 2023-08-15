@@ -19,10 +19,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
 QT_END_NAMESPACE
 
-#define DEFAULT_CONNECT_BR_INDEX           8
+#define DEFAULT_CONNECT_BR_INDEX           0
 #define DEFAULT_CONNECT_PARITY_INDEX       0
 #define DEFAULT_CONNECT_STOP_BITS_INDEX    0
-#define DEFAULT_CONNECT_SLAVE_ADDRESS      254
+#define DEFAULT_CONNECT_SLAVE_ADDRESS      1
 #define DEFAULT_CONNECT_VERSION            0
 #define DEFAULT_CONNECT_YEAR               0
 #define DEFAULT_CONNECT_MONTH              0
@@ -68,12 +68,13 @@ signals:
 
 private:
     void initCustomUi();
-    void updateUiConnectionStatusStr(bool isConnect);
-    void updateUiDeviceMetaInfStr(bool isConnect);
+    void updateUiConnectionStatusStr(void);
+    void updateUiDeviceMetaInfStr(void);
     void updateUiCommunicationStatisticStr(void);
     bool updateUiConfiguration(void);
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed);
+    void resetSlaveInformation(void);
 
     /*
      * The groupe of CB functin from the Communication class
@@ -137,15 +138,16 @@ private:
     int stateReplyCnt;
 
     bool needConnectSlave;
-    uint connectPortIndex = 0;
-    uint connectBrIndex = DEFAULT_CONNECT_BR_INDEX;
-    uint connectParityIndex = DEFAULT_CONNECT_PARITY_INDEX;
-    uint connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
-    uint connectSlaveAddress = DEFAULT_CONNECT_SLAVE_ADDRESS;
-    uint connectDeviceVersion = DEFAULT_CONNECT_VERSION;
-    uint connectDeviceConfYear = DEFAULT_CONNECT_YEAR;
-    uint connectDeviceConfMonth = DEFAULT_CONNECT_MONTH;
-    uint connectDeviceConfDay = DEFAULT_CONNECT_DATE;
+    bool isSlaveConnect;
+    uint connectPortIndex;
+    uint connectBrIndex;
+    uint connectParityIndex;
+    uint connectStopBitsIndex;
+    uint connectSlaveAddress;
+    uint connectDeviceVersion;
+    uint connectDeviceConfYear;
+    uint connectDeviceConfMonth;
+    uint connectDeviceConfDay;
 
     Communication::SlaveConfiguration connectDeviceConf;
 

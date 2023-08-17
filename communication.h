@@ -38,50 +38,63 @@ private:
         /*
          * Generyc registers
          */
-        ADDRESS_TS = 0x0000,
-        ADDRESS_GLOBAL_STATUS = 0x0004,
+        ADDR_REG_TS = 0x0000,
+        ADDR_REG_GLOBAL_STATUS = 0x0004,
 
         /*
          * State registers
          */
-        ADDRESS_TELE_CONTROL_BASE = 0x0009,
-        ADDRESS_TELE_CONTROL_1 = 0x0009,
-        ADDRESS_TELE_CONTROL_2 = 0x000A,
-        ADDRESS_TELE_CONTROL_3 = 0x000B,
+        ADDR_REG_TELE_CONTROL_BASE = 0x0009,
+        ADDR_REG_TELE_CONTROL_1 = 0x0009,
+        ADDR_REG_TELE_CONTROL_2 = 0x000A,
+        ADDR_REG_TELE_CONTROL_3 = 0x000B,
 
         /*
          * settings registers
          */
-        ADDRESS_VERSION_FW = 0x03E8,
-        ADDRESS_DATE_CONFIGURATION = 0x03E9,
+        ADDR_REG_VERSION_FW = 0x03E8,
+        ADDR_REG_DATE_CONFIGURATION = 0x03E9,
 
         /*
          * Communication settings
          */
-        ADDRESS_COMMUNICATION_BAUDRATE = 0x03EA,
-        ADDRESS_COMMUNICATION_SETTINGS = 0x03EB,
-        ADDRESS_COMMUNICATION_SILENTS_INTERVAL = 0x03EC,
-        ADDRESS_COMMUNICATION_REPLY_DELAY = 0x03ED,
+        ADDR_REG_COMMUNICATION_BAUDRATE = 0x03EA,
+        ADDR_REG_COMMUNICATION_SETTINGS = 0x03EB,
+        ADDR_REG_COMMUNICATION_SILENTS_INTERVAL = 0x03EC,
+        ADDR_REG_COMMUNICATION_REPLY_DELAY = 0x03ED,
 
         /*
          * Tele signal settings
          */
-        ADDRESS_TS_DEBOUNCE_DELAY = 0x03EE,
-        ADDRESS_TS_INVERSION_SETTINGS = 0x03EF,
+        ADDR_REG_TS_DEBOUNCE_DELAY = 0x03EE,
+        ADDR_REG_TS_INVERSION_SETTINGS = 0x03EF,
 
         /*
          * Tele control settings
          */
-        ADDRESS_TC_PULS_DURATION = 0x03F0,
+        ADDR_REG_TC_PULS_DURATION = 0x03F0,
 
-        ADDRESS_TC_EEPROM_RELAY_1 = 0x03F1,
-        ADDRESS_TC_EEPROM_RELAY_2 = 0x03F2,
+        ADDR_REG_TC_EEPROM_RELAY_1 = 0x03F1,
+        ADDR_REG_TC_EEPROM_RELAY_2 = 0x03F2,
 
         /*
          * Reset device control
          */
-        ADDRESS_RESET = 0x03F3,
-    } AddressRegisters;
+        ADDR_REG_RESET = 0x03F3,
+    } AddrReg;
+
+    typedef enum {
+        ADDR_COIL_TC_1 = 0,
+        ADDR_COIL_TC_2 = 1,
+        ADDR_COIL_TC_3 = 2,
+        ADDR_COIL_TC_4 = 3,
+
+        ADDR_COIL_220_V_ERROR = 4,
+        ADDR_COIL_TRANSACTION_ERROR = 5,
+        ADDR_COIL_EEPROM_ERROR = 6,
+        ADDR_COIL_EEPROM_CLEAR_ERROR = 7,
+        ADDR_COIL_CONFIGURATION_ERROR = 8,
+    } AddrCoil;
 
     #define TELESIGNAL_NUMBERS              4
     #define TELECONTROL_NUMBERS             2
@@ -147,8 +160,10 @@ public:
 
     typedef struct {
         bool error220;
-        bool errorEeprom;
         bool errorTransaction;
+        bool errorEeprom;
+        bool errorcEepromClear;
+        bool errorcConfiguration;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;

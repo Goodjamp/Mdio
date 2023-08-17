@@ -43,42 +43,42 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
         /*
          * Serialiase configuration to registers list
          */
-        baseConfReg = ADDRESS_DATE_CONFIGURATION;
-        registersNumbers = ADDRESS_TC_PULS_DURATION - baseConfReg + 1;
+        baseConfReg = ADDR_REG_DATE_CONFIGURATION;
+        registersNumbers = ADDR_REG_TC_PULS_DURATION - baseConfReg + 1;
         configReg.resize(registersNumbers);
 
         /*
          * Serialiase date of configuration
          */
-        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (DAY_CON_MASK & configuration.day) << DAY_CON_POS;
-        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (MONTH_CON_MASK & configuration.month) << MONTH_CON_POS;
-        configReg[ADDRESS_DATE_CONFIGURATION - baseConfReg] |= (YEAR_CON_MASK & configuration.year) << YEAR_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (DAY_CON_MASK & configuration.day) << DAY_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (MONTH_CON_MASK & configuration.month) << MONTH_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (YEAR_CON_MASK & configuration.year) << YEAR_CON_POS;
 
         /*
          * Serialiase communicaiotn settings
          */
-        configReg[ADDRESS_COMMUNICATION_BAUDRATE - baseConfReg] = configuration.communication.baudRate;
-        configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] = 0;
-        configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] |= parity << PARITY_POS;
-        configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] |= stopBits << STOP_BITS_POS;
-        configReg[ADDRESS_COMMUNICATION_SILENTS_INTERVAL - baseConfReg] = configuration.communication.silentInterval;
-        configReg[ADDRESS_COMMUNICATION_REPLY_DELAY - baseConfReg] = configuration.communication.replyDelay;
+        configReg[ADDR_REG_COMMUNICATION_BAUDRATE - baseConfReg] = configuration.communication.baudRate;
+        configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] = 0;
+        configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] |= parity << PARITY_POS;
+        configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] |= stopBits << STOP_BITS_POS;
+        configReg[ADDR_REG_COMMUNICATION_SILENTS_INTERVAL - baseConfReg] = configuration.communication.silentInterval;
+        configReg[ADDR_REG_COMMUNICATION_REPLY_DELAY - baseConfReg] = configuration.communication.replyDelay;
 
         /*
          * Serialiase tele signalisation settings
          */
-        configReg[ADDRESS_TS_DEBOUNCE_DELAY - baseConfReg] = configuration.signalisation.debounsInterval;
-        configReg[ADDRESS_TS_INVERSION_SETTINGS - baseConfReg] = 0;
+        configReg[ADDR_REG_TS_DEBOUNCE_DELAY - baseConfReg] = configuration.signalisation.debounsInterval;
+        configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] = 0;
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             if (configuration.signalisation.isInvers[k] == true) {
-                configReg[ADDRESS_TS_INVERSION_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
+                configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
 
         /*
          * Serialiase tele control settings
          */
-        configReg[ADDRESS_TC_PULS_DURATION - baseConfReg] = configuration.control.pulsDuration;
+        configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg] = configuration.control.pulsDuration;
 
         result = modbus->presetMultipleRegister(slaveAddress, baseConfReg, configReg);
         if (result == ModbusRtuMaster::MB_OK) {
@@ -108,22 +108,22 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
     /*
      * Read reagisters range from the ADDRESS_COMMUNICATION_BAUDRATE to the ADDRESS_TC_PULS_DURATION
      */
-    baseConfReg = ADDRESS_DATE_CONFIGURATION;
-    registersNumbers = ADDRESS_TC_PULS_DURATION - baseConfReg + 1;
+    baseConfReg = ADDR_REG_DATE_CONFIGURATION;
+    registersNumbers = ADDR_REG_TC_PULS_DURATION - baseConfReg + 1;
     result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, configReg);
     if (result == ModbusRtuMaster::MB_OK) {
         /*
          * Deserialiase configuration date
          */
-        configuration.day = DAY_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> DAY_CON_POS);
-        configuration.month = MONTH_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> MONTH_CON_POS);
-        configuration.year = YEAR_CON_MASK & (configReg[baseConfReg - ADDRESS_DATE_CONFIGURATION] >> YEAR_CON_POS);
+        configuration.day = DAY_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
+        configuration.month = MONTH_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
+        configuration.year = YEAR_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
 
         /*
          * Deserialiase configuration
          */
-        parity = static_cast<int>(PARITY_MASK & (configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
-        stopBits =  static_cast<int>(STOP_BITS_MASK & (configReg[ADDRESS_COMMUNICATION_SETTINGS - baseConfReg] >> STOP_BITS_POS));
+        parity = static_cast<int>(PARITY_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
+        stopBits =  static_cast<int>(STOP_BITS_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> STOP_BITS_POS));
         if (parityMbToSerialLUT.contains(parity) == true
             && stopBitsMbToSerialLUT.contains(stopBits) == true) {
             /*
@@ -131,22 +131,22 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
              */
             configuration.communication.parity = parityMbToSerialLUT.value(parity);
             configuration.communication.stopBits = stopBitsMbToSerialLUT.value(stopBits);
-            configuration.communication.baudRate = configReg[ADDRESS_COMMUNICATION_BAUDRATE - baseConfReg];
-            configuration.communication.silentInterval = configReg[ADDRESS_COMMUNICATION_SILENTS_INTERVAL - baseConfReg];
-            configuration.communication.replyDelay = configReg[ADDRESS_COMMUNICATION_REPLY_DELAY - baseConfReg];
+            configuration.communication.baudRate = configReg[ADDR_REG_COMMUNICATION_BAUDRATE - baseConfReg];
+            configuration.communication.silentInterval = configReg[ADDR_REG_COMMUNICATION_SILENTS_INTERVAL - baseConfReg];
+            configuration.communication.replyDelay = configReg[ADDR_REG_COMMUNICATION_REPLY_DELAY - baseConfReg];
 
             /*
              * Deserialiase tele signalisation settings
              */
-            configuration.signalisation.debounsInterval = configReg[ADDRESS_TS_DEBOUNCE_DELAY - baseConfReg];
+            configuration.signalisation.debounsInterval = configReg[ADDR_REG_TS_DEBOUNCE_DELAY - baseConfReg];
             for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-                configuration.signalisation.isInvers[k] = (1 & (configReg[ADDRESS_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 1;
+                configuration.signalisation.isInvers[k] = (1 & (configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 1;
             }
 
             /*
              * Deserialiase tele control settings
              */
-            configuration.control.pulsDuration = configReg[ADDRESS_TC_PULS_DURATION - baseConfReg];
+            configuration.control.pulsDuration = configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg];
             resulReadConfiguration = true;
         } else {
             qDebug()<<"readConfigurationSlot parity or stop bits error:";
@@ -164,7 +164,7 @@ void Communication::readMetaInformationSlot(std::function<void(bool result, int 
     QVector<uint16_t> readData;
     ModbusRtuMaster::MbStatus result;
 
-    result = modbus->readHoldingRegisters(slaveAddress, ADDRESS_VERSION_FW, 1, readData);
+    result = modbus->readHoldingRegisters(slaveAddress, ADDR_REG_VERSION_FW, 1, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
@@ -181,7 +181,7 @@ void Communication::reloadSlot(std::function<void(bool result)> cb,
     QVector<uint16_t> registersList= {RESET_MAGIC_NUMBER};
     ModbusRtuMaster::MbStatus result;
 
-    result = modbus->presetMultipleRegister(slaveAddress, ADDRESS_RESET, registersList);
+    result = modbus->presetMultipleRegister(slaveAddress, ADDR_REG_RESET, registersList);
 
     if (result == ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, true);
@@ -199,19 +199,25 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     QVector<uint16_t> teleControl;
     ModbusRtuMaster::MbStatus result;
     SlaveState state;
+    uint16_t baseCoilAddress;
+    uint16_t readCoilsNumber;
 
     /*
      * Read global status
      */
-    result = modbus->readDiscreteInputs(slaveAddress, ADDRESS_GLOBAL_STATUS, 3, status);
+    baseCoilAddress = ADDR_COIL_220_V_ERROR;
+    readCoilsNumber = ADDR_COIL_CONFIGURATION_ERROR - baseCoilAddress + 1;
+    result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"readStateSlot read globalStatusReg error:"<<modbus->getStatusString(result);
         return;
     }
-    state.error220 =  status[0];
-    state.errorEeprom = status[1];
-    state.errorTransaction =  status[2];
+    state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
+    state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
+    state.errorTransaction =  status[ADDR_COIL_TRANSACTION_ERROR - baseCoilAddress];
+    state.errorcEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
+    state.errorcConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR- baseCoilAddress];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with
@@ -221,7 +227,9 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         /*
          * Read tele signal status
          */
-        result = modbus->readDiscreteInputs(slaveAddress, ADDRESS_TS, TELESIGNAL_NUMBERS, teleSignal);
+        baseCoilAddress = ADDR_COIL_TC_1;
+        readCoilsNumber = ADDR_COIL_TC_4 - baseCoilAddress + 1;
+        result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, teleSignal);
         if (result != ModbusRtuMaster::MB_OK) {
             CALL_CB(cb, false, state);
             qDebug()<<"readStateSlot read read signals error:"<<modbus->getStatusString(result);
@@ -242,7 +250,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Read tele control state
      */
-    result = modbus->readInputRegisters(slaveAddress, ADDRESS_TELE_CONTROL_BASE, TELECONTROL_TOTAL_NUMBERS, teleControl);
+    result = modbus->readInputRegisters(slaveAddress, ADDR_REG_TELE_CONTROL_BASE, TELECONTROL_TOTAL_NUMBERS, teleControl);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"readStateSlot read tele control error:"<<modbus->getStatusString(result);
@@ -252,22 +260,22 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Test and apply the context of telecontrol registers
      */
-    if (teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_1] == TELECONTROL_PULS_ON) {
-        teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_1] = true;
-    } else if (teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_1] == TELECONTROL_PULS_OFF) {
-        teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_1] = false;
+    if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] == TELECONTROL_PULS_ON) {
+        teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] = true;
+    } else if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] == TELECONTROL_PULS_OFF) {
+        teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] = false;
     } else {
         qDebug()<<"readStateSlot puls telecontrol value error";
         CALL_CB(cb, false, state);
         return;
     }
     for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
-        if (teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_2 + k]
+        if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k]
             == ModbusRtuMaster::COIL_ON) {
-            teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_2 + k] = true;
-        } else if (teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_2 + k]
+            teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k] = true;
+        } else if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k]
                    == ModbusRtuMaster::COIL_OFF) {
-            teleControl[ADDRESS_TELE_CONTROL_BASE - ADDRESS_TELE_CONTROL_2 + k] = false;
+            teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k] = false;
         } else {
             qDebug()<<"readStateSlot telecontrol value error";
             CALL_CB(cb, false, state);
@@ -286,7 +294,7 @@ ModbusRtuMaster::MbStatus result;
         emit setTeleControlReply(false);
         return;
     }
-    result = modbus->forceSingleCoil(slaveAddress, ADDRESS_TELE_CONTROL_2 + index, enable);
+    result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable);
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"setTeleControlSlot send error:"<<modbus->getStatusString(result);
     }
@@ -297,7 +305,7 @@ void Communication::setTeleControlPulsSlot(int slaveAddress, bool enable)
 {
     ModbusRtuMaster::MbStatus result;
 
-    result = modbus->presetSingleRegister(slaveAddress,ADDRESS_TELE_CONTROL_1,
+    result = modbus->presetSingleRegister(slaveAddress,ADDR_REG_TELE_CONTROL_1,
                                           enable == true
                                           ? static_cast<uint16_t>(TELECONTROL_PULS_ON)
                                           : static_cast<uint16_t>(TELECONTROL_PULS_OFF));

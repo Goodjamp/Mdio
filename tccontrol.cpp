@@ -1,15 +1,15 @@
 #include "tccontrol.h"
 #include "ui_tccontrol.h"
 
-TcControl::TcControl(QString name, QWidget *parent) :
+TcControl::TcControl(QString name, int index, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
 
-    ui->fBackGround->setStyleSheet("QFrame  {background-color:rgb(150, 200, 200);}");
     ui->lTc->setText(name);
     ui->pbTcState->setEnabled(false);
+    userIndex = index;
 }
 
 TcControl::~TcControl()
@@ -19,10 +19,15 @@ TcControl::~TcControl()
 
 void TcControl::on_pbOn_clicked()
 {
-
+    emit setControlState(userIndex, true);
 }
 
 void TcControl::on_pbOff_clicked()
+{
+    emit setControlState(userIndex, false);
+}
+
+void TcControl::setState(bool enable)
 {
 
 }

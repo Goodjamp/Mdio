@@ -216,8 +216,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
     state.errorTransaction =  status[ADDR_COIL_TRANSACTION_ERROR - baseCoilAddress];
-    state.errorcEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
-    state.errorcConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR- baseCoilAddress];
+    state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
+    state.errorConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR- baseCoilAddress];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with
@@ -244,8 +244,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         }
     }
 
-    CALL_CB(cb, true, state);
-    return;
+    //CALL_CB(cb, true, state);
+    //return;
 
     /*
      * Read tele control state
@@ -285,23 +285,25 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
 
 }
 
-void Communication::setTeleControlSlot(int slaveAddress, int index, bool enable)
+void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
+                                       int slaveAddress, int index, bool enable)
 {
 ModbusRtuMaster::MbStatus result;
 
     if (index > TELECONTROL_NUMBERS) {
         qDebug()<<"setTeleControlSlot index value error: "<<index;
-        emit setTeleControlReply(false);
+        CALL_CB(cb, false);
         return;
     }
     result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable);
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"setTeleControlSlot send error:"<<modbus->getStatusString(result);
     }
-    emit setTeleControlReply(result == ModbusRtuMaster::MB_OK);
+    CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }
 
-void Communication::setTeleControlPulsSlot(int slaveAddress, bool enable)
+void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
+                                           int slaveAddress, bool enable)
 {
     ModbusRtuMaster::MbStatus result;
 
@@ -312,5 +314,5 @@ void Communication::setTeleControlPulsSlot(int slaveAddress, bool enable)
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"setTeleControlPulsSlot send error:"<<modbus->getStatusString(result);
     }
-    emit setTeleControlReply(result == ModbusRtuMaster::MB_OK);
+    CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }

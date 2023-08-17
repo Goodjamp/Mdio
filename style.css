@@ -8,6 +8,13 @@ QPushButton
 }
 */
 
+QFrame#fBackGround{
+    background-color:rgb(150, 200, 200);
+}
+
+
+QPushButton#pbConfigurationStatus,
+QPushButton#pbEepromClearStatus,
 QPushButton#pbEepromStatus,
 QPushButton#pbTransactionStatus,
 QPushButton#pbVoltageOnTcStatus{
@@ -15,6 +22,8 @@ QPushButton#pbVoltageOnTcStatus{
     background-color:rgb(50, 250, 50);
 }
 
+QPushButton#pbConfigurationStatus:checked,
+QPushButton#pbEepromClearStatus:checked,
 QPushButton#pbEepromStatus:checked,
 QPushButton#pbTransactionStatus:checked,
 QPushButton#pbVoltageOnTcStatus:checked{

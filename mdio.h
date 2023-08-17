@@ -62,7 +62,10 @@ signals:
                 int slaveAddress);
     void readState(std::function<void(bool result, Communication::SlaveState state)> cb,
                    int slaveAddress);
-    void setTeleControl(int slaveAddress, int index, bool enable);
+    void setTeleControlPuls(std::function<void(bool result)> cb,
+                            int slaveAddress, bool enable);
+    void setTeleControl(std::function<void(bool result)> cb,
+                        int slaveAddress, int index, bool enable);
     void readMetaInformation(std::function<void(bool result, int fwVersion)> cb,
                              int slaveAddress);
 
@@ -85,16 +88,20 @@ private:
     void reloadResult(bool result);
     void writeConfigurationResult(bool result);
     void readStateResult(bool result, Communication::SlaveState state);
+    void setTeleControlResult(bool result);
 
 
 private slots:
     /*
-     * The applyConnectionSettings is use settings set by the user over the dialog to
-     * connect to the slave readStateResult
+     * The applyConnectionSettings is use to pass the user connection settings
+     * from the DialogConectionSettings to the UI space. Also
+     * this slot is use to set variable readStateResult.
      */
     void applyConnectionSettings(QVector<int>);
 
     void readSlaveState(void);
+
+    void tcSetStateSlot(int index, bool enable);
 
 private slots:
 

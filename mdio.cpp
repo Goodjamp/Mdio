@@ -30,10 +30,10 @@ void Mdio::initCustomUi()
     /*
      * Add TeleControl statuc/control items
      */
-    tcPuls = new TcControl("Імпульсне");
+    tcPuls = new TcControl("Імпульсне", 0);
     ui->vlTcControlMonitorInternal->addWidget(tcPuls);
     for (uint32_t k = 0; k < TC_STATIC_NUMBER; k++) {
-        tcStatic.append(new TcControl("Статичне " + QString::number(k + 1)));
+        tcStatic.append(new TcControl("Статичне " + QString::number(k + 1), k + 1));
         ui->vlTcControlMonitorInternal->addWidget(tcStatic[tcStatic.size() - 1]);
     }
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -73,6 +73,8 @@ void Mdio::initCustomUi()
     ui->pbVoltageOnTcStatus->setEnabled(false);
     ui->pbEepromStatus->setEnabled(false);
     ui->pbTransactionStatus->setEnabled(false);
+    ui->pbConfigurationStatus->setEnabled(false);
+    ui->pbEepromClearStatus->setEnabled(false);
 }
 
 
@@ -100,8 +102,18 @@ Mdio::Mdio(QWidget *parent)
     connect(this, &Mdio::writeConfiguration, communicaiton, &Communication::writeConfigurationSlot);
     connect(this, &Mdio::reload, communicaiton, &Communication::reloadSlot);
     connect(this, &Mdio::readState, communicaiton, &Communication::readStateSlot);
-    connect(this, &Mdio::setTeleControl, communicaiton, &Communication::setTeleControlSlot);
     connect(this, &Mdio::readMetaInformation, communicaiton, &Communication::readMetaInformationSlot);
+    connect(this, &Mdio::setTeleControl, communicaiton, &Communication::setTeleControlSlot);
+    connect(this, &Mdio::setTeleControlPuls, communicaiton, &Communication::setTeleControlPulsSlot);
+
+    /*
+     * Add slots to processing tele control commands
+     */
+    connect(tcPuls, &TcControl::setControlState, this, &Mdio::tcSetStateSlot);
+    foreach(auto tcControlItem, tcStatic)
+    {
+        connect(tcControlItem, &TcControl::setControlState, this, &Mdio::tcSetStateSlot);
+    }
 
     /*
      * Runing communication class on the dedicated thread.
@@ -248,6 +260,27 @@ void Mdio::connectSlaveResult(bool result)
 
 }
 
+void  Mdio::writeConfigurationResult(bool result)
+{
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationResult = result;
+    qDebug()<<"writeConfigurationResult result: "<<result;
+    communicationSyncSem.release(1);
+}
+
+void Mdio::setTeleControlResult(bool result)
+{
+    /*
+     * Release (give) semaphore to unblok code that waite to complete
+     */
+    communicationResult = result;
+    qDebug()<<"setTeleControlResult result: "<<result;
+    communicationSyncSem.release(1);
+}
+
+
 void Mdio::readMetaInformationResult(bool result, int fwVersion)
 {
     /*
@@ -258,16 +291,6 @@ void Mdio::readMetaInformationResult(bool result, int fwVersion)
     if (result == true) {
         connectDeviceVersion = fwVersion;
     }
-    communicationSyncSem.release(1);
-}
-
-void  Mdio::writeConfigurationResult(bool result)
-{
-    /*
-     * Release (give) semaphore to unblok code that waite to complete
-     */
-    communicationResult = result;
-    qDebug()<<"writeConfigurationResult result: "<<result;
     communicationSyncSem.release(1);
 }
 
@@ -293,7 +316,9 @@ void Mdio::reloadResult(bool result)
     communicationResult = result;
     qDebug()<<"reloadResult result: "<<result;
     if (result == true) {
-
+        /*
+         * Do we need apply new communicaiotn settings ?
+         */
     }
     communicationSyncSem.release(1);
 }
@@ -518,21 +543,40 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             tsStatus[k]->setStatus(state.signalisation[k]);
         }
+        tcPuls->setState(state.control[0]);
+
         ui->pbVoltageOnTcStatus->setChecked(state.error220);
         ui->pbEepromStatus->setChecked(state.errorEeprom);
         ui->pbTransactionStatus->setChecked(state.errorTransaction);
+        ui->pbConfigurationStatus->setChecked(state.errorConfiguration);
+        ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
     }
 }
 
 void Mdio::readStateResult(bool result, Communication::SlaveState state)
 {
     qDebug()<<"readStateResult result: "<<result;
-    emit this->updateUiStateSlot(result, state);
+    emit this->updateUiStateSignal(result, state);
 }
 
 void Mdio::readSlaveState(void)
 {
-    emit communicaiton->readStateSlot(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
+    emit readState(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
     stateRequestCnt++;
     updateUiCommunicationStatisticStr();
 }
+
+void Mdio::tcSetStateSlot(int index, bool enable)
+{
+    if (index == 0) {
+        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, enable);
+    } else {
+        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);
+    }
+
+    if (processingCommunicatitonResult("Телеуправління",
+                                       "Помилка передачі команди телеуправління") == false) {
+        return;
+    }
+}
+

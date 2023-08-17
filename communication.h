@@ -162,15 +162,11 @@ public:
         bool error220;
         bool errorTransaction;
         bool errorEeprom;
-        bool errorcEepromClear;
-        bool errorcConfiguration;
+        bool errorEepromClear;
+        bool errorConfiguration;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;
-
- signals:
-    void setTeleControlReply(bool result);
-    void setTeleControlPulsSlot(bool result);
 
 private:
     QThread *communicationThread;
@@ -217,8 +213,10 @@ public slots:
                     int slaveAddress);
     void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                        int slaveAddress);
-    void setTeleControlSlot(int slaveAddress, int index, bool enable);
-    void setTeleControlPulsSlot(int slaveAddress, bool enable);
+    void setTeleControlSlot(std::function<void(bool result)> cb,
+                            int slaveAddress, int index, bool enable);
+    void setTeleControlPulsSlot(std::function<void(bool result)> cb,
+                                int slaveAddress, bool enable);
 };
 
 #endif // B_H

@@ -115,16 +115,16 @@ private:
     #define YEAR_CON_POS                    9
     #define YEAR_CON_MASK                   127
 
-    #define PARITY_POS                      0
+    #define STOP_BITS_POS                   0
+    #define STOP_BITS_MASK                  3
+    #define STOP_BITS_ONE                   0
+    #define STOP_BITS_TWO                   1
+
+    #define PARITY_POS                      2
     #define PARITY_MASK                     3
     #define PARITY_NONE                     0
     #define PARITY_EVEN                     2
     #define PARITY_ODD                      3
-
-    #define STOP_BITS_POS                   2
-    #define STOP_BITS_MASK                  3
-    #define STOP_BITS_ONE                   0
-    #define STOP_BITS_TWO                   1
 
     #define INVERS_SETTINGS_TI1_POS         0
     #define INVERS_SETTINGS_TI2_POS         1

@@ -204,7 +204,7 @@ bool Mdio::updateUiConfiguration(void)
      */
     ui->cbBaudRate->setCurrentText(brValueToStrLUT.value(connectDeviceConf.communication.baudRate));
     ui->cbParity->setCurrentText(paritySerialToStrLUT.value(connectDeviceConf.communication.parity));
-    ui->cbStopBits->setCurrentText(paritySerialToStrLUT.value(connectDeviceConf.communication.parity));
+    ui->cbStopBits->setCurrentText(stopBitsSerialToStrLUT.value(connectDeviceConf.communication.stopBits));
     ui->leReplyDelay->setText(QString::number(connectDeviceConf.communication.replyDelay));
     ui->leSilentInterval->setText(QString::number(connectDeviceConf.communication.silentInterval));
     ui->leDebounceInterval->setText(QString::number(connectDeviceConf.signalisation.debounsInterval));
@@ -247,6 +247,32 @@ void Mdio::resetSlaveInformation(void)
     connectDeviceConfMonth = DEFAULT_CONNECT_MONTH;
     connectDeviceConfDay = DEFAULT_CONNECT_DATE;
     isSlaveConnect = false;
+}
+
+void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
+{
+    connectPortIndex = connectionSettings[DialogConnectionSettings::PORT];
+    connectBrIndex = connectionSettings[DialogConnectionSettings::BR];
+    connectParityIndex = connectionSettings[DialogConnectionSettings::PARITY];
+    connectStopBitsIndex = connectionSettings[DialogConnectionSettings::STOP_BITS];
+    connectSlaveAddress = connectionSettings[DialogConnectionSettings::ADDRESS];
+
+    needConnectSlave = true;
+}
+
+bool Mdio::processingCommunicatitonResult(QString headr, QString detailed)
+{
+    if (communicationSyncSem.tryAcquire(1, COMMUNICATION_COMPLETE_TIMEOUTE)
+        == false) {
+        errorMessage(headr, "Апаратний збій");
+        return false;
+    };
+    if (communicationResult == false) {
+        errorMessage(headr, detailed);
+        return false;
+    }
+
+    return true;
 }
 
 void Mdio::connectSlaveResult(bool result)
@@ -323,30 +349,10 @@ void Mdio::reloadResult(bool result)
     communicationSyncSem.release(1);
 }
 
-void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
+void Mdio::readStateResult(bool result, Communication::SlaveState state)
 {
-    connectPortIndex = connectionSettings[DialogConnectionSettings::PORT];
-    connectBrIndex = connectionSettings[DialogConnectionSettings::BR];
-    connectParityIndex = connectionSettings[DialogConnectionSettings::PARITY];
-    connectStopBitsIndex = connectionSettings[DialogConnectionSettings::STOP_BITS];
-    connectSlaveAddress = connectionSettings[DialogConnectionSettings::ADDRESS];
-
-    needConnectSlave = true;
-}
-
-bool Mdio::processingCommunicatitonResult(QString headr, QString detailed)
-{
-    if (communicationSyncSem.tryAcquire(1, COMMUNICATION_COMPLETE_TIMEOUTE)
-        == false) {
-        errorMessage(headr, "Апаратний збій");
-        return false;
-    };
-    if (communicationResult == false) {
-        errorMessage(headr, detailed);
-        return false;
-    }
-
-    return true;
+    qDebug()<<"readStateResult result: "<<result;
+    emit this->updateUiStateSignal(result, state);
 }
 
 void Mdio::on_pbConnectionSettings_clicked()
@@ -413,7 +419,7 @@ void Mdio::on_pbConnectionSettings_clicked()
      */
     emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка считування мета конфігурації") == false) {
+                                       "Помилка считування конфігурації") == false) {
         return;
     }
 
@@ -551,12 +557,6 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         ui->pbConfigurationStatus->setChecked(state.errorConfiguration);
         ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
     }
-}
-
-void Mdio::readStateResult(bool result, Communication::SlaveState state)
-{
-    qDebug()<<"readStateResult result: "<<result;
-    emit this->updateUiStateSignal(result, state);
 }
 
 void Mdio::readSlaveState(void)

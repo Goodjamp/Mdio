@@ -122,8 +122,8 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
         /*
          * Deserialiase configuration
          */
-        parity = static_cast<int>(PARITY_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
         stopBits =  static_cast<int>(STOP_BITS_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> STOP_BITS_POS));
+        parity = static_cast<int>(PARITY_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
         if (parityMbToSerialLUT.contains(parity) == true
             && stopBitsMbToSerialLUT.contains(stopBits) == true) {
             /*
@@ -140,7 +140,7 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
              */
             configuration.signalisation.debounsInterval = configReg[ADDR_REG_TS_DEBOUNCE_DELAY - baseConfReg];
             for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-                configuration.signalisation.isInvers[k] = (1 & (configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 1;
+                configuration.signalisation.isInvers[k] = (1 & (configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 0;
             }
 
             /*
@@ -244,12 +244,14 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         }
     }
 
-    //CALL_CB(cb, true, state);
-    //return;
+    CALL_CB(cb, true, state);
+    return;
 
     /*
      * Read tele control state
      */
+
+
     result = modbus->readInputRegisters(slaveAddress, ADDR_REG_TELE_CONTROL_BASE, TELECONTROL_TOTAL_NUMBERS, teleControl);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);

@@ -11,6 +11,10 @@
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
 
+#define STR_CAST(str)    static_cast<QString>(str)
+#define SW_NAME          STR_CAST("МВВ-4-2 конфігуратор")
+
+
 #define TC_STATIC_NUMBER    2
 #define TC_PULS_NUMBER      1
 
@@ -63,7 +67,7 @@ void Mdio::initCustomUi()
     /*
      *  Title bar: icon name
      */
-    setWindowTitle("МДВВ-4-2 конфігуратор");
+    setWindowTitle(SW_NAME);
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
     ui->cbBaudRate->addItems(brValueToStrLUT.values());

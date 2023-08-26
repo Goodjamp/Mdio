@@ -1,15 +1,28 @@
-/*
-QPushButton
+QFrame#fTcControlBackGround
 {
     border-style: outset;
-    border-radius: 4px;
-    border-width: 1px;
-    border-color: rgb(50,50,50);
+    border-width: 2px;
+    border-radius: 8px;
+    border-color: rgb(0, 0, 0);
+    background-color:rgb(160, 250, 250);
 }
-*/
 
-QFrame#fBackGround{
-    background-color:rgb(150, 200, 200);
+QPushButton#pbStaticOff,
+QPushButton#pbPuls,
+QPushButton#pbStaticOn
+{
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 8px;
+    border-color: rgb(0, 0, 0);
+    background-color:rgb(50, 200, 50);
+}
+
+QPushButton#pbStaticOff:checked,
+QPushButton#pbPuls:checked,
+QPushButton#pbStaticOn:checked
+{
+    background-color:rgb(255, 100, 100);
 }
 
 
@@ -17,7 +30,8 @@ QPushButton#pbConfigurationStatus,
 QPushButton#pbEepromClearStatus,
 QPushButton#pbEepromStatus,
 QPushButton#pbTransactionStatus,
-QPushButton#pbVoltageOnTcStatus{
+QPushButton#pbVoltageOnTcStatus
+{
     border-radius: 12px;
     background-color:rgb(50, 250, 50);
 }
@@ -30,28 +44,20 @@ QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);
 }
 
-
+QPushButton#pbTsState,
 QPushButton#pbTcState
 {
     border-style: outset;
     border-radius: 4px;
-    background-color:rgba(0, 0, 0, 0);
-}
-
-QPushButton#pbTsState
-{
-    border-style: outset;
-    border-radius: 4px;
     background-color:rgb(150, 200, 200);
+    image: url(:/Resources/Off_resize_v2.png);
 }
 
 QPushButton#pbTsState:checked,
-QPushButton#pbTcState:checked {
+QPushButton#pbTcState:checked
+{
     image: url(:/Resources/On_resize_v2.png);
     background-color:rgb(150, 255, 200);
 }
 
-QPushButton#pbTsState,
-QPushButton#pbTcState {
-    image: url(:/Resources/Off_resize_v2.png);
-}
+

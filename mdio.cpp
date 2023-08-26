@@ -34,10 +34,11 @@ void Mdio::initCustomUi()
     /*
      * Add TeleControl statuc/control items
      */
-    tcPuls = new TcControl("Імпульсне", 0);
-    ui->vlTcControlMonitorInternal->addWidget(tcPuls);
     for (uint32_t k = 0; k < TC_STATIC_NUMBER; k++) {
-        tcStatic.append(new TcControl("Статичне " + QString::number(k + 1), k + 1));
+        tcStatic.append(new TcControl("ТК" + QString::number(k + 2),
+                                      k == 0 ? "ТК1 ВВІМКНУТИ" : "ТК1 ВИМКНУТИ",
+                                      k,
+                                      this));
         ui->vlTcControlMonitorInternal->addWidget(tcStatic[tcStatic.size() - 1]);
     }
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -113,10 +114,9 @@ Mdio::Mdio(QWidget *parent)
     /*
      * Add slots to processing tele control commands
      */
-    connect(tcPuls, &TcControl::setControlState, this, &Mdio::tcSetStateSlot);
     foreach(auto tcControlItem, tcStatic)
     {
-        connect(tcControlItem, &TcControl::setControlState, this, &Mdio::tcSetStateSlot);
+        connect(tcControlItem, &TcControl::setStaticControlState, this, &Mdio::tcSetStateSlot);
     }
 
     /*
@@ -553,7 +553,6 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             tsStatus[k]->setStatus(state.signalisation[k]);
         }
-        tcPuls->setState(state.control[0]);
 
         ui->pbVoltageOnTcStatus->setChecked(state.error220);
         ui->pbEepromStatus->setChecked(state.errorEeprom);

@@ -43,7 +43,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tSettings">
        <attribute name="title">
@@ -79,7 +79,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Підключення</string>
+               <string>ПІДКЛЮЧЕННЯ</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -102,6 +102,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                </widget>
               </item>
               <item row="1" column="1">
@@ -118,6 +125,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                </widget>
               </item>
               <item row="3" column="0">
@@ -133,6 +147,13 @@
                   <width>115</width>
                   <height>25</height>
                  </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
                 </property>
                 <property name="text">
                  <string>Інтервал тиші, мс</string>
@@ -153,6 +174,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Стоп біти</string>
                 </property>
@@ -171,6 +199,13 @@
                   <width>115</width>
                   <height>25</height>
                  </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
                 </property>
                 <property name="text">
                  <string>Швидкість</string>
@@ -191,6 +226,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Паритет</string>
                 </property>
@@ -210,6 +252,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                </widget>
               </item>
               <item row="4" column="0">
@@ -217,17 +266,25 @@
                 <property name="minimumSize">
                  <size>
                   <width>115</width>
-                  <height>25</height>
+                  <height>30</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
                   <width>115</width>
-                  <height>25</height>
+                  <height>30</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Затримка відповіді, мс</string>
+                 <string>Затримка
+відповіді, мс</string>
                 </property>
                </widget>
               </item>
@@ -243,15 +300,22 @@
                  <widget class="QLineEdit" name="leSilentInterval">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
+                    <width>40</width>
                     <height>25</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>30</width>
+                    <width>40</width>
                     <height>25</height>
                    </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
                   </property>
                   <property name="text">
                    <string>50</string>
@@ -263,6 +327,13 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_10">
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
                   <property name="text">
                    <string>  (0-100)</string>
                   </property>
@@ -295,15 +366,22 @@
                  <widget class="QLineEdit" name="leReplyDelay">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
+                    <width>40</width>
                     <height>25</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>30</width>
+                    <width>40</width>
                     <height>25</height>
                    </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
                   </property>
                   <property name="text">
                    <string>0</string>
@@ -315,6 +393,13 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_11">
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
                   <property name="text">
                    <string>  (0-100)</string>
                   </property>
@@ -415,7 +500,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Телесигналізація</string>
+               <string>ТЕЛЕСИГНАЛІЗАЦІЯ</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -438,6 +523,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>20</string>
                 </property>
@@ -450,18 +542,26 @@
                <widget class="QLabel" name="lBounceTimeoute">
                 <property name="minimumSize">
                  <size>
-                  <width>130</width>
-                  <height>25</height>
+                  <width>90</width>
+                  <height>30</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>130</width>
-                  <height>25</height>
+                  <width>90</width>
+                  <height>30</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Тривалість брязкіту, мс</string>
+                 <string>Тривалість
+брязкіту, мс</string>
                 </property>
                </widget>
               </item>
@@ -480,6 +580,13 @@
               </item>
               <item row="0" column="3">
                <widget class="QLabel" name="label_8">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>(20-100)</string>
                 </property>
@@ -552,7 +659,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Телекерування</string>
+               <string>ТЕЛЕКЕРУВАННЯ</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -565,15 +672,22 @@
                <widget class="QLabel" name="lBounceTimeoute_2">
                 <property name="minimumSize">
                  <size>
-                  <width>110</width>
+                  <width>140</width>
                   <height>25</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>110</width>
+                  <width>140</width>
                   <height>25</height>
                  </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
                 </property>
                 <property name="text">
                  <string>Тривалість імп. ТК, мс</string>
@@ -587,7 +701,7 @@
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>10</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -607,6 +721,13 @@
                   <height>25</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>1000</string>
                 </property>
@@ -617,6 +738,13 @@
               </item>
               <item row="0" column="3">
                <widget class="QLabel" name="label_9">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
                 <property name="text">
                  <string>(100-4000)</string>
                 </property>
@@ -670,6 +798,13 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Застосувати</string>
             </property>
@@ -689,6 +824,13 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Прочитати</string>
             </property>
@@ -707,6 +849,13 @@
               <width>110</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
             </property>
             <property name="text">
              <string>Перезавантажити</string>
@@ -749,7 +898,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Телесигналізація</string>
+             <string>ТЕЛЕСИГНАЛІЗАЦІЯ</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -789,13 +938,13 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>9</pointsize>
+              <pointsize>10</pointsize>
               <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string>Телекерування</string>
+             <string>ТЕЛЕКЕРУВАННЯ</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -838,13 +987,13 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>9</pointsize>
+              <pointsize>10</pointsize>
               <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string>Статуси помилок</string>
+             <string>СТАТУСИ ПОМИЛОК</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -857,7 +1006,7 @@
              <widget class="QLabel" name="label_7">
               <property name="minimumSize">
                <size>
-                <width>130</width>
+                <width>140</width>
                 <height>25</height>
                </size>
               </property>
@@ -866,6 +1015,13 @@
                 <width>130</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
               </property>
               <property name="text">
                <string>Збій обміну</string>
@@ -920,7 +1076,7 @@
              <widget class="QLabel" name="label_6">
               <property name="minimumSize">
                <size>
-                <width>130</width>
+                <width>140</width>
                 <height>25</height>
                </size>
               </property>
@@ -929,6 +1085,13 @@
                 <width>130</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
               </property>
               <property name="text">
                <string>Збій EEPROM</string>
@@ -939,7 +1102,7 @@
              <widget class="QLabel" name="label_12">
               <property name="minimumSize">
                <size>
-                <width>130</width>
+                <width>140</width>
                 <height>25</height>
                </size>
               </property>
@@ -948,6 +1111,13 @@
                 <width>130</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
               </property>
               <property name="text">
                <string>EEPROM чистий</string>
@@ -1002,7 +1172,7 @@
              <widget class="QLabel" name="l220STate">
               <property name="minimumSize">
                <size>
-                <width>130</width>
+                <width>140</width>
                 <height>25</height>
                </size>
               </property>
@@ -1011,6 +1181,13 @@
                 <width>130</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
               </property>
               <property name="text">
                <string>220 В в ланцюгах ТС</string>
@@ -1021,7 +1198,7 @@
              <widget class="QLabel" name="label_13">
               <property name="minimumSize">
                <size>
-                <width>130</width>
+                <width>140</width>
                 <height>25</height>
                </size>
               </property>
@@ -1030,6 +1207,13 @@
                 <width>130</width>
                 <height>25</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
               </property>
               <property name="text">
                <string>Помилка конфігурації</string>
@@ -1108,6 +1292,13 @@
           <height>30</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Параметри з'єднання</string>
         </property>
@@ -1127,6 +1318,13 @@
           <height>25</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>8N1 19200 26</string>
         </property>
@@ -1139,15 +1337,22 @@
        <widget class="QPushButton" name="pbConnect">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string>Підключити</string>
@@ -1158,15 +1363,22 @@
        <widget class="QPushButton" name="pbDisconnect">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string>Відключити</string>
@@ -1175,10 +1387,43 @@
       </item>
       <item>
        <widget class="QLabel" name="lDeviceMetaInfo">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>v0  Дата 00.00.0000</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_12">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -1195,13 +1440,27 @@
       </item>
       <item>
        <widget class="QLabel" name="lConnectionStatus">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>Статус підключення:</string>
+         <string> З'єднання:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QRadioButton" name="rbConnectionStatus">
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -1220,6 +1479,13 @@
           <width>70</width>
           <height>25</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string>0/0</string>

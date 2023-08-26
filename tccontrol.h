@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QString>
+#include <QGroupBox>
+#include <QLayout>
 
 namespace Ui {
 class TcControl;
@@ -13,21 +15,27 @@ class TcControl : public QWidget
     Q_OBJECT
 
 public:
-    explicit TcControl(QString name, int index, QWidget *parent = nullptr);
+    explicit TcControl(QString nameStatic, QString namePuls, int index, QWidget *parent);
     ~TcControl();
 
-    void setState(bool enable);
+    void setStaticState(bool enable);
 
 signals:
-    void setControlState(int index, bool enable);
+    void setStaticControlState(int index, bool enable);
+    void setPulsControl(int index);
 
 private slots:
-    void on_pbOn_clicked();
-    void on_pbOff_clicked();
+    void on_pbStaticOn_clicked();
+
+    void on_pbStaticOff_clicked();
+
+    void on_pbPuls_clicked();
 
 private:
     Ui::TcControl *ui;
     int userIndex;
+    QGroupBox *pbCroupe;
+    QLayout *checkItemList;
 };
 
 #endif // TCCONTROL_H

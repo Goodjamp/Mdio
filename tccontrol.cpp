@@ -1,15 +1,23 @@
 #include "tccontrol.h"
 #include "ui_tccontrol.h"
 
-TcControl::TcControl(QString name, int index, QWidget *parent) :
+QString redColor = "background-color: rgb(255, 100, 100)";
+QString greenColor = "background-color: rgb(50, 200, 50)";
+
+TcControl::TcControl(QString nameStatic, QString namePuls, int index, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
 
-    ui->lTc->setText(name);
+    ui->pbStaticOn->setText(nameStatic + " ВВІМКНУТИ\n СТАТИЧНЕ");
+    ui->pbStaticOff->setText(nameStatic + " ВИМКНУТИ\n СТАТИЧНЕ");
+    ui->pbPuls->setText(namePuls + "\n ІМПУЛЬСНЕ");
     ui->pbTcState->setEnabled(false);
     userIndex = index;
+    //pbCroupe = new QGroupBox();
+    //checkItemList = new QLayout();
+
 }
 
 TcControl::~TcControl()
@@ -17,17 +25,22 @@ TcControl::~TcControl()
     delete ui;
 }
 
-void TcControl::on_pbOn_clicked()
+void TcControl::setStaticState(bool enable)
 {
-    emit setControlState(userIndex, true);
+    ui->pbTcState->setChecked(enable);
 }
 
-void TcControl::on_pbOff_clicked()
+void TcControl::on_pbStaticOn_clicked()
 {
-    emit setControlState(userIndex, false);
+    emit setStaticControlState(userIndex, true);
 }
 
-void TcControl::setState(bool enable)
+void TcControl::on_pbStaticOff_clicked()
 {
+    emit setStaticControlState(userIndex, false);
+}
 
+void TcControl::on_pbPuls_clicked()
+{
+    emit setPulsControl(userIndex);
 }

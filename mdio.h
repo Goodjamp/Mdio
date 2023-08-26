@@ -134,7 +134,6 @@ private:
     QVector<TcControl *> tcStatic;
     QVector<TsSettings *> tsSetings;
     QVector<TsStatus *> tsStatus;
-    TcControl *tcPuls;
     QRandomGenerator rand;
     QSpacerItem *tcLayoutSpacer;
     QSpacerItem *tsLayoutSpacer;

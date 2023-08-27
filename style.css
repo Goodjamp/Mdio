@@ -1,3 +1,10 @@
+QMainWindow
+{
+    background-color:rgb(150, 150, 250);
+}
+
+
+
 QFrame#fTcControlBackGround
 {
     border-style: outset;

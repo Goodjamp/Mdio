@@ -3,8 +3,7 @@
 
 #include <QWidget>
 #include <QString>
-#include <QGroupBox>
-#include <QLayout>
+#include <QButtonGroup>
 
 namespace Ui {
 class TcControl;
@@ -34,8 +33,7 @@ private slots:
 private:
     Ui::TcControl *ui;
     int userIndex;
-    QGroupBox *pbCroupe;
-    QLayout *checkItemList;
+    QButtonGroup *checkButtonsList;
 };
 
 #endif // TCCONTROL_H

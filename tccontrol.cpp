@@ -15,7 +15,11 @@ TcControl::TcControl(QString nameStatic, QString namePuls, int index, QWidget *p
     ui->pbPuls->setText(namePuls + "\n ІМПУЛЬСНЕ");
     ui->pbTcState->setEnabled(false);
     userIndex = index;
-    //pbCroupe = new QGroupBox();
+    checkButtonsList = new QButtonGroup();
+    checkButtonsList->addButton(ui->pbStaticOn);
+    checkButtonsList->addButton(ui->pbStaticOff);
+    checkButtonsList->addButton(ui->pbPuls);
+
     //checkItemList = new QLayout();
 
 }

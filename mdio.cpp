@@ -14,10 +14,6 @@
 #define STR_CAST(str)    static_cast<QString>(str)
 #define SW_NAME          STR_CAST("МВВ-4-2 конфігуратор")
 
-
-#define TC_STATIC_NUMBER    2
-#define TC_PULS_NUMBER      1
-
 void Mdio::initCustomUi()
 {
     QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
@@ -32,9 +28,9 @@ void Mdio::initCustomUi()
     ui->lePulsDuration->setValidator(numericValidator4D);
 
     /*
-     * Add TeleControl statuc/control items
+     * Add TeleControl status/control items
      */
-    for (uint32_t k = 0; k < TC_STATIC_NUMBER; k++) {
+    for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
         tcStatic.append(new TcControl("ТК" + QString::number(k + 2),
                                       k == 0 ? "ТК1 ВВІМКНУТИ" : "ТК1 ВИМКНУТИ",
                                       k,
@@ -116,7 +112,8 @@ Mdio::Mdio(QWidget *parent)
      */
     foreach(auto tcControlItem, tcStatic)
     {
-        connect(tcControlItem, &TcControl::setStaticControlState, this, &Mdio::tcSetStateSlot);
+        connect(tcControlItem, &TcControl::setStaticControlState, this, &Mdio::tcSetStaticSlot);
+        connect(tcControlItem, &TcControl::setPulsControl, this, &Mdio::tcSetPulsSlot);
     }
 
     /*
@@ -161,7 +158,7 @@ void Mdio::updateUiConnectionStatusStr(void)
                                 + brValueToStrLUT.values()[connectBrIndex]
                                 + " "
                                 + "8"
-                                + paritySerialToStrLUT.values()[connectParityIndex]
+                                + paritySerialToStrLUT.values()[connectParityIndex][0]
                                 + stopBitsSerialToStrLUT.values()[connectStopBitsIndex]
                                 + " "
                                 + "Адр."
@@ -365,9 +362,9 @@ void Mdio::on_pbConnectionSettings_clicked()
     SerialCommunication::SerialPortParity parity;
     SerialCommunication::SerialPortStopBits stopBits;
     DialogConnectionSettings dialogConnectionSettings(comList,
-                                                      brValueToStrLUT.values(),
-                                                      paritySerialToStrLUT.values(),
-                                                      stopBitsSerialToStrLUT.values());
+                                                      brValueToStrLUT.values(), 3,
+                                                      paritySerialToStrLUT.values(), 0,
+                                                      stopBitsSerialToStrLUT.values(), 0);
 
     dialogConnectionSettings.setModal(true);
     connect(&dialogConnectionSettings, &DialogConnectionSettings::applySettings, this, &Mdio::applyConnectionSettings);
@@ -548,8 +545,16 @@ void Mdio::updateUiCommunicationStatisticStr(void)
 void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 {
     if (result == true) {
+        /*
+         * Update communicaiotn statistic indication
+         */
         stateReplyCnt++;
         updateUiCommunicationStatisticStr();
+
+
+        /*
+         * Update Tele signalisarion and status indication
+         */
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             tsStatus[k]->setStatus(state.signalisation[k]);
         }
@@ -559,6 +564,16 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         ui->pbTransactionStatus->setChecked(state.errorTransaction);
         ui->pbConfigurationStatus->setChecked(state.errorConfiguration);
         ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
+
+        /*
+         * Update Tele control indication
+         *
+         * The communicaiotn return 3 registers (puls and 2 static)
+         * but we need indicaiotn only 2 (static)
+         */
+        for (int k = 0; k < TELECONTROL_NUMBERS; k++) {
+            tcStatic[k]->setStaticState(state.control[k + 1]);
+        }
     }
 }
 
@@ -569,16 +584,27 @@ void Mdio::readSlaveState(void)
     updateUiCommunicationStatisticStr();
 }
 
-void Mdio::tcSetStateSlot(int index, bool enable)
+void Mdio::tcSetStaticSlot(int index, bool enable)
 {
-    if (index == 0) {
-        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, enable);
-    } else {
-        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);
-    }
+    emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index, enable);
 
-    if (processingCommunicatitonResult("Телеуправління",
-                                       "Помилка передачі команди телеуправління") == false) {
+    if (processingCommunicatitonResult("Телекерування",
+                                       "Помилка передачі команди\nдля статичного телекерування") == false) {
+        return;
+    }
+}
+
+void Mdio::tcSetPulsSlot(int index)
+{
+    /*
+     * The target state depends on the index of the TcControl item:
+     * - the item  by the index 0 is responsible for the enable puls;
+     * - the item by the index 1 is responsible for the disable puls.
+     */
+    emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index == 0);
+
+    if (processingCommunicatitonResult("Телекерування",
+                                       "Помилка передачі команди\nдля імпульсного телекерування") == false) {
         return;
     }
 }

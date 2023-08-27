@@ -19,6 +19,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
 QT_END_NAMESPACE
 
+#define DEFAULT_BR_VALUE                   19200
 #define DEFAULT_CONNECT_BR_INDEX           0
 #define DEFAULT_CONNECT_PARITY_INDEX       0
 #define DEFAULT_CONNECT_STOP_BITS_INDEX    0
@@ -101,7 +102,9 @@ private slots:
 
     void readSlaveState(void);
 
-    void tcSetStateSlot(int index, bool enable);
+    void tcSetStaticSlot(int index, bool enable);
+
+    void tcSetPulsSlot(int index);
 
 private slots:
 

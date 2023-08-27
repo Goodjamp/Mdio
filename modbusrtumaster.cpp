@@ -233,8 +233,9 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::forceSingleCoil(uint8_t slaveAddress,
                                                            bool coilState)
 {
     return writeSlaveSingleRegister(slaveAddress, FORCE_SINGLE_COIL, coilAddress,
-                                    coilState == true ? static_cast<uint16_t>(COIL_ON)
-                                                        : static_cast<uint16_t>(COIL_OFF),
+                                    coilState == true
+                                    ? static_cast<uint16_t>(COIL_ON)
+                                    : static_cast<uint16_t>(COIL_OFF),
                                     MB_TRANSACTION_TIMEOUTE);
 }
 

@@ -7,14 +7,18 @@
 #include <QDebug>
 
 DialogConnectionSettings::DialogConnectionSettings(QStringList comList,
-                                                   QStringList brList,
-                                                   QStringList parityList,
-                                                   QStringList stopBitsList,
+                                                   QStringList brList, int defBr,
+                                                   QStringList parityList, int defParity,
+                                                   QStringList stopBitsList, int defStopBits,
                                                    QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogConnectionSettings)
 {
     ui->setupUi(this);
+
+    defaultBrIndex = defBr;
+    defaultParityIndex = defParity;
+    defaultStopBitsIndex = defStopBits;
 
     ui->cbPort->addItems(comList);
     ui->cbBaudRate->addItems(brList);
@@ -26,6 +30,14 @@ DialogConnectionSettings::DialogConnectionSettings(QStringList comList,
 
     using ::operator|;
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    setDefaultUi();
+}
+
+void DialogConnectionSettings::setDefaultUi(){
+    ui->cbBaudRate->setCurrentIndex(defaultBrIndex);
+    ui->cbParity->setCurrentIndex(defaultParityIndex);
+    ui->cbStopBits->setCurrentIndex(defaultStopBitsIndex);
+    ui->leAddress->setText("1");
 }
 
 DialogConnectionSettings::~DialogConnectionSettings()
@@ -66,4 +78,9 @@ void DialogConnectionSettings::on_pbApply_clicked()
 void DialogConnectionSettings::on_pbClose_clicked()
 {
     this->customClose();
+}
+
+void DialogConnectionSettings::on_byDefault_clicked()
+{
+    setDefaultUi();
 }

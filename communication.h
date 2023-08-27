@@ -18,6 +18,41 @@
                                           std::placeholders::_5)
 #define CALL_CB(x,...)        if (x != NULL) {x(__VA_ARGS__);}
 
+#define TELESIGNAL_NUMBERS              4
+#define TELECONTROL_NUMBERS             2
+#define TELECONTROL_PULS_NUMBERS        1
+#define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTROL_NUMBERS)
+#define RESET_MAGIC_NUMBER              0X55FF
+#define TELECONTROL_PULS_ON             0x0002
+#define TELECONTROL_PULS_OFF            0x0001
+
+#define STATUS_220_POS                  0
+#define STATUS_EEPROM_ERROR_POS         1
+#define STATUS_TRANSACTION_ERROR_POS    2
+
+#define DAY_CON_POS                     0
+#define DAY_CON_MASK                    31
+#define MONTH_CON_POS                   5
+#define MONTH_CON_MASK                  15
+#define YEAR_CON_POS                    9
+#define YEAR_CON_MASK                   127
+
+#define STOP_BITS_POS                   0
+#define STOP_BITS_MASK                  1
+#define STOP_BITS_ONE                   0
+#define STOP_BITS_TWO                   1
+
+#define PARITY_POS                      8
+#define PARITY_MASK                     3
+#define PARITY_NONE                     0
+#define PARITY_EVEN                     2
+#define PARITY_ODD                      3
+
+#define INVERS_SETTINGS_TI1_POS         0
+#define INVERS_SETTINGS_TI2_POS         1
+#define INVERS_SETTINGS_TI3_POS         2
+#define INVERS_SETTINGS_TI4_POS         3
+
 /*
  * Class B is a wrapper for the Modbus class + Communication class (A) implementation.
  * The Communication class implements access to the target interface: comm port,  Ethernet other.
@@ -42,9 +77,8 @@ private:
         ADDR_REG_GLOBAL_STATUS = 0x0004,
 
         /*
-         * State registers
+         * Tele control registers
          */
-        ADDR_REG_TELE_CONTROL_BASE = 0x0009,
         ADDR_REG_TELE_CONTROL_1 = 0x0009,
         ADDR_REG_TELE_CONTROL_2 = 0x000A,
         ADDR_REG_TELE_CONTROL_3 = 0x000B,
@@ -95,41 +129,6 @@ private:
         ADDR_COIL_EEPROM_CLEAR_ERROR = 7,
         ADDR_COIL_CONFIGURATION_ERROR = 8,
     } AddrCoil;
-
-    #define TELESIGNAL_NUMBERS              4
-    #define TELECONTROL_NUMBERS             2
-    #define TELECONTROL_PULS_NUMBERS        1
-    #define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTROL_NUMBERS)
-    #define RESET_MAGIC_NUMBER              0X55FF
-    #define TELECONTROL_PULS_ON             0x0002
-    #define TELECONTROL_PULS_OFF            0x0001
-
-    #define STATUS_220_POS                  0
-    #define STATUS_EEPROM_ERROR_POS         1
-    #define STATUS_TRANSACTION_ERROR_POS    2
-
-    #define DAY_CON_POS                     0
-    #define DAY_CON_MASK                    31
-    #define MONTH_CON_POS                   5
-    #define MONTH_CON_MASK                  15
-    #define YEAR_CON_POS                    9
-    #define YEAR_CON_MASK                   127
-
-    #define STOP_BITS_POS                   0
-    #define STOP_BITS_MASK                  3
-    #define STOP_BITS_ONE                   0
-    #define STOP_BITS_TWO                   1
-
-    #define PARITY_POS                      2
-    #define PARITY_MASK                     3
-    #define PARITY_NONE                     0
-    #define PARITY_EVEN                     2
-    #define PARITY_ODD                      3
-
-    #define INVERS_SETTINGS_TI1_POS         0
-    #define INVERS_SETTINGS_TI2_POS         1
-    #define INVERS_SETTINGS_TI3_POS         2
-    #define INVERS_SETTINGS_TI4_POS         3
 
 public:
     Communication(){}

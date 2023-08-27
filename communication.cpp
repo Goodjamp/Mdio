@@ -70,7 +70,7 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
         configReg[ADDR_REG_TS_DEBOUNCE_DELAY - baseConfReg] = configuration.signalisation.debounsInterval;
         configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] = 0;
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-            if (configuration.signalisation.isInvers[k] == true) {
+            if (configuration.signalisation.isInvers[k] == false) {
                 configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
@@ -201,6 +201,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     SlaveState state;
     uint16_t baseCoilAddress;
     uint16_t readCoilsNumber;
+    uint16_t baseTcAddress;
 
     /*
      * Read global status
@@ -244,15 +245,14 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         }
     }
 
-    CALL_CB(cb, true, state);
-    return;
+    // CALL_CB(cb, true, state);
+    // return;
 
     /*
-     * Read tele control state
+     * Read tele control state.
      */
-
-
-    result = modbus->readInputRegisters(slaveAddress, ADDR_REG_TELE_CONTROL_BASE, TELECONTROL_TOTAL_NUMBERS, teleControl);
+    baseTcAddress = ADDR_REG_TELE_CONTROL_1;
+    result = modbus->readInputRegisters(slaveAddress, baseTcAddress, TELECONTROL_TOTAL_NUMBERS, teleControl);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"readStateSlot read tele control error:"<<modbus->getStatusString(result);
@@ -262,29 +262,29 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Test and apply the context of telecontrol registers
      */
-    if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] == TELECONTROL_PULS_ON) {
-        teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] = true;
-    } else if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] == TELECONTROL_PULS_OFF) {
-        teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_1] = false;
+    if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_PULS_ON) {
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = true;
+    } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_PULS_OFF) {
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = false;
     } else {
         qDebug()<<"readStateSlot puls telecontrol value error";
         CALL_CB(cb, false, state);
         return;
     }
     for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
-        if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k]
+        if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
             == ModbusRtuMaster::COIL_ON) {
-            teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k] = true;
-        } else if (teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k]
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = true;
+        } else if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
                    == ModbusRtuMaster::COIL_OFF) {
-            teleControl[ADDR_REG_TELE_CONTROL_BASE - ADDR_REG_TELE_CONTROL_2 + k] = false;
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = false;
         } else {
             qDebug()<<"readStateSlot telecontrol value error";
             CALL_CB(cb, false, state);
             return;
         }
     }
-
+    CALL_CB(cb, true, state);
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
@@ -309,7 +309,7 @@ void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
 {
     ModbusRtuMaster::MbStatus result;
 
-    result = modbus->presetSingleRegister(slaveAddress,ADDR_REG_TELE_CONTROL_1,
+    result = modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_1,
                                           enable == true
                                           ? static_cast<uint16_t>(TELECONTROL_PULS_ON)
                                           : static_cast<uint16_t>(TELECONTROL_PULS_OFF));

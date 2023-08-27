@@ -1,6 +1,6 @@
 QMainWindow
 {
-    background-color:rgb(150, 150, 250);
+    background-color: rgb(150, 150, 250);
 }
 
 
@@ -14,9 +14,45 @@ QFrame#fTcControlBackGround
     background-color:rgb(160, 250, 250);
 }
 
+QPushButton#pbApplySettings,
+QPushButton#pbReadSettings,
+QPushButton#pbReload,
+QPushButton#pbConnectionSettings,
+QPushButton#pbConnect,
+QPushButton#pbDisconnect
+{
+    border-style: solid;
+    border-color: rgb(0, 0, 0);
+    border-width: 2px;
+    border-radius: 4px;
+    background-color:rgb(80, 190, 190);
+}
+
+QPushButton#pbApplySettings:hover,
+QPushButton#pbReadSettings:hover,
+QPushButton#pbReload:hover,
+QPushButton#pbConnectionSettings:hover,
+QPushButton#pbConnect:hover,
+QPushButton#pbDisconnect:hover
+{
+    background-color:rgb(160, 190, 190);
+}
+
+QPushButton#pbApplySettings:pressed,
+QPushButton#pbReadSettings:pressed,
+QPushButton#pbReload:pressed,
+QPushButton#pbConnectionSettings:pressed,
+QPushButton#pbConnect:pressed,
+QPushButton#pbDisconnect:pressed
+{
+    background-color:rgb(80, 190, 190);
+    border-color: rgb(100, 100, 100);
+}
+
+
 QPushButton#pbStaticOff,
-QPushButton#pbPuls,
-QPushButton#pbStaticOn
+QPushButton#pbStaticOn,
+QPushButton#pbPuls
 {
     border-style: outset;
     border-width: 2px;
@@ -26,8 +62,8 @@ QPushButton#pbStaticOn
 }
 
 QPushButton#pbStaticOff:checked,
-QPushButton#pbPuls:checked,
-QPushButton#pbStaticOn:checked
+QPushButton#pbStaticOn:checked,
+QPushButton#pbPuls:checked
 {
     background-color:rgb(255, 100, 100);
 }
@@ -56,7 +92,7 @@ QPushButton#pbTcState
 {
     border-style: outset;
     border-radius: 4px;
-    background-color:rgb(150, 200, 200);
+    background-color:rgb(50, 200, 50);
     image: url(:/Resources/Off_resize_v2.png);
 }
 
@@ -64,7 +100,7 @@ QPushButton#pbTsState:checked,
 QPushButton#pbTcState:checked
 {
     image: url(:/Resources/On_resize_v2.png);
-    background-color:rgb(150, 255, 200);
+    background-color:rgb(255, 100, 100);
 }
 
 

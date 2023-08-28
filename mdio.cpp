@@ -261,9 +261,11 @@ void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
     needConnectSlave = true;
 }
 
-bool Mdio::processingCommunicatitonResult(QString headr, QString detailed)
+bool Mdio::processingCommunicatitonResult(QString headr, QString detailed, bool openPort)
 {
-    if (communicationSyncSem.tryAcquire(1, COMMUNICATION_COMPLETE_TIMEOUTE)
+    if (communicationSyncSem.tryAcquire(1, openPort
+                                           ? OPEN_PORT_TIMEOUTE
+                                           : COMMUNICATION_COMPLETE_TIMEOUTE)
         == false) {
         errorMessage(headr, "Апаратний збій");
         return false;
@@ -402,7 +404,7 @@ void Mdio::on_pbConnectionSettings_clicked()
      * Waite to complete connection
      */
     if (processingCommunicatitonResult("Неможливо приєднатися",
-                                        "Порт недоступний") == false) {
+                                        "Порт недоступний", true) == false) {
         return;
     }
 
@@ -411,7 +413,7 @@ void Mdio::on_pbConnectionSettings_clicked()
      */
     emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка зчитування метаінформації") == false) {
+                                       "Помилка зчитування метаінформації", false) == false) {
         return;
     }
 
@@ -420,7 +422,7 @@ void Mdio::on_pbConnectionSettings_clicked()
      */
     emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка считування конфігурації") == false) {
+                                       "Помилка считування конфігурації", false) == false) {
         return;
     }
 
@@ -496,7 +498,7 @@ void Mdio::on_pbApplySettings_clicked()
 
     emit writeConfiguration(CB_WRAP_1(Mdio, writeConfigurationResult), connectSlaveAddress, configuration);
     if (processingCommunicatitonResult("Оновлення конфігурації",
-                                       "Помилка оновлення конфігурації") == false) {
+                                       "Помилка оновлення конфігурації", false) == false) {
         return;
     }
 }
@@ -518,7 +520,7 @@ void Mdio::on_pbReload_clicked()
     communicationSyncSem.tryAcquire(1);
     emit reload(CB_WRAP_1(Mdio,reloadResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Перезавантаження пристрою",
-                                       "Помилка перезавантаження") == false) {
+                                       "Помилка перезавантаження", false) == false) {
         return;
     }
 }
@@ -530,7 +532,7 @@ void Mdio::on_pbReadSettings_clicked()
      */
     emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Зчитування конфігурації",
-                                       "Помилка считування мета конфігурації") == false) {
+                                       "Помилка считування мета конфігурації", false) == false) {
         return;
     }
 
@@ -589,7 +591,7 @@ void Mdio::tcSetStaticSlot(int index, bool enable)
     emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index, enable);
 
     if (processingCommunicatitonResult("Телекерування",
-                                       "Помилка передачі команди\nдля статичного телекерування") == false) {
+                                       "Помилка передачі команди\nдля статичного телекерування", false) == false) {
         return;
     }
 }
@@ -604,7 +606,7 @@ void Mdio::tcSetPulsSlot(int index)
     emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index == 0);
 
     if (processingCommunicatitonResult("Телекерування",
-                                       "Помилка передачі команди\nдля імпульсного телекерування") == false) {
+                                       "Помилка передачі команди\nдля імпульсного телекерування", false) == false) {
         return;
     }
 }

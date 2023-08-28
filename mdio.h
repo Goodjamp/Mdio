@@ -29,6 +29,7 @@ QT_END_NAMESPACE
 #define DEFAULT_CONNECT_MONTH              0
 #define DEFAULT_CONNECT_DATE               0
 #define COMMUNICATION_COMPLETE_TIMEOUTE    2000
+#define OPEN_PORT_TIMEOUTE                 6000
 #define SILENT_INTERVAL_MIN_MS             0
 #define SILENT_INTERVAL_MAX_MS             100
 #define REPLAY_DELAY_MIN_MS                0
@@ -77,7 +78,7 @@ private:
     void updateUiCommunicationStatisticStr(void);
     bool updateUiConfiguration(void);
     void errorMessage(QString headr, QString detailed);
-    bool processingCommunicatitonResult(QString headr, QString detailed);
+    bool processingCommunicatitonResult(QString headr, QString detailed, bool openPort);
     void resetSlaveInformation(void);
 
     /*

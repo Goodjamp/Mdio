@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>830</width>
-    <height>380</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>830</width>
-    <height>380</height>
+    <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -111,133 +111,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="cbParity">
-                <property name="minimumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="lSilentInterval">
-                <property name="minimumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Інтервал тиші, мс</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="lStopBits">
-                <property name="minimumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Стоп біти</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="lBaudRate">
-                <property name="minimumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Швидкість</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="lParity">
-                <property name="minimumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>115</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Паритет</string>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="1">
                <widget class="QComboBox" name="cbStopBits">
                 <property name="minimumSize">
@@ -258,33 +131,6 @@
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="lBaudRate_2">
-                <property name="minimumSize">
-                 <size>
-                  <width>115</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>115</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Затримка
-відповіді, мс</string>
                 </property>
                </widget>
               </item>
@@ -354,6 +200,85 @@
                 </item>
                </layout>
               </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="lSilentInterval">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Інтервал тиші, мс</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="lParity">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Паритет</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="lBaudRate_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>115</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Затримка
+відповіді, мс</string>
+                </property>
+               </widget>
+              </item>
               <item row="4" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <property name="spacing">
@@ -419,6 +344,81 @@
                  </spacer>
                 </item>
                </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lStopBits">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Стоп біти</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="cbParity">
+                <property name="minimumSize">
+                 <size>
+                  <width>75</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>75</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="lBaudRate">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>115</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Швидкість</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

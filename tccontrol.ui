@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>406</width>
-    <height>128</height>
+    <height>131</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,7 +131,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
-         <number>6</number>
+         <number>9</number>
         </property>
         <item>
          <widget class="QPushButton" name="pbStaticOn">

@@ -141,8 +141,25 @@ QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);
 }
 
-QPushButton#pbTsState,
-QPushButton#pbTcState
+QLabel#lTcState
+{
+    border-style: outset;
+    border-radius: 4px;
+}
+
+QLabel[RemoteControl="false"]
+{
+    background-color:rgb(50, 200, 50);
+    image: url(:/Resources/Relay_Off.png);
+}
+
+QLabel[RemoteControl="true"]
+{
+    background-color:rgb(255, 100, 100);
+    image: url(:/Resources/Relay_On.png);
+}
+
+QPushButton#pbTsState
 {
     border-style: outset;
     border-radius: 4px;
@@ -150,11 +167,9 @@ QPushButton#pbTcState
     image: url(:/Resources/Off_resize_v2.png);
 }
 
-QPushButton#pbTsState:checked,
-QPushButton#pbTcState:checked
+QPushButton#pbTsState:checked
 {
-    image: url(:/Resources/On_resize_v2.png);
     background-color:rgb(255, 100, 100);
+    image: url(:/Resources/On_resize_v2.png);
 }
-
 

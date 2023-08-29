@@ -270,8 +270,8 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     commandBuff.push_back(static_cast<uint8_t>(value >> 8));
     commandBuff.push_back(static_cast<uint8_t>(value));
     crcCalc = crc(&commandBuff);
-    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
     commandBuff.push_back(static_cast<uint8_t>(crcCalc));
+    commandBuff.push_back(static_cast<uint8_t>(crcCalc >> 8));
 
     /*
      * Send command
@@ -287,7 +287,10 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     if (result != MB_OK) {
         return result;
     }
-
+    if (commandBuff.size() - replyBuff.size() != 2) {
+        return MB_REPLY_ERROR;
+    }
+    commandBuff.remove(commandBuff.size() - 2, 2);
     if (commandBuff != replyBuff) {
         return MB_REPLY_ERROR;
     }

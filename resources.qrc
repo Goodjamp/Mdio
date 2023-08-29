@@ -2,9 +2,10 @@
     <qresource prefix="/">
         <file>Resources/CompanyIcon.png</file>
         <file>style.css</file>
-        <file>Resources/On_resize.png</file>
-        <file>Resources/Off_resize.png</file>
         <file>Resources/On_resize_v2.png</file>
         <file>Resources/Off_resize_v2.png</file>
+        <file>Resources/Rela_RC1_Off.png</file>
+        <file>Resources/Relay_Off.png</file>
+        <file>Resources/Relay_On.png</file>
     </qresource>
 </RCC>

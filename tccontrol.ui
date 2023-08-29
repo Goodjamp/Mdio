@@ -84,7 +84,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pbTcState">
+       <widget class="QLabel" name="lTcState">
         <property name="minimumSize">
          <size>
           <width>120</width>
@@ -99,19 +99,14 @@
         </property>
         <property name="font">
          <font>
-          <pointsize>9</pointsize>
+          <family>Trebuchet MS</family>
+          <pointsize>12</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
+         <string>RC1 ON</string>
         </property>
        </widget>
       </item>

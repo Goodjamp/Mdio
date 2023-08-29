@@ -1,3 +1,5 @@
+#include <QStyle>
+#include <QString>
 #include "tccontrol.h"
 #include "ui_tccontrol.h"
 
@@ -9,19 +11,17 @@ TcControl::TcControl(QString nameStatic, QString namePuls, int index, QWidget *p
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
-
-    ui->pbStaticOn->setText(nameStatic + " ВВІМКНУТИ\n СТАТИЧНЕ");
-    ui->pbStaticOff->setText(nameStatic + " ВИМКНУТИ\n СТАТИЧНЕ");
-    ui->pbPuls->setText(namePuls + "\n ІМПУЛЬСНЕ");
-    ui->pbTcState->setEnabled(false);
     userIndex = index;
+
+    ui->pbStaticOn->setText(nameStatic + " ВВІМКНУТИ\n СТАТИЧНО");
+    ui->pbStaticOff->setText(nameStatic + " ВИМКНУТИ\n СТАТИЧНО");
+    ui->pbPuls->setText(namePuls + "\n ІМПУЛЬСНО");
+    setStaticState(false);
+
     checkButtonsList = new QButtonGroup();
     checkButtonsList->addButton(ui->pbStaticOn);
     checkButtonsList->addButton(ui->pbStaticOff);
     checkButtonsList->addButton(ui->pbPuls);
-
-    //checkItemList = new QLayout();
-
 }
 
 TcControl::~TcControl()
@@ -30,8 +30,15 @@ TcControl::~TcControl()
 }
 
 void TcControl::setStaticState(bool enable)
-{
-    ui->pbTcState->setChecked(enable);
+{   
+    ui->lTcState->setText(" RC"
+                          + QString::number(userIndex + 1)
+                          + " "
+                          + (enable ? "ON" : "OFF"));
+    ui->lTcState->setProperty("RemoteControl", enable);
+    ui->lTcState->style()->unpolish(ui->lTcState);
+    ui->lTcState->style()->polish(ui->lTcState);
+    //ui->pbTcState->setChecked(enable);
 }
 
 void TcControl::on_pbStaticOn_clicked()

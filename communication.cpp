@@ -207,7 +207,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
      * Read global status
      */
     baseCoilAddress = ADDR_COIL_220_V_ERROR;
-    readCoilsNumber = ADDR_COIL_CONFIGURATION_ERROR - baseCoilAddress + 1;
+    readCoilsNumber = ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress + 1;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
@@ -218,7 +218,6 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
     state.errorTransaction =  status[ADDR_COIL_TRANSACTION_ERROR - baseCoilAddress];
     state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
-    state.errorConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR- baseCoilAddress];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with

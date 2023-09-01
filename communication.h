@@ -126,8 +126,7 @@ private:
         ADDR_COIL_220_V_ERROR = 4,
         ADDR_COIL_TRANSACTION_ERROR = 5,
         ADDR_COIL_EEPROM_ERROR = 6,
-        ADDR_COIL_EEPROM_CLEAR_ERROR = 7,
-        ADDR_COIL_CONFIGURATION_ERROR = 8,
+        ADDR_COIL_EEPROM_CLEAR_ERROR = 7
     } AddrCoil;
 
 public:
@@ -162,7 +161,6 @@ public:
         bool errorTransaction;
         bool errorEeprom;
         bool errorEepromClear;
-        bool errorConfiguration;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;

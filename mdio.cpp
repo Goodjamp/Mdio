@@ -74,7 +74,6 @@ void Mdio::initCustomUi()
     ui->pbVoltageOnTcStatus->setEnabled(false);
     ui->pbEepromStatus->setEnabled(false);
     ui->pbTransactionStatus->setEnabled(false);
-    ui->pbConfigurationStatus->setEnabled(false);
     ui->pbEepromClearStatus->setEnabled(false);
 }
 
@@ -564,7 +563,6 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         ui->pbVoltageOnTcStatus->setChecked(state.error220);
         ui->pbEepromStatus->setChecked(state.errorEeprom);
         ui->pbTransactionStatus->setChecked(state.errorTransaction);
-        ui->pbConfigurationStatus->setChecked(state.errorConfiguration);
         ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
 
         /*

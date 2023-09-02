@@ -2,6 +2,7 @@
 #define TSSETTINGS_H
 
 #include <QWidget>
+#include <QComboBox>
 
 namespace Ui {
 class TsSettings;
@@ -16,6 +17,7 @@ public:
     ~TsSettings();
     bool isInvert();
     void setInver(bool invert);
+    QComboBox *getComboBoxPointer();
 
 private:
     Ui::TsSettings *ui;

@@ -22,10 +22,26 @@ public:
         ADDRESS,
         SETTINGS_CNT
     } SettingsIndex;
-    explicit DialogConnectionSettings(QStringList comList,
-                                      QStringList brList, int defBr,
-                                      QStringList parityList, int defParity,
-                                      QStringList stopBitsList, int defStopBits,
+
+    typedef struct {
+        QStringList comList;
+        QStringList brList;
+        int defBr;
+        QStringList parityList;
+        int defParity;
+        QStringList stopBitsList;
+        int defStopBits;
+    } UiFilingList;
+
+    typedef struct {
+        int portIndex;
+        int brIndex;
+        int parityIndex;
+        int stopBitsIndex;
+        int address;
+    } UserSettingsList;
+    explicit DialogConnectionSettings(UiFilingList uiFillingList,
+                                      UserSettingsList currentSettings,
                                       QWidget *parent = nullptr);
     ~DialogConnectionSettings();
 
@@ -40,7 +56,7 @@ private slots:
     void on_byDefault_clicked();
 
 signals:
-    void applySettings(QVector<int>);
+    void applySettings(UserSettingsList);
 
 private:
     Ui::DialogConnectionSettings *ui;

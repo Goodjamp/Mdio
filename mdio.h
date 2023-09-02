@@ -10,10 +10,13 @@
 #include <QThread>
 #include <QSemaphore>
 #include <QTimer>
+#include <QButtonGroup>
+#include <QWidget>
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"
 #include "tsstatus.h"
+#include "dialogconnectionsettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -72,6 +75,9 @@ signals:
                              int slaveAddress);
 
 private:
+    void enableSettingsControl();
+    void disableSettingsControl();
+    void updateLanguage(QString language);
     void initCustomUi();
     void updateUiConnectionStatusStr(void);
     void updateUiDeviceMetaInfStr(void);
@@ -99,13 +105,11 @@ private slots:
      * from the DialogConectionSettings to the UI space. Also
      * this slot is use to set variable readStateResult.
      */
-    void applyConnectionSettings(QVector<int>);
+    void applyConnectionSettings(DialogConnectionSettings::UserSettingsList);
 
     void readSlaveState(void);
 
-    void tcSetStaticSlot(int index, bool enable);
-
-    void tcSetPulsSlot(int index);
+    void tcSetTcSlot(int index, bool enable);
 
 private slots:
 
@@ -135,8 +139,8 @@ private slots:
 private:
     Ui::Mdio *ui;
     Communication *communicaiton;
-    QVector<TcControl *> tcStatic;
-    QVector<TsSettings *> tsSetings;
+    QVector<TcControl *> tcMonitorList;
+    QVector<TsSettings *> tsSetingsList;
     QVector<TsStatus *> tsStatus;
     QRandomGenerator rand;
     QSpacerItem *tcLayoutSpacer;
@@ -144,8 +148,11 @@ private:
     QSpacerItem *tsStatusLayoutSpacer;
     QThread *commmunicationThread;
     QTimer *readStateTimer;
+    QButtonGroup *relayCOntrolButtonsList;
+    QVector<QWidget *> settingsItemsList;
     int stateRequestCnt;
     int stateReplyCnt;
+    DialogConnectionSettings::UserSettingsList lastConnectionUserSettings;
 
     bool needConnectSlave;
     bool isSlaveConnect;

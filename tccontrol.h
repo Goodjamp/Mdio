@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QString>
-#include <QButtonGroup>
+#include <QPushButton>
 
 namespace Ui {
 class TcControl;
@@ -14,26 +14,27 @@ class TcControl : public QWidget
     Q_OBJECT
 
 public:
-    explicit TcControl(QString nameStatic, QString namePuls, int index, QWidget *parent);
+    explicit TcControl(QString name, int index, QWidget *parent);
     ~TcControl();
 
-    void setStaticState(bool enable);
+    void setStateTextIndication(int stateIndex);
+    void setName(QString name);
+    void setTextStateList(QStringList textList);
+    QPushButton *getOnButtonPointer();
+    QPushButton *getOffButtonPointer();
 
 signals:
-    void setStaticControlState(int index, bool enable);
-    void setPulsControl(int index);
+    void setState(int index, bool enable);
 
 private slots:
-    void on_pbStaticOn_clicked();
-
-    void on_pbStaticOff_clicked();
-
-    void on_pbPuls_clicked();
+    void on_pbOn_clicked();
+    void on_pbOff_clicked();
 
 private:
     Ui::TcControl *ui;
     int userIndex;
-    QButtonGroup *checkButtonsList;
+    QStringList stateTextList;
+    int stateIndex;
 };
 
 #endif // TCCONTROL_H

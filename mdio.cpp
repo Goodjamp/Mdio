@@ -1,21 +1,72 @@
 #include "mdio.h"
 #include "ui_mdio.h"
 
+#include <QFile>
 #include <QDebug>
 #include <QMap>
 #include <QDate>
 #include <QThread>
 #include <QMessageBox>
 #include <QValidator>
+#include <QByteArray>
 #include <QRegExp>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
+
 
 #define STR_CAST(str)    static_cast<QString>(str)
 #define SW_NAME          STR_CAST("МВВ-4-2 конфігуратор")
 
+void Mdio::updateLanguage(QString language)
+{
+    QFile uiSettingsJson(":/UiSettings.json");
+    QByteArray uiSettingsRaw;
+    QJsonDocument uiDescrJson;
+    QJsonObject rootObj;
+    QJsonArray temJsonArray;
+    QJsonArray relayStateString;
+    QJsonObject temObj;
+
+    uiSettingsJson.open(QFile::ReadOnly);
+
+    uiSettingsRaw = uiSettingsJson.readAll();
+    uiDescrJson = QJsonDocument::fromJson(uiSettingsRaw);
+    rootObj = uiDescrJson.object();
+    temJsonArray = rootObj.take("Language").toObject().take(language).toObject().take("TC").toArray();
+    for (int k = 0; k < temJsonArray.size(); k++) {
+        tcMonitorList[k]->setName(temJsonArray[k].toObject().take("Name").toString());
+        tcMonitorList[k]->setTextStateList(temJsonArray[k].toObject().take("Relay").toArray().toVariantList()[0].toStringList());
+    }
+}
+
+void Mdio::enableSettingsControl()
+{
+    foreach(auto item,  settingsItemsList) {
+        item->setEnabled(true);
+    }
+    ui->pbConnect->setEnabled(false);
+    ui->pbConnectionSettings->setEnabled(false);
+}
+
+void Mdio::disableSettingsControl()
+{
+    foreach(auto item,  settingsItemsList) {
+        item->setEnabled(false);
+    }
+    ui->cbBaudRate->setCurrentIndex(-1);
+    ui->cbParity->setCurrentIndex(-1);
+    ui->cbStopBits->setCurrentIndex(-1);
+    ui->pbConnect->setEnabled(true);
+    ui->pbConnectionSettings->setEnabled(false);
+}
+
 void Mdio::initCustomUi()
 {
+    relayCOntrolButtonsList = new QButtonGroup();
     QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
     QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
 
@@ -30,12 +81,13 @@ void Mdio::initCustomUi()
     /*
      * Add TeleControl status/control items
      */
-    for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
-        tcStatic.append(new TcControl("ТК" + QString::number(k + 2),
-                                      k == 0 ? "ТК1 ВВІМКНУТИ" : "ТК1 ВИМКНУТИ",
-                                      k,
-                                      this));
-        ui->vlTcControlMonitorInternal->addWidget(tcStatic[tcStatic.size() - 1]);
+    for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
+        tcMonitorList.append(new TcControl("",
+                                    k,
+                                    this));
+        ui->vlTcControlMonitorInternal->addWidget(tcMonitorList[tcMonitorList.size() - 1]);
+        relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOffButtonPointer());
+        relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOnButtonPointer());
     }
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
@@ -44,8 +96,8 @@ void Mdio::initCustomUi()
      * Add TeleSignalisation configuration items
      */
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        tsSetings.append(new TsSettings(k + 1));
-        ui->vlTeleSignalSettings->addWidget(tsSetings[tsSetings.size() - 1]);
+        tsSetingsList.append(new TsSettings(k + 1));
+        ui->vlTeleSignalSettings->addWidget(tsSetingsList[tsSetingsList.size() - 1]);
     }
     tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
@@ -75,6 +127,35 @@ void Mdio::initCustomUi()
     ui->pbEepromStatus->setEnabled(false);
     ui->pbTransactionStatus->setEnabled(false);
     ui->pbEepromClearStatus->setEnabled(false);
+
+    /*
+     * Set UI text settings according to the target language
+     */
+    updateLanguage("UA");
+
+    /*
+     * Add all UI element to control enbling
+     */
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->cbBaudRate));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->cbParity));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->cbStopBits));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leDebounceInterval));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->lePulsDuration));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leReplyDelay));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leSilentInterval));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbApplySettings));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReadSettings));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));
+    foreach(auto item, tcMonitorList) {
+        settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
+        settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
+    }
+    foreach(auto item, tsSetingsList) {
+         settingsItemsList.push_back(static_cast<QWidget *>(item->getComboBoxPointer()));
+    }
+    disableSettingsControl();
+    ui->pbConnect->setEnabled(false);
 }
 
 
@@ -109,10 +190,9 @@ Mdio::Mdio(QWidget *parent)
     /*
      * Add slots to processing tele control commands
      */
-    foreach(auto tcControlItem, tcStatic)
+    foreach(auto tcControlItem, tcMonitorList)
     {
-        connect(tcControlItem, &TcControl::setStaticControlState, this, &Mdio::tcSetStaticSlot);
-        connect(tcControlItem, &TcControl::setPulsControl, this, &Mdio::tcSetPulsSlot);
+        connect(tcControlItem, &TcControl::setState, this, &Mdio::tcSetTcSlot);
     }
 
     /*
@@ -139,6 +219,15 @@ Mdio::Mdio(QWidget *parent)
      * function, called from the external thread to the Mdio thread.
      */
     connect(this, &Mdio::updateUiStateSignal, this, &Mdio::updateUiStateSlot);
+
+    /*
+     * Default (initial) connection settings
+     */
+    lastConnectionUserSettings.address = 1;
+    lastConnectionUserSettings.brIndex = 3;
+    lastConnectionUserSettings.parityIndex = 0;
+    lastConnectionUserSettings.stopBitsIndex = 0;
+    lastConnectionUserSettings.portIndex = 0;
 }
 
 Mdio::~Mdio()
@@ -209,7 +298,7 @@ bool Mdio::updateUiConfiguration(void)
     ui->leSilentInterval->setText(QString::number(connectDeviceConf.communication.silentInterval));
     ui->leDebounceInterval->setText(QString::number(connectDeviceConf.signalisation.debounsInterval));
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        tsSetings[k]->setInver(connectDeviceConf.signalisation.isInvers[k]);
+        tsSetingsList[k]->setInver(connectDeviceConf.signalisation.isInvers[k]);
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
 
@@ -249,13 +338,14 @@ void Mdio::resetSlaveInformation(void)
     isSlaveConnect = false;
 }
 
-void Mdio::applyConnectionSettings(QVector<int> connectionSettings)
+void Mdio::applyConnectionSettings(DialogConnectionSettings::UserSettingsList connectionSettings)
 {
-    connectPortIndex = connectionSettings[DialogConnectionSettings::PORT];
-    connectBrIndex = connectionSettings[DialogConnectionSettings::BR];
-    connectParityIndex = connectionSettings[DialogConnectionSettings::PARITY];
-    connectStopBitsIndex = connectionSettings[DialogConnectionSettings::STOP_BITS];
-    connectSlaveAddress = connectionSettings[DialogConnectionSettings::ADDRESS];
+    connectPortIndex = connectionSettings.portIndex;
+    connectBrIndex =connectionSettings.brIndex;
+    connectParityIndex =connectionSettings.parityIndex;
+    connectStopBitsIndex =connectionSettings.stopBitsIndex;
+    connectSlaveAddress =connectionSettings.address;
+    lastConnectionUserSettings = connectionSettings;
 
     needConnectSlave = true;
 }
@@ -359,13 +449,24 @@ void Mdio::readStateResult(bool result, Communication::SlaveState state)
 
 void Mdio::on_pbConnectionSettings_clicked()
 {
+    DialogConnectionSettings::UiFilingList dialoConnectUiFillList;
     QStringList comList = Communication::getPortsList();
     SerialCommunication::SerialPortParity parity;
     SerialCommunication::SerialPortStopBits stopBits;
-    DialogConnectionSettings dialogConnectionSettings(comList,
-                                                      brValueToStrLUT.values(), 3,
-                                                      paritySerialToStrLUT.values(), 0,
-                                                      stopBitsSerialToStrLUT.values(), 0);
+
+    dialoConnectUiFillList.comList = comList;
+    dialoConnectUiFillList.brList = brValueToStrLUT.values();
+    dialoConnectUiFillList.defBr = 3;
+    dialoConnectUiFillList.parityList = paritySerialToStrLUT.values();
+    dialoConnectUiFillList.defParity = 0;
+    dialoConnectUiFillList.stopBitsList = stopBitsSerialToStrLUT.values();
+    dialoConnectUiFillList.defStopBits = 0;
+    if (lastConnectionUserSettings.portIndex >= comList.size()) {
+        lastConnectionUserSettings.portIndex = 0;
+    }
+
+    DialogConnectionSettings dialogConnectionSettings(dialoConnectUiFillList,
+                                                      lastConnectionUserSettings);
 
     dialogConnectionSettings.setModal(true);
     connect(&dialogConnectionSettings, &DialogConnectionSettings::applySettings, this, &Mdio::applyConnectionSettings);
@@ -438,6 +539,7 @@ void Mdio::on_pbConnectionSettings_clicked()
 
     isSlaveConnect = true;
     updateUiConnectionStatusStr();
+    enableSettingsControl();
 }
 
 void Mdio::on_pbApplySettings_clicked()
@@ -488,7 +590,7 @@ void Mdio::on_pbApplySettings_clicked()
     configuration.communication.silentInterval = ui->leSilentInterval->text().toInt();
     configuration.signalisation.debounsInterval = ui->leDebounceInterval->text().toInt();
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        configuration.signalisation.isInvers[k] = tsSetings[k]->isInvert();
+        configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
     configuration.year = QDate::currentDate().year() - 2000;
@@ -509,6 +611,7 @@ void Mdio::on_pbDisconnect_clicked()
     resetSlaveInformation();
     updateUiConnectionStatusStr();
     updateUiDeviceMetaInfStr();
+    disableSettingsControl();
 }
 
 void Mdio::on_pbReload_clicked()
@@ -571,8 +674,8 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
          * The communicaiotn return 3 registers (puls and 2 static)
          * but we need indicaiotn only 2 (static)
          */
-        for (int k = 0; k < TELECONTROL_NUMBERS; k++) {
-            tcStatic[k]->setStaticState(state.control[k + 1]);
+        for (int k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
+            //tcStatic[k]->setStaticState(state.control[k + 1]);
         }
     }
 }
@@ -584,7 +687,7 @@ void Mdio::readSlaveState(void)
     updateUiCommunicationStatisticStr();
 }
 
-void Mdio::tcSetStaticSlot(int index, bool enable)
+void Mdio::tcSetTcSlot(int index, bool enable)
 {
     emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index, enable);
 
@@ -593,19 +696,3 @@ void Mdio::tcSetStaticSlot(int index, bool enable)
         return;
     }
 }
-
-void Mdio::tcSetPulsSlot(int index)
-{
-    /*
-     * The target state depends on the index of the TcControl item:
-     * - the item  by the index 0 is responsible for the enable puls;
-     * - the item by the index 1 is responsible for the disable puls.
-     */
-    emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index == 0);
-
-    if (processingCommunicatitonResult("Телекерування",
-                                       "Помилка передачі команди\nдля імпульсного телекерування", false) == false) {
-        return;
-    }
-}
-

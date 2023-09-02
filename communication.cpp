@@ -270,7 +270,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         CALL_CB(cb, false, state);
         return;
     }
-    for (uint32_t k = 0; k < TELECONTROL_NUMBERS; k++) {
+    for (uint32_t k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
         if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
             == ModbusRtuMaster::COIL_ON) {
             state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = true;
@@ -291,7 +291,7 @@ void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
 {
 ModbusRtuMaster::MbStatus result;
 
-    if (index > TELECONTROL_NUMBERS) {
+    if (index > TELECONTRO_STATIC_NUMBERS) {
         qDebug()<<"setTeleControlSlot index value error: "<<index;
         CALL_CB(cb, false);
         return;

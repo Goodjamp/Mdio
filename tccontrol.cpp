@@ -1,27 +1,39 @@
 #include <QStyle>
 #include <QString>
+#include <QDebug>
 #include "tccontrol.h"
 #include "ui_tccontrol.h"
 
-QString redColor = "background-color: rgb(255, 100, 100)";
-QString greenColor = "background-color: rgb(50, 200, 50)";
-
-TcControl::TcControl(QString nameStatic, QString namePuls, int index, QWidget *parent) :
+TcControl::TcControl(QString name, int index, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
     userIndex = index;
 
-    ui->pbStaticOn->setText(nameStatic + " ВВІМКНУТИ\n СТАТИЧНО");
-    ui->pbStaticOff->setText(nameStatic + " ВИМКНУТИ\n СТАТИЧНО");
-    ui->pbPuls->setText(namePuls + "\n ІМПУЛЬСНО");
-    setStaticState(false);
+    ui->lTcName->setText(name);
+    stateIndex = 0;
+}
 
-    checkButtonsList = new QButtonGroup();
-    checkButtonsList->addButton(ui->pbStaticOn);
-    checkButtonsList->addButton(ui->pbStaticOff);
-    checkButtonsList->addButton(ui->pbPuls);
+void TcControl::setName(QString name)
+{
+    ui->lTcName->setText(name);
+}
+
+void TcControl::setTextStateList(QStringList textList)
+{
+    stateTextList = textList;
+    setStateTextIndication(stateIndex);
+}
+
+QPushButton *TcControl::getOnButtonPointer()
+{
+    return ui->pbOn;
+}
+
+QPushButton *TcControl::getOffButtonPointer()
+{
+    return ui->pbOff;
 }
 
 TcControl::~TcControl()
@@ -29,29 +41,25 @@ TcControl::~TcControl()
     delete ui;
 }
 
-void TcControl::setStaticState(bool enable)
+void TcControl::setStateTextIndication(int targetStateIndex)
 {   
-    ui->lTcState->setText(" RC"
-                          + QString::number(userIndex + 1)
-                          + " "
-                          + (enable ? "ON" : "OFF"));
-    ui->lTcState->setProperty("RemoteControl", enable);
-    ui->lTcState->style()->unpolish(ui->lTcState);
-    ui->lTcState->style()->polish(ui->lTcState);
-    //ui->pbTcState->setChecked(enable);
+    if (targetStateIndex >= stateTextList.size()) {
+        qDebug()<<"TcControl targetStateIndex";
+        return;
+    }
+    ui->lStateText->setText(stateTextList[targetStateIndex]);
+    stateIndex = targetStateIndex;
 }
 
-void TcControl::on_pbStaticOn_clicked()
+
+void TcControl::on_pbOn_clicked()
 {
-    emit setStaticControlState(userIndex, true);
+    emit setState(userIndex, true);
 }
 
-void TcControl::on_pbStaticOff_clicked()
+
+void TcControl::on_pbOff_clicked()
 {
-    emit setStaticControlState(userIndex, false);
+    emit setState(userIndex, false);
 }
 
-void TcControl::on_pbPuls_clicked()
-{
-    emit setPulsControl(userIndex);
-}

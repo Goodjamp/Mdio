@@ -144,16 +144,24 @@ QLabel#lTcState
     border-radius: 4px;
 }
 
-QLabel[RemoteControl="false"]
+QPushButton#pbOn,
+QPushButton#pbOff
 {
-    background-color:rgb(50, 200, 50);
-    image: url(:/Resources/Relay_Off.png);
+    border-style: outset;
+    border-radius: 25px;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+    background-color:rgb(220, 220, 220);
 }
 
-QLabel[RemoteControl="true"]
+QPushButton#pbOff:checked
 {
     background-color:rgb(255, 100, 100);
-    image: url(:/Resources/Relay_On.png);
+}
+
+QPushButton#pbOn:checked
+{
+    background-color:rgb(50, 200, 50);
 }
 
 QPushButton#pbTsState

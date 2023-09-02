@@ -7,6 +7,7 @@ TsSettings::TsSettings(int index, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->lTS->setText("TC" + QString::number(index));
+    ui->cbTS->setCurrentText("Не задано");
 }
 
 TsSettings::~TsSettings()
@@ -22,4 +23,9 @@ bool TsSettings::isInvert()
 void TsSettings::setInver(bool invert)
 {
     ui->cbTS->setCurrentIndex(invert == false ? 0 : 1);
+}
+
+QComboBox *TsSettings::getComboBoxPointer()
+{
+    return ui->cbTS;
 }

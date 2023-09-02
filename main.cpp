@@ -10,6 +10,7 @@
 #include "serialcommunication.h"
 #include "stdbool.h"
 #include "communication.h"
+#include "dialogconnectionsettings.h"
 
 Q_DECLARE_METATYPE(uint8_t);
 Q_DECLARE_METATYPE(uint16_t);
@@ -17,6 +18,8 @@ Q_DECLARE_METATYPE(SerialCommunication::SerialPortParity);
 Q_DECLARE_METATYPE(SerialCommunication::SerialPortStopBits);
 Q_DECLARE_METATYPE(Communication::SlaveConfiguration);
 Q_DECLARE_METATYPE(Communication::SlaveState);
+Q_DECLARE_METATYPE(DialogConnectionSettings::UserSettingsList);
+Q_DECLARE_METATYPE(DialogConnectionSettings::UiFilingList);
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +45,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<SerialCommunication::SerialPortStopBits>("SerialCommunication::SerialPortStopBits");
     qRegisterMetaType<Communication::SlaveConfiguration>("Communication::SlaveConfiguration");
     qRegisterMetaType<Communication::SlaveState>("Communication::SlaveState");
+    qRegisterMetaType<DialogConnectionSettings::UserSettingsList>("DialogConnectionSettings::UserSettingsList");
+    qRegisterMetaType<DialogConnectionSettings::UiFilingList>("DialogConnectionSettings::UiFilingList");
 
     w.show();
     return a.exec();

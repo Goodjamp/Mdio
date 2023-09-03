@@ -14,9 +14,9 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
 {
     ui->setupUi(this);
 
-    defaultBrIndex = uiFillingList.defBr;
-    defaultParityIndex = uiFillingList.defParity;
-    defaultStopBitsIndex = uiFillingList.defStopBits;
+    defaultBrIndex = uiFillingList.brDefault;
+    defaultParityIndex = uiFillingList.parityDefault;
+    defaultStopBitsIndex = uiFillingList.stopBitsDefault;
 
     ui->cbPort->addItems(uiFillingList.comList);
     ui->cbBaudRate->addItems(uiFillingList.brList);

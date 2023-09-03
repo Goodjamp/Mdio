@@ -17,7 +17,12 @@ public:
     ~TsSettings();
     bool isInvert();
     void setInver(bool invert);
-    QComboBox *getComboBoxPointer();
+    void setEnableCb(bool);
+
+    /*
+     * Return true if user settings is valid
+     */
+    bool isConfigurationSeted();
 
 private:
     Ui::TsSettings *ui;

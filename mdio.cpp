@@ -48,6 +48,9 @@ void Mdio::enableSettingsControl()
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(true);
     }
+    foreach(auto item, tsSetingsList) {
+         item->setEnableCb(true);
+    }
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
 }
@@ -57,11 +60,18 @@ void Mdio::disableSettingsControl()
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(false);
     }
+    foreach(auto item, tsSetingsList) {
+         item->setEnableCb(false);
+    }
     ui->cbBaudRate->setCurrentIndex(-1);
     ui->cbParity->setCurrentIndex(-1);
     ui->cbStopBits->setCurrentIndex(-1);
+    ui->leDebounceInterval->setText("");
+    ui->lePulsDuration->setText("");
+    ui->leReplyDelay->setText("");
+    ui->leSilentInterval->setText("");
     ui->pbConnect->setEnabled(true);
-    ui->pbConnectionSettings->setEnabled(false);
+    ui->pbConnectionSettings->setEnabled(true);
 }
 
 void Mdio::initCustomUi()
@@ -151,9 +161,7 @@ void Mdio::initCustomUi()
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
     }
-    foreach(auto item, tsSetingsList) {
-         settingsItemsList.push_back(static_cast<QWidget *>(item->getComboBoxPointer()));
-    }
+
     disableSettingsControl();
     ui->pbConnect->setEnabled(false);
 }
@@ -456,11 +464,11 @@ void Mdio::on_pbConnectionSettings_clicked()
 
     dialoConnectUiFillList.comList = comList;
     dialoConnectUiFillList.brList = brValueToStrLUT.values();
-    dialoConnectUiFillList.defBr = 3;
+    dialoConnectUiFillList.brDefault = 3;
     dialoConnectUiFillList.parityList = paritySerialToStrLUT.values();
-    dialoConnectUiFillList.defParity = 0;
+    dialoConnectUiFillList.parityDefault = 0;
     dialoConnectUiFillList.stopBitsList = stopBitsSerialToStrLUT.values();
-    dialoConnectUiFillList.defStopBits = 0;
+    dialoConnectUiFillList.stopBitsDefault = 0;
     if (lastConnectionUserSettings.portIndex >= comList.size()) {
         lastConnectionUserSettings.portIndex = 0;
     }
@@ -546,12 +554,16 @@ void Mdio::on_pbApplySettings_clicked()
 {
     Communication::SlaveConfiguration configuration;
 
+
     /*
-     * Read user configuration and serialiase it to the SlaveConfiguration
-     * structure
+     * Make a test of the user configuration
      */
 
-    if (VALUE_IN_RANGE(ui->leReplyDelay->text().toUInt(),
+    if (ui->leReplyDelay->text().isDetached()) {
+        errorMessage("Помилка конфігурації",
+                     "Час затримки відповіді не заданий");
+        return;
+    } else if (VALUE_IN_RANGE(ui->leReplyDelay->text().toUInt(),
                        SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
         errorMessage("Помилка конфігурації",
                      "Час затримки відповіді повинено бути в діапазоні [" + QString::number(REPLAY_DELAY_MIN_MS)
@@ -559,7 +571,12 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
-    if (VALUE_IN_RANGE(ui->leSilentInterval->text().toUInt(),
+
+    if (ui->leReplyDelay->text().isDetached()) {
+        errorMessage("Помилка конфігурації",
+                     "Інтервал тиші не заданий");
+        return;
+    } else if (VALUE_IN_RANGE(ui->leSilentInterval->text().toUInt(),
                        SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
         errorMessage("Помилка конфігурації",
                      "Інтервал тиші повинено бути в діапазоні [" + QString::number(SILENT_INTERVAL_MIN_MS)
@@ -567,7 +584,11 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
-    if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toUInt(),
+    if (ui->leReplyDelay->text().isDetached()) {
+        errorMessage("Помилка конфігурації",
+                     "Тривалість брязкіту не заданий");
+        return;
+    } else if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toUInt(),
                        DEBOUNCE_INTARVAL_MIN_MS, DEBOUNCE_INTARVAL_MAX_MS) == false ) {
         errorMessage("Помилка конфігурації",
                      "Тривалість брязкіту повинно бути в діапазоні [" + QString::number(DEBOUNCE_INTARVAL_MIN_MS)
@@ -575,7 +596,11 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
-    if (VALUE_IN_RANGE(ui->lePulsDuration->text().toUInt(),
+    if (ui->leReplyDelay->text().isDetached()) {
+        errorMessage("Помилка конфігурації",
+                     "Тривалість імпульсу ТК не заданий");
+        return;
+    } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toUInt(),
                        PULS_DURATION_MIN_MS, PULS_DURATION_MMAX_MS) == false ) {
         errorMessage("Помилка конфігурації",
                      "Тривалість імпульсу ТК повинно бути в діапазоні [" + QString::number(PULS_DURATION_MIN_MS)
@@ -583,6 +608,33 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
+    if (ui->cbBaudRate->currentIndex() == -1) {
+        errorMessage("Помилка конфігурації",
+                     "Швидкість не задана");
+        return;
+    }
+    if (ui->cbParity->currentIndex() == -1) {
+        errorMessage("Помилка конфігурації",
+                     "Паритет не заданий");
+        return;
+    }
+    if (ui->cbParity->currentIndex() == -1) {
+        errorMessage("Помилка конфігурації",
+                     "Кількість стоп бітів не задано");
+        return;
+    }
+
+    foreach(auto item, tsSetingsList) {
+        if (item->isConfigurationSeted() == false) {
+            errorMessage("Помилка конфігурації",
+                         "Інверсія ТС не задана");
+        }
+    }
+
+    /*
+     * Read user configuration and serialiase it to the SlaveConfiguration
+     * structure
+     */
     configuration.communication.baudRate = brValueToStrLUT.key(ui->cbBaudRate->currentText());
     configuration.communication.parity = paritySerialToStrLUT.key(ui->cbParity->currentText());
     configuration.communication.stopBits = stopBitsSerialToStrLUT.key(ui->cbStopBits->currentText());

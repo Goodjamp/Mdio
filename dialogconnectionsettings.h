@@ -26,11 +26,11 @@ public:
     typedef struct {
         QStringList comList;
         QStringList brList;
-        int defBr;
+        int brDefault;
         QStringList parityList;
-        int defParity;
+        int parityDefault;
         QStringList stopBitsList;
-        int defStopBits;
+        int stopBitsDefault;
     } UiFilingList;
 
     typedef struct {

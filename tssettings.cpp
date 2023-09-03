@@ -25,7 +25,15 @@ void TsSettings::setInver(bool invert)
     ui->cbTS->setCurrentIndex(invert == false ? 0 : 1);
 }
 
-QComboBox *TsSettings::getComboBoxPointer()
+void  TsSettings::setEnableCb(bool enable)
 {
-    return ui->cbTS;
+    ui->cbTS->setEnabled(enable);
+    if (enable == false) {
+        ui->cbTS->setCurrentIndex(-1);
+    }
+}
+
+bool TsSettings::isConfigurationSeted()
+{
+    return ui->cbTS->currentIndex() != -1;
 }

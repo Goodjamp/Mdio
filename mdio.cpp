@@ -31,6 +31,9 @@ void Mdio::updateLanguage(QString language)
     QJsonArray relayStateString;
     QJsonObject temObj;
 
+    QStringList strListRelayStr1;
+    QStringList strListRelayStr2;
+
     uiSettingsJson.open(QFile::ReadOnly);
 
     uiSettingsRaw = uiSettingsJson.readAll();
@@ -38,9 +41,16 @@ void Mdio::updateLanguage(QString language)
     rootObj = uiDescrJson.object();
     temJsonArray = rootObj.take("Language").toObject().take(language).toObject().take("TC").toArray();
     for (int k = 0; k < temJsonArray.size(); k++) {
+        strListRelayStr1.clear();
+        strListRelayStr2.clear();
         tcMonitorList[k]->setName(temJsonArray[k].toObject().take("Name").toString());
-        tcMonitorList[k]->setTextStateList(temJsonArray[k].toObject().take("RelayStr1").toArray().toVariantList()[0].toStringList(),
-                                           temJsonArray[k].toObject().take("RelayStr2").toArray().toVariantList()[0].toStringList());
+        foreach(auto item, temJsonArray[k].toObject().take("RelayStr1").toArray().toVariantList()) {
+           strListRelayStr1.push_back(item.toString());
+        }
+        foreach(auto item, temJsonArray[k].toObject().take("RelayStr2").toArray().toVariantList()) {
+           strListRelayStr2.push_back(item.toString());
+        }
+        tcMonitorList[k]->setTextStateList(strListRelayStr1, strListRelayStr2);
     }
 }
 
@@ -741,8 +751,8 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
          *
          * The communicaiotn return 3 registers (1 puls and 2 static)
          */
-        for (int k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
-            tcMonitorList[k]->setStateTextIndication(state.control[k + 1] == false ? 0 : 1);
+        for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
+            tcMonitorList[k]->setStateTextIndication(state.control[k] == false ? 0 : 1);
         }
     }
 }
@@ -778,3 +788,8 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     }
 }
 
+
+void Mdio::on_pbConnect_clicked()
+{
+
+}

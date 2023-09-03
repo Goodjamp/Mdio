@@ -115,9 +115,9 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
         /*
          * Deserialiase configuration date
          */
-        configuration.configurationDay = DAY_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
-        configuration.configurationMonth = MONTH_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
-        configuration.configurationYear = YEAR_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
+        configuration.configurationDay = DAY_CON_MASK & (configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] >> DAY_CON_POS);
+        configuration.configurationMonth = MONTH_CON_MASK & (configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] >> MONTH_CON_POS);
+        configuration.configurationYear = YEAR_CON_MASK & (configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] >> YEAR_CON_POS);
 
         /*
          * Deserialiase configuration
@@ -164,16 +164,16 @@ void Communication::readMetaInformationSlot(std::function<void(bool result, Meta
     QVector<uint16_t> readData;
     ModbusRtuMaster::MbStatus result;
     MetaInformation metaInformation;
-    uint16_t baseConfReg;
+    uint16_t baseReg;
     uint16_t registersNumbers;
 
     /*
      * Read reagisters range from the ADDR_REG_VERSION_FW to the ADDR_REG_DATE_CONFIGURATION
      */
-    baseConfReg = ADDR_REG_VERSION_FW;
-    registersNumbers = ADDR_REG_DATE_CONFIGURATION - baseConfReg + 1;
+    baseReg = ADDR_REG_VERSION_FW;
+    registersNumbers = ADDR_REG_DATE_CONFIGURATION - baseReg + 1;
 
-    result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, readData);
+    result = modbus->readHoldingRegisters(slaveAddress, baseReg, registersNumbers, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
@@ -181,9 +181,9 @@ void Communication::readMetaInformationSlot(std::function<void(bool result, Meta
         return;
     }
     metaInformation.fwVersion = static_cast<int>(readData[0]);
-    metaInformation.configurationDay = DAY_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
-    metaInformation.configurationMonth = MONTH_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
-    metaInformation.configurationYear = YEAR_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
+    metaInformation.configurationDay = DAY_CON_MASK & (readData[ADDR_REG_DATE_CONFIGURATION - baseReg] >> DAY_CON_POS);
+    metaInformation.configurationMonth = MONTH_CON_MASK & (readData[ADDR_REG_DATE_CONFIGURATION - baseReg] >> MONTH_CON_POS);
+    metaInformation.configurationYear = YEAR_CON_MASK & (readData[ADDR_REG_DATE_CONFIGURATION - baseReg] >> YEAR_CON_POS);
 
     CALL_CB(cb, true, metaInformation);
 }

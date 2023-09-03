@@ -142,6 +142,8 @@ private slots:
 
     void on_pbSetDefaultSettings_clicked();
 
+    void on_pbConnect_clicked();
+
 private:
     Ui::Mdio *ui;
     Communication *communicaiton;

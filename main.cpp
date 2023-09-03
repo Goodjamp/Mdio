@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<std::function<void(bool result, Communication::SlaveState state)>>
         ("std::function<void(bool result, Communication::SlaveState state)>");
     qRegisterMetaType<std::function<void(bool result, int fwVersion)>>("std::function<void(bool result, int fwVersion)>");
+    qRegisterMetaType<std::function<void(bool result, Communication::MetaInformation metaInformation)>>
+        ("std::function<void(bool result, Communication::MetaInformation metaInformation)>");
     qRegisterMetaType<SerialCommunication::SerialPortParity>("SerialCommunication::SerialPortParity");
     qRegisterMetaType<SerialCommunication::SerialPortStopBits>("SerialCommunication::SerialPortStopBits");
     qRegisterMetaType<Communication::SlaveConfiguration>("Communication::SlaveConfiguration");

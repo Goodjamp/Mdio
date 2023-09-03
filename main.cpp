@@ -20,6 +20,7 @@ Q_DECLARE_METATYPE(Communication::SlaveConfiguration);
 Q_DECLARE_METATYPE(Communication::SlaveState);
 Q_DECLARE_METATYPE(DialogConnectionSettings::UserSettingsList);
 Q_DECLARE_METATYPE(DialogConnectionSettings::UiFilingList);
+Q_DECLARE_METATYPE(Communication::MetaInformation);
 
 int main(int argc, char *argv[])
 {
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<Communication::SlaveState>("Communication::SlaveState");
     qRegisterMetaType<DialogConnectionSettings::UserSettingsList>("DialogConnectionSettings::UserSettingsList");
     qRegisterMetaType<DialogConnectionSettings::UiFilingList>("DialogConnectionSettings::UiFilingList");
+    qRegisterMetaType<Communication::MetaInformation>("Communication::MetaInformation");
 
     w.show();
     return a.exec();

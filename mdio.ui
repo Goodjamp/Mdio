@@ -788,7 +788,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pbApplySettings">
+           <widget class="QPushButton" name="pbSetDefaultSettings">
             <property name="minimumSize">
              <size>
               <width>120</width>
@@ -801,15 +801,8 @@
               <height>25</height>
              </size>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
             <property name="text">
-             <string>Застосувати</string>
+             <string>За умовчуванням</string>
             </property>
            </widget>
           </item>
@@ -836,6 +829,32 @@
             </property>
             <property name="text">
              <string>Прочитати</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbApplySettings">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>120</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Застосувати</string>
             </property>
            </widget>
           </item>

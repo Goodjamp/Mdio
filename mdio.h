@@ -22,8 +22,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
 QT_END_NAMESPACE
 
-#define DEFAULT_BR_VALUE                   19200
-#define DEFAULT_CONNECT_BR_INDEX           0
+#define DEFAULT_CONNECT_BR_INDEX           3
 #define DEFAULT_CONNECT_PARITY_INDEX       0
 #define DEFAULT_CONNECT_STOP_BITS_INDEX    0
 #define DEFAULT_CONNECT_SLAVE_ADDRESS      1
@@ -31,6 +30,10 @@ QT_END_NAMESPACE
 #define DEFAULT_CONNECT_YEAR               0
 #define DEFAULT_CONNECT_MONTH              0
 #define DEFAULT_CONNECT_DATE               0
+#define DEFAULT_SILENT_INTERVAL            50
+#define DEFAULT_REPLY_DELAY                0
+#define DEFAULT_DEBOUNCE_INTERVAL          20
+#define DEFAULT_PULS_DURATION              1000
 #define COMMUNICATION_COMPLETE_TIMEOUTE    2000
 #define OPEN_PORT_TIMEOUTE                 6000
 #define SILENT_INTERVAL_MIN_MS             0
@@ -71,12 +74,13 @@ signals:
                             int slaveAddress, bool enable);
     void setTeleControl(std::function<void(bool result)> cb,
                         int slaveAddress, int index, bool enable);
-    void readMetaInformation(std::function<void(bool result, int fwVersion)> cb,
+    void readMetaInformation(std::function<void(bool result, Communication::MetaInformation metaInformation)> cb,
                              int slaveAddress);
 
 private:
     void enableSettingsControl();
     void disableSettingsControl();
+    void skipAllSettings();
     void updateLanguage(QString language);
     void initCustomUi();
     void updateUiConnectionStatusStr(void);
@@ -91,7 +95,7 @@ private:
      * The groupe of CB functin from the Communication class
      */
     void connectSlaveResult(bool result);
-    void readMetaInformationResult(bool result, int fwVersion);
+    void readMetaInformationResult(bool result, Communication::MetaInformation metaInformation);
     void readConfigurationResult(bool result, Communication::SlaveConfiguration configuration);
     void reloadResult(bool result);
     void writeConfigurationResult(bool result);
@@ -136,6 +140,8 @@ private slots:
     void updateUiStateSlot(bool result, Communication::SlaveState state);
 
 
+    void on_pbSetDefaultSettings_clicked();
+
 private:
     Ui::Mdio *ui;
     Communication *communicaiton;
@@ -162,9 +168,9 @@ private:
     uint connectStopBitsIndex;
     uint connectSlaveAddress;
     uint connectDeviceVersion;
-    uint connectDeviceConfYear;
-    uint connectDeviceConfMonth;
-    uint connectDeviceConfDay;
+    uint lastConfigurationYear;
+    uint lastConfigurationMonth;
+    uint lastConfigurationDay;
 
     Communication::SlaveConfiguration connectDeviceConf;
 

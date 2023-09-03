@@ -19,7 +19,7 @@ public:
 
     void setStateTextIndication(int stateIndex);
     void setName(QString name);
-    void setTextStateList(QStringList textList);
+    void setTextStateList(QStringList textListStr1, QStringList textListStr2);
     QPushButton *getOnButtonPointer();
     QPushButton *getOffButtonPointer();
 
@@ -33,7 +33,8 @@ private slots:
 private:
     Ui::TcControl *ui;
     int userIndex;
-    QStringList stateTextList;
+    QStringList stateTextListStr1;
+    QStringList stateTextListStr2;
     int stateIndex;
 };
 

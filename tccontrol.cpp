@@ -20,9 +20,10 @@ void TcControl::setName(QString name)
     ui->lTcName->setText(name);
 }
 
-void TcControl::setTextStateList(QStringList textList)
+void TcControl::setTextStateList(QStringList textListStr1, QStringList textListStr2)
 {
-    stateTextList = textList;
+    stateTextListStr1 = textListStr1;
+    stateTextListStr2 = textListStr2;
     setStateTextIndication(stateIndex);
 }
 
@@ -43,11 +44,13 @@ TcControl::~TcControl()
 
 void TcControl::setStateTextIndication(int targetStateIndex)
 {   
-    if (targetStateIndex >= stateTextList.size()) {
+    if (targetStateIndex >= stateTextListStr1.size()
+        || targetStateIndex >= stateTextListStr2.size()) {
         qDebug()<<"TcControl targetStateIndex";
         return;
     }
-    ui->lStateText->setText(stateTextList[targetStateIndex]);
+    ui->lStateTextStr1->setText(stateTextListStr1[targetStateIndex]);
+    ui->lStateTextStr2->setText(stateTextListStr2[targetStateIndex]);
     stateIndex = targetStateIndex;
 }
 

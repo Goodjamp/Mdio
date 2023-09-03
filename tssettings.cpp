@@ -20,7 +20,7 @@ bool TsSettings::isInvert()
     return ui->cbTS->currentIndex() == 1;
 }
 
-void TsSettings::setInver(bool invert)
+void TsSettings::setInvert(bool invert)
 {
     ui->cbTS->setCurrentIndex(invert == false ? 0 : 1);
 }

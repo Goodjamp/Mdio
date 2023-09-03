@@ -50,9 +50,9 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
         /*
          * Serialiase date of configuration
          */
-        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (DAY_CON_MASK & configuration.day) << DAY_CON_POS;
-        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (MONTH_CON_MASK & configuration.month) << MONTH_CON_POS;
-        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (YEAR_CON_MASK & configuration.year) << YEAR_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (DAY_CON_MASK & configuration.configurationDay) << DAY_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (MONTH_CON_MASK & configuration.configurationMonth) << MONTH_CON_POS;
+        configReg[ADDR_REG_DATE_CONFIGURATION - baseConfReg] |= (YEAR_CON_MASK & configuration.configurationYear) << YEAR_CON_POS;
 
         /*
          * Serialiase communicaiotn settings
@@ -115,9 +115,9 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
         /*
          * Deserialiase configuration date
          */
-        configuration.day = DAY_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
-        configuration.month = MONTH_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
-        configuration.year = YEAR_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
+        configuration.configurationDay = DAY_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
+        configuration.configurationMonth = MONTH_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
+        configuration.configurationYear = YEAR_CON_MASK & (configReg[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
 
         /*
          * Deserialiase configuration
@@ -158,21 +158,34 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
     CALL_CB(cb, resulReadConfiguration, configuration);
 }
 
-void Communication::readMetaInformationSlot(std::function<void(bool result, int fwVersion)> cb,
+void Communication::readMetaInformationSlot(std::function<void(bool result, MetaInformation metaInformation)> cb,
                                             int slaveAddress)
 {
     QVector<uint16_t> readData;
     ModbusRtuMaster::MbStatus result;
+    MetaInformation metaInformation;
+    uint16_t baseConfReg;
+    uint16_t registersNumbers;
 
-    result = modbus->readHoldingRegisters(slaveAddress, ADDR_REG_VERSION_FW, 1, readData);
+    /*
+     * Read reagisters range from the ADDR_REG_VERSION_FW to the ADDR_REG_DATE_CONFIGURATION
+     */
+    baseConfReg = ADDR_REG_VERSION_FW;
+    registersNumbers = ADDR_REG_DATE_CONFIGURATION - baseConfReg + 1;
+
+    result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
-        CALL_CB(cb, false, 0);
+        CALL_CB(cb, false, metaInformation);
         return;
     }
+    metaInformation.fwVersion = static_cast<int>(readData[0]);
+    metaInformation.configurationDay = DAY_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> DAY_CON_POS);
+    metaInformation.configurationMonth = MONTH_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> MONTH_CON_POS);
+    metaInformation.configurationYear = YEAR_CON_MASK & (readData[baseConfReg - ADDR_REG_DATE_CONFIGURATION] >> YEAR_CON_POS);
 
-    CALL_CB(cb, true, static_cast<int>(readData[0]));
+    CALL_CB(cb, true, metaInformation);
 }
 
 void Communication::reloadSlot(std::function<void(bool result)> cb,

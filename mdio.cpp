@@ -39,7 +39,8 @@ void Mdio::updateLanguage(QString language)
     temJsonArray = rootObj.take("Language").toObject().take(language).toObject().take("TC").toArray();
     for (int k = 0; k < temJsonArray.size(); k++) {
         tcMonitorList[k]->setName(temJsonArray[k].toObject().take("Name").toString());
-        tcMonitorList[k]->setTextStateList(temJsonArray[k].toObject().take("Relay").toArray().toVariantList()[0].toStringList());
+        tcMonitorList[k]->setTextStateList(temJsonArray[k].toObject().take("RelayStr1").toArray().toVariantList()[0].toStringList(),
+                                           temJsonArray[k].toObject().take("RelayStr2").toArray().toVariantList()[0].toStringList());
     }
 }
 
@@ -63,6 +64,12 @@ void Mdio::disableSettingsControl()
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(false);
     }
+    ui->pbConnect->setEnabled(true);
+    ui->pbConnectionSettings->setEnabled(true);
+}
+
+void Mdio::skipAllSettings()
+{
     ui->cbBaudRate->setCurrentIndex(-1);
     ui->cbParity->setCurrentIndex(-1);
     ui->cbStopBits->setCurrentIndex(-1);
@@ -70,8 +77,6 @@ void Mdio::disableSettingsControl()
     ui->lePulsDuration->setText("");
     ui->leReplyDelay->setText("");
     ui->leSilentInterval->setText("");
-    ui->pbConnect->setEnabled(true);
-    ui->pbConnectionSettings->setEnabled(true);
 }
 
 void Mdio::initCustomUi()
@@ -81,7 +86,7 @@ void Mdio::initCustomUi()
     QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
 
     /*
-     * Add validation to the numeric fields
+     * Add validation to the numeric UI items
      */
     ui->leSilentInterval->setValidator(numericValidator3D);
     ui->leReplyDelay->setValidator(numericValidator3D);
@@ -93,8 +98,8 @@ void Mdio::initCustomUi()
      */
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("",
-                                    k,
-                                    this));
+                                           k,
+                                           this));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList[tcMonitorList.size() - 1]);
         relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOffButtonPointer());
         relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOnButtonPointer());
@@ -144,7 +149,7 @@ void Mdio::initCustomUi()
     updateLanguage("UA");
 
     /*
-     * Add all UI element to control enbling
+     * Add all UI element to control enabling
      */
     settingsItemsList.push_back(static_cast<QWidget *>(ui->cbBaudRate));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->cbParity));
@@ -157,12 +162,14 @@ void Mdio::initCustomUi()
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReadSettings));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbSetDefaultSettings));
     foreach(auto item, tcMonitorList) {
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
     }
 
     disableSettingsControl();
+    skipAllSettings();
     ui->pbConnect->setEnabled(false);
 }
 
@@ -219,6 +226,10 @@ Mdio::Mdio(QWidget *parent)
     communicaiton->moveToThread(commmunicationThread);
     commmunicationThread->start();
 
+    /*
+     * Take semaphjre.
+     * Remove this string on the future
+     */
     communicationSyncSem.acquire();
 
     /*
@@ -231,10 +242,10 @@ Mdio::Mdio(QWidget *parent)
     /*
      * Default (initial) connection settings
      */
-    lastConnectionUserSettings.address = 1;
-    lastConnectionUserSettings.brIndex = 3;
-    lastConnectionUserSettings.parityIndex = 0;
-    lastConnectionUserSettings.stopBitsIndex = 0;
+    lastConnectionUserSettings.address = DEFAULT_CONNECT_SLAVE_ADDRESS;
+    lastConnectionUserSettings.brIndex = DEFAULT_CONNECT_BR_INDEX;
+    lastConnectionUserSettings.parityIndex = DEFAULT_CONNECT_PARITY_INDEX;
+    lastConnectionUserSettings.stopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
     lastConnectionUserSettings.portIndex = 0;
 }
 
@@ -273,9 +284,9 @@ void Mdio::updateUiDeviceMetaInfStr(void)
     metaInfStr = "v"
                  + QString::number(connectDeviceVersion)
                  + "  Дата:"
-                 + QString::number(connectDeviceConfDay) + "."
-                 + QString::number(connectDeviceConfMonth) + "."
-                 + QString::number(connectDeviceConfYear);
+                 + QString::number(lastConfigurationDay) + "."
+                 + QString::number(lastConfigurationMonth) + "."
+                 + QString::number(lastConfigurationYear);
 
 
     ui->lDeviceMetaInfo->setText(metaInfStr);
@@ -306,13 +317,13 @@ bool Mdio::updateUiConfiguration(void)
     ui->leSilentInterval->setText(QString::number(connectDeviceConf.communication.silentInterval));
     ui->leDebounceInterval->setText(QString::number(connectDeviceConf.signalisation.debounsInterval));
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        tsSetingsList[k]->setInver(connectDeviceConf.signalisation.isInvers[k]);
+        tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
 
-    connectDeviceConfYear = connectDeviceConf.year;
-    connectDeviceConfMonth = connectDeviceConf.month;
-    connectDeviceConfDay = connectDeviceConf.day;
+    lastConfigurationYear = connectDeviceConf.configurationYear;
+    lastConfigurationMonth = connectDeviceConf.configurationMonth;
+    lastConfigurationDay = connectDeviceConf.configurationDay;
 
     /*
      * Update last configuration date information
@@ -340,9 +351,9 @@ void Mdio::resetSlaveInformation(void)
     connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
     connectSlaveAddress = DEFAULT_CONNECT_SLAVE_ADDRESS;
     connectDeviceVersion = DEFAULT_CONNECT_VERSION;
-    connectDeviceConfYear = DEFAULT_CONNECT_YEAR;
-    connectDeviceConfMonth = DEFAULT_CONNECT_MONTH;
-    connectDeviceConfDay = DEFAULT_CONNECT_DATE;
+    lastConfigurationYear = DEFAULT_CONNECT_YEAR;
+    lastConfigurationMonth = DEFAULT_CONNECT_MONTH;
+    lastConfigurationDay = DEFAULT_CONNECT_DATE;
     isSlaveConnect = false;
 }
 
@@ -407,7 +418,7 @@ void Mdio::setTeleControlResult(bool result)
 }
 
 
-void Mdio::readMetaInformationResult(bool result, int fwVersion)
+void Mdio::readMetaInformationResult(bool result, Communication::MetaInformation metaInformation)
 {
     /*
      * Release (give) semaphore to unblok code that waite to complete
@@ -415,7 +426,10 @@ void Mdio::readMetaInformationResult(bool result, int fwVersion)
     communicationResult = result;
     qDebug()<<"Read meta information result: "<<result;
     if (result == true) {
-        connectDeviceVersion = fwVersion;
+        connectDeviceVersion = metaInformation.fwVersion;
+        lastConfigurationDay = metaInformation.configurationDay;
+        lastConfigurationMonth = metaInformation.configurationMonth;
+        lastConfigurationYear = metaInformation.configurationYear;
     }
     communicationSyncSem.release(1);
 }
@@ -464,11 +478,11 @@ void Mdio::on_pbConnectionSettings_clicked()
 
     dialoConnectUiFillList.comList = comList;
     dialoConnectUiFillList.brList = brValueToStrLUT.values();
-    dialoConnectUiFillList.brDefault = 3;
+    dialoConnectUiFillList.brDefault = DEFAULT_CONNECT_BR_INDEX;
     dialoConnectUiFillList.parityList = paritySerialToStrLUT.values();
-    dialoConnectUiFillList.parityDefault = 0;
+    dialoConnectUiFillList.parityDefault = DEFAULT_CONNECT_PARITY_INDEX;
     dialoConnectUiFillList.stopBitsList = stopBitsSerialToStrLUT.values();
-    dialoConnectUiFillList.stopBitsDefault = 0;
+    dialoConnectUiFillList.stopBitsDefault = DEFAULT_CONNECT_STOP_BITS_INDEX;
     if (lastConnectionUserSettings.portIndex >= comList.size()) {
         lastConnectionUserSettings.portIndex = 0;
     }
@@ -528,6 +542,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     /*
      * Read configuration
      */
+    /*
     emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка считування конфігурації", false) == false) {
@@ -537,6 +552,7 @@ void Mdio::on_pbConnectionSettings_clicked()
     if (updateUiConfiguration() == false) {
         return;
     }
+    */
 
     /*
      * Start timer to read the slave state
@@ -645,9 +661,9 @@ void Mdio::on_pbApplySettings_clicked()
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
-    configuration.year = QDate::currentDate().year() - 2000;
-    configuration.month = QDate::currentDate().month();
-    configuration.day = QDate::currentDate().day();
+    configuration.configurationYear = QDate::currentDate().year() - 2000;
+    configuration.configurationMonth = QDate::currentDate().month();
+    configuration.configurationDay = QDate::currentDate().day();
 
     emit writeConfiguration(CB_WRAP_1(Mdio, writeConfigurationResult), connectSlaveAddress, configuration);
     if (processingCommunicatitonResult("Оновлення конфігурації",
@@ -723,11 +739,10 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         /*
          * Update Tele control indication
          *
-         * The communicaiotn return 3 registers (puls and 2 static)
-         * but we need indicaiotn only 2 (static)
+         * The communicaiotn return 3 registers (1 puls and 2 static)
          */
         for (int k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
-            //tcStatic[k]->setStaticState(state.control[k + 1]);
+            tcMonitorList[k]->setStateTextIndication(state.control[k + 1] == false ? 0 : 1);
         }
     }
 }
@@ -748,3 +763,18 @@ void Mdio::tcSetTcSlot(int index, bool enable)
         return;
     }
 }
+
+void Mdio::on_pbSetDefaultSettings_clicked()
+{
+    ui->cbBaudRate->setCurrentIndex(DEFAULT_CONNECT_BR_INDEX);
+    ui->cbParity->setCurrentIndex(DEFAULT_CONNECT_PARITY_INDEX);
+    ui->cbStopBits->setCurrentIndex(DEFAULT_CONNECT_STOP_BITS_INDEX);
+    ui->leSilentInterval->setText(QString::number(DEFAULT_SILENT_INTERVAL));
+    ui->leReplyDelay->setText(QString::number(DEFAULT_REPLY_DELAY));
+    ui->leDebounceInterval->setText(QString::number(DEFAULT_DEBOUNCE_INTERVAL));
+    ui->lePulsDuration->setText(QString::number(DEFAULT_PULS_DURATION));
+    foreach(auto item, tsSetingsList) {
+        item->setInvert(false);
+    }
+}
+

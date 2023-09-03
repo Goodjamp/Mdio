@@ -16,7 +16,7 @@ public:
     explicit TsSettings(int index, QWidget *parent = nullptr);
     ~TsSettings();
     bool isInvert();
-    void setInver(bool invert);
+    void setInvert(bool invert);
     void setEnableCb(bool);
 
     /*

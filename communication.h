@@ -137,9 +137,9 @@ public:
 
 public:
     typedef struct {
-        int day;
-        int month;
-        int year;
+        int configurationDay;
+        int configurationMonth;
+        int configurationYear;
         struct {
             int baudRate;
             int silentInterval;
@@ -164,6 +164,13 @@ public:
         bool signalisation[TELESIGNAL_NUMBERS];
         bool control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;
+
+    typedef struct {
+        int fwVersion;
+        int configurationDay;
+        int configurationMonth;
+        int configurationYear;
+    } MetaInformation;
 
 private:
     QThread *communicationThread;
@@ -204,7 +211,7 @@ public slots:
                                 int slaveAddress, SlaveConfiguration configuration);
     void readConfigurationSlot(std::function<void(bool result, SlaveConfiguration settings)> cb,
                                int slaveAddress);
-    void readMetaInformationSlot(std::function<void(bool result, int fwVersion)> cb,
+    void readMetaInformationSlot(std::function<void(bool result, MetaInformation metaInformation)> cb,
                                  int slaveAddress);
     void reloadSlot(std::function<void(bool result)> cb,
                     int slaveAddress);

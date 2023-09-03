@@ -25,6 +25,7 @@
 #define RESET_MAGIC_NUMBER              0X55FF
 #define TELECONTROL_PULS_ON             0x0002
 #define TELECONTROL_PULS_OFF            0x0001
+#define TELECONTROL_UNDEFINED           0xFFFF
 
 #define STATUS_220_POS                  0
 #define STATUS_EEPROM_ERROR_POS         1

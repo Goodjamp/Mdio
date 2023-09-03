@@ -278,6 +278,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = true;
     } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_PULS_OFF) {
         state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = false;
+    } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_UNDEFINED) {
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = false;
     } else {
         qDebug()<<"readStateSlot puls telecontrol value error";
         CALL_CB(cb, false, state);
@@ -289,6 +291,9 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
             state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = true;
         } else if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
                    == ModbusRtuMaster::COIL_OFF) {
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = false;
+        } else if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
+                   == TELECONTROL_UNDEFINED) {
             state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = false;
         } else {
             qDebug()<<"readStateSlot telecontrol value error";

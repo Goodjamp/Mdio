@@ -78,6 +78,7 @@ signals:
                              int slaveAddress);
 
 private:
+    void connectWithSettings();
     void enableSettingsControl();
     void disableSettingsControl();
     void skipAllSettings();
@@ -109,7 +110,7 @@ private slots:
      * from the DialogConectionSettings to the UI space. Also
      * this slot is use to set variable readStateResult.
      */
-    void applyConnectionSettings(DialogConnectionSettings::UserSettingsList);
+    void saveConnectionSettings(DialogConnectionSettings::UserSettingsList);
 
     void readSlaveState(void);
 
@@ -164,7 +165,7 @@ private:
 
     bool needConnectSlave;
     bool isSlaveConnect;
-    uint connectPortIndex;
+    QString connectPort;
     uint connectBrIndex;
     uint connectParityIndex;
     uint connectStopBitsIndex;

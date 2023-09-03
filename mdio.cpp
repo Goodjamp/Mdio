@@ -270,7 +270,7 @@ void Mdio::updateUiConnectionStatusStr(void)
     QStringList comList = Communication::getPortsList();
 
     if (isSlaveConnect == true) {
-        connectionSettingsStr = comList[connectPortIndex]
+        connectionSettingsStr = connectPort
                                 + " "
                                 + brValueToStrLUT.values()[connectBrIndex]
                                 + " "
@@ -355,7 +355,7 @@ void Mdio::errorMessage(QString headr, QString detailed)
 
 void Mdio::resetSlaveInformation(void)
 {
-    connectPortIndex = 0;
+    connectPort = "";
     connectBrIndex = DEFAULT_CONNECT_BR_INDEX;
     connectParityIndex = DEFAULT_CONNECT_PARITY_INDEX;
     connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
@@ -367,9 +367,11 @@ void Mdio::resetSlaveInformation(void)
     isSlaveConnect = false;
 }
 
-void Mdio::applyConnectionSettings(DialogConnectionSettings::UserSettingsList connectionSettings)
+void Mdio::saveConnectionSettings(DialogConnectionSettings::UserSettingsList connectionSettings)
 {
-    connectPortIndex = connectionSettings.portIndex;
+    QStringList comList = Communication::getPortsList();
+
+    connectPort = comList[connectionSettings.portIndex];
     connectBrIndex =connectionSettings.brIndex;
     connectParityIndex =connectionSettings.parityIndex;
     connectStopBitsIndex =connectionSettings.stopBitsIndex;
@@ -479,6 +481,66 @@ void Mdio::readStateResult(bool result, Communication::SlaveState state)
     emit this->updateUiStateSignal(result, state);
 }
 
+void Mdio::connectWithSettings()
+{
+    SerialCommunication::SerialPortParity parity;
+    SerialCommunication::SerialPortStopBits stopBits;
+    QStringList comList = Communication::getPortsList();
+
+    if (comList.indexOf(connectPort) == -1) {
+        errorMessage("Помилка конфігурації",
+                     "СCOM порт не доступний");
+        return;
+    }
+
+    /*
+     * Open connection
+     */
+    if(parityUiToSerilaLUT.contains(connectParityIndex)) {
+        parity = parityUiToSerilaLUT.value(connectParityIndex);
+    } else {
+        return;
+    }
+
+    if(stopUiToSerilaLUT.contains(connectStopBitsIndex)) {
+        stopBits = stopUiToSerilaLUT.value(connectStopBitsIndex);
+    } else {
+        return;
+    }
+    emit connectSlave(CB_WRAP_1(Mdio, connectSlaveResult),
+                      connectPort,
+                      brValueToStrLUT.keys()[connectBrIndex],
+                      parity,
+                      stopBits);
+    /*
+     * Waite to complete connection
+     */
+    if (processingCommunicatitonResult("Неможливо приєднатися",
+                                        "Порт недоступний", true) == false) {
+        return;
+    }
+
+    /*
+     * Read meta information
+     */
+    emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
+    if (processingCommunicatitonResult("Неможливо приєднатися",
+                                       "Помилка зчитування метаінформації", false) == false) {
+        return;
+    }
+
+    /*
+     * Start timer to read the slave state
+     */
+    stateRequestCnt = 0;
+    stateReplyCnt = 0;
+    readStateTimer->start();
+
+    isSlaveConnect = true;
+    updateUiConnectionStatusStr();
+    enableSettingsControl();
+}
+
 void Mdio::on_pbConnectionSettings_clicked()
 {
     DialogConnectionSettings::UiFilingList dialoConnectUiFillList;
@@ -501,7 +563,7 @@ void Mdio::on_pbConnectionSettings_clicked()
                                                       lastConnectionUserSettings);
 
     dialogConnectionSettings.setModal(true);
-    connect(&dialogConnectionSettings, &DialogConnectionSettings::applySettings, this, &Mdio::applyConnectionSettings);
+    connect(&dialogConnectionSettings, &DialogConnectionSettings::applySettings, this, &Mdio::saveConnectionSettings);
     needConnectSlave = false;
 
     dialogConnectionSettings.exec();
@@ -513,67 +575,7 @@ void Mdio::on_pbConnectionSettings_clicked()
         return;
     }
 
-    /*
-     * Open connection
-     */
-    if(parityUiToSerilaLUT.contains(connectParityIndex)) {
-        parity = parityUiToSerilaLUT.value(connectParityIndex);
-    } else {
-        return;
-    }
-
-    if(stopUiToSerilaLUT.contains(connectStopBitsIndex)) {
-        stopBits = stopUiToSerilaLUT.value(connectStopBitsIndex);
-    } else {
-        return;
-    }
-    emit connectSlave(CB_WRAP_1(Mdio, connectSlaveResult),
-                      comList[connectPortIndex],
-                      brValueToStrLUT.keys()[connectBrIndex],
-                      parity,
-                      stopBits);
-    /*
-     * Waite to complete connection
-     */
-    if (processingCommunicatitonResult("Неможливо приєднатися",
-                                        "Порт недоступний", true) == false) {
-        return;
-    }
-
-    /*
-     * Read meta information
-     */
-    emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
-    if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка зчитування метаінформації", false) == false) {
-        return;
-    }
-
-    /*
-     * Read configuration
-     */
-    /*
-    emit readConfiguration(CB_WRAP_2(Mdio, readConfigurationResult), connectSlaveAddress);
-    if (processingCommunicatitonResult("Неможливо приєднатися",
-                                       "Помилка считування конфігурації", false) == false) {
-        return;
-    }
-
-    if (updateUiConfiguration() == false) {
-        return;
-    }
-    */
-
-    /*
-     * Start timer to read the slave state
-     */
-    stateRequestCnt = 0;
-    stateReplyCnt = 0;
-    readStateTimer->start();
-
-    isSlaveConnect = true;
-    updateUiConnectionStatusStr();
-    enableSettingsControl();
+    connectWithSettings();
 }
 
 void Mdio::on_pbApplySettings_clicked()
@@ -788,8 +790,7 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     }
 }
 
-
 void Mdio::on_pbConnect_clicked()
 {
-
+    connectWithSettings();
 }

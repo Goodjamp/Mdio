@@ -91,6 +91,7 @@ private:
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed, bool openPort);
     void resetSlaveInformation(void);
+    void resetConnectionSettings(void);
 
     /*
      * The groupe of CB functin from the Communication class

@@ -198,6 +198,7 @@ Mdio::Mdio(QWidget *parent)
 
     connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
     resetSlaveInformation();
+    resetConnectionSettings();
     initCustomUi();
     updateUiConnectionStatusStr();
     updateUiDeviceMetaInfStr();
@@ -335,10 +336,6 @@ bool Mdio::updateUiConfiguration(void)
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
     lastConfigurationDay = connectDeviceConf.configurationDay;
 
-    /*
-     * Update last configuration date information
-     */
-    updateUiDeviceMetaInfStr();
     return true;
 }
 
@@ -353,13 +350,17 @@ void Mdio::errorMessage(QString headr, QString detailed)
     errorAddressMessage->show();
 }
 
-void Mdio::resetSlaveInformation(void)
+void Mdio::resetConnectionSettings(void)
 {
     connectPort = "";
     connectBrIndex = DEFAULT_CONNECT_BR_INDEX;
     connectParityIndex = DEFAULT_CONNECT_PARITY_INDEX;
     connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
     connectSlaveAddress = DEFAULT_CONNECT_SLAVE_ADDRESS;
+}
+
+void Mdio::resetSlaveInformation(void)
+{
     connectDeviceVersion = DEFAULT_CONNECT_VERSION;
     lastConfigurationYear = DEFAULT_CONNECT_YEAR;
     lastConfigurationMonth = DEFAULT_CONNECT_MONTH;
@@ -489,7 +490,7 @@ void Mdio::connectWithSettings()
 
     if (comList.indexOf(connectPort) == -1) {
         errorMessage("Помилка конфігурації",
-                     "СCOM порт не доступний");
+                     "СOM порт не доступний");
         return;
     }
 
@@ -538,6 +539,15 @@ void Mdio::connectWithSettings()
 
     isSlaveConnect = true;
     updateUiConnectionStatusStr();
+
+    /*
+     * Update last configuration date information
+     */
+    updateUiDeviceMetaInfStr();
+
+    /*
+     * Enable UI items
+     */
     enableSettingsControl();
 }
 
@@ -545,8 +555,6 @@ void Mdio::on_pbConnectionSettings_clicked()
 {
     DialogConnectionSettings::UiFilingList dialoConnectUiFillList;
     QStringList comList = Communication::getPortsList();
-    SerialCommunication::SerialPortParity parity;
-    SerialCommunication::SerialPortStopBits stopBits;
 
     dialoConnectUiFillList.comList = comList;
     dialoConnectUiFillList.brList = brValueToStrLUT.values();
@@ -756,6 +764,11 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
             tcMonitorList[k]->setStateTextIndication(state.control[k] == false ? 0 : 1);
         }
+
+        /*
+         * Update blinker
+         */
+        ui->pbConnectionStatus->setChecked(true);
     }
 }
 
@@ -764,11 +777,17 @@ void Mdio::readSlaveState(void)
     emit readState(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
     stateRequestCnt++;
     updateUiCommunicationStatisticStr();
+    //ui->pbConnectionStatus->
+    ui->pbConnectionStatus->setChecked(false);
 }
 
 void Mdio::tcSetTcSlot(int index, bool enable)
 {
-    emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index, enable);
+    if (index == 0) {
+        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, enable);
+    } else {
+        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);
+    }
 
     if (processingCommunicatitonResult("Телекерування",
                                        "Помилка передачі команди\nдля статичного телекерування", false) == false) {

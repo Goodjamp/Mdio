@@ -128,6 +128,7 @@ QPushButton#pbPuls:checked
     background-color:rgb(255, 100, 100);
 }
 
+QPushButton#pbConnectionStatus,
 QPushButton#pbEepromClearStatus,
 QPushButton#pbEepromStatus,
 QPushButton#pbTransactionStatus,
@@ -137,6 +138,7 @@ QPushButton#pbVoltageOnTcStatus
     background-color:rgb(50, 250, 50);
 }
 
+QPushButton#pbConnectionStatus:checked,
 QPushButton#pbEepromClearStatus:checked,
 QPushButton#pbEepromStatus:checked,
 QPushButton#pbTransactionStatus:checked,

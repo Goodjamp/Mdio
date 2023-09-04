@@ -34,7 +34,8 @@ HEADERS += \
     serialcommunication.h \
     tccontrol.h \
     tssettings.h \
-    tsstatus.h
+    tsstatus.h \
+    Version.h
 
 FORMS += \
     dialogconnectionsettings.ui \

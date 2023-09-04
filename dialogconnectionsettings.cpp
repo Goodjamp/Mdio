@@ -1,6 +1,5 @@
 #include "dialogconnectionsettings.h"
 #include "ui_dialogconnectionsettings.h"
-#include <QtGui>
 #include <QRegularExpression>
 #include <QValidator>
 #include <QMessageBox>

@@ -16,6 +16,7 @@
 #include <QJsonArray>
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
+#include "Version.h"
 
 
 #define STR_CAST(str)    static_cast<QString>(str)
@@ -141,7 +142,10 @@ void Mdio::initCustomUi()
     /*
      *  Title bar: icon name
      */
-    setWindowTitle(SW_NAME);
+    setWindowTitle(SW_NAME + " V"
+                   + QString::number(VERSION_MAJOR) + "."
+                   + QString::number(VERSION_MINOR) + "."
+                   + QString::number(VERSION_BUILD));
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
     ui->cbBaudRate->addItems(brValueToStrLUT.values());

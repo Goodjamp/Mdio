@@ -24,3 +24,5 @@ rmdir /S /Q MdioDelivery
 xcopy Mdio\ToolsAndDocumentation\MdioDelivery MdioDelivery /S /E /Y /I
 
 copy Build\release\Mdio.exe MdioDelivery\Mdio.exe
+
+rmdir /S /Q Build

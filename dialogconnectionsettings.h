@@ -3,7 +3,9 @@
 
 #include <QDialog>
 #include <QVector>
+#include <QString>
 #include <QStringList>
+#include <QJsonObject>
 
 namespace Ui {
 class DialogConnectionSettings;
@@ -14,31 +16,18 @@ class DialogConnectionSettings : public QDialog
     Q_OBJECT
 
 public:
-    typedef enum {
-        PORT,
-        PARITY,
-        STOP_BITS,
-        BR,
-        ADDRESS,
-        SETTINGS_CNT
-    } SettingsIndex;
-
     typedef struct {
         QStringList comList;
-        QStringList brList;
-        int brDefault;
-        QStringList parityList;
-        int parityDefault;
-        QStringList stopBitsList;
-        int stopBitsDefault;
     } UiFilingList;
 
     typedef struct {
-        int portIndex;
-        int brIndex;
-        int parityIndex;
-        int stopBitsIndex;
-        int address;
+        QString port;
+        QString br;
+        QString parity;
+        QString stopBits;
+        QString address;
+        QString replyTimeout;
+        QString silentInterval;
     } UserSettingsList;
     explicit DialogConnectionSettings(UiFilingList uiFillingList,
                                       UserSettingsList currentSettings,
@@ -48,6 +37,7 @@ public:
 private:
     void customClose();
     void setDefaultUi();
+    void getSettingsFromJson();
 
 private slots:
     void on_pbApply_clicked();
@@ -61,9 +51,9 @@ signals:
 private:
     Ui::DialogConnectionSettings *ui;
 
-    int defaultBrIndex;
-    int defaultParityIndex;
-    int defaultStopBitsIndex;
+    QJsonObject jsonRootObj;
+
+    void errorMessage(QString headr, QString detailed);
 };
 
 #endif // DIALOGCONNECTIONSETTINGS_H

@@ -9,7 +9,8 @@ void Communication::startCommunication(void)
 void Communication::connectSlaveSlot(std::function<void(bool result)> cb,
                                      QString port, int baudRate,
                                      SerialCommunication::SerialPortParity parity,
-                                     SerialCommunication::SerialPortStopBits stopBits)
+                                     SerialCommunication::SerialPortStopBits stopBits,
+                                     int readReplyTimeoute)
 {
     /*
      * Open port
@@ -18,6 +19,7 @@ void Communication::connectSlaveSlot(std::function<void(bool result)> cb,
         CALL_CB(cb, true);
         return;
     }
+    modbus->setReadReplyTimeout(readReplyTimeoute);
     CALL_CB(cb, true);
 }
 

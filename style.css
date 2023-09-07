@@ -186,3 +186,13 @@ QPushButton#pbTsState:checked
     image: url(:/Resources/On_resize_v2.png);
 }
 
+QFrame#fPortSettings,
+QFrame#fModbusSettings
+{
+    background-color: rgb(180, 180, 250);
+    border: solid;
+    border-width: 2px;
+    border-radius: 4px;
+    border-color: rgb(0, 0, 0);
+}
+

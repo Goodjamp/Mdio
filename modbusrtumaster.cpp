@@ -2,6 +2,7 @@
 #include <QtEndian>
 #include <QTime>
 #include <QThread>
+#include <QDebug>
 
 #define UINT8_TO_UINT16(L, M)      UINT16_MAX & ((0x00FF & (L)) | (0xFF00 & ((M) << 8)));
 #define MB_TRANSACTION_TIMEOUTE    500
@@ -43,7 +44,7 @@ static const uint16_t crcTable[256] = {
 
 ModbusRtuMaster::ModbusRtuMaster(QObject *parent) : SerialCommunication(parent)
 {
-
+    readTimeout = MB_TRANSACTION_TIMEOUTE;
 }
 
 uint16_t ModbusRtuMaster::crc(QByteArray *buff)
@@ -61,14 +62,14 @@ uint16_t ModbusRtuMaster::crc(QByteArray *buff)
     return rezCrc;
 }
 
-ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int timeoute,
+ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int timeout,
                                                         int targetSize, uint8_t slaveAddress,
                                                         uint8_t function)
 {
     QByteArray tempReadBuff;
     uint16_t crcRx;
     uint16_t crcCalc;
-    QTime endReceiveTime = QTime::currentTime().addMSecs(timeoute);
+    QTime endReceiveTime = QTime::currentTime().addMSecs(timeout);
 
     rxData->clear();
     while(QTime::currentTime().msecsTo(endReceiveTime) > 0) {
@@ -117,7 +118,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readCoilStatus(uint8_t slaveAddress, 
 {
     return readSlaveGeneral<bool>(slaveAddress, READ_COIL_STATUS,
                                   coilAddress, coilsNumber, coilState,
-                                  MB_TRANSACTION_TIMEOUTE);
+                                  readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readDiscreteInputs(uint8_t slaveAddress, uint16_t coilAddress,
@@ -125,7 +126,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readDiscreteInputs(uint8_t slaveAddre
 {
     return readSlaveGeneral<bool>(slaveAddress, READ_DISCRET_INPUTS,
                                   coilAddress, coilsNumber, coilState,
-                                  MB_TRANSACTION_TIMEOUTE);
+                                  readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readHoldingRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
@@ -133,7 +134,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readHoldingRegisters(uint8_t slaveAdd
 {
     return readSlaveGeneral<uint16_t>(slaveAddress, READ_HOLDING_REGISTERS,
                                       regStartAddress, registersNumber, regValue,
-                                      MB_TRANSACTION_TIMEOUTE);
+                                      readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
@@ -141,13 +142,13 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddre
 {
     return readSlaveGeneral<uint16_t>(slaveAddress, READ_INPUT_REGISTERS,
                                       regStartAddress, registersNumber, regValue,
-                                      MB_TRANSACTION_TIMEOUTE);
+                                      readTimeout);
 }
 
 template <typename T>
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
                                                             uint16_t address, uint16_t number, QVector<T> &state,
-                                                            uint32_t timeoute)
+                                                            uint32_t timeout)
 {
     QByteArray commandBuff;
     uint16_t crcCalc;
@@ -204,7 +205,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
     /*
      * Receive reply
      */
-    result = receiveReply(&commandBuff, timeoute, rxSize, slaveAddress, function);
+    result = receiveReply(&commandBuff, timeout, rxSize, slaveAddress, function);
     if (result != MB_OK) {
         return result;
     }
@@ -268,18 +269,18 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::forceSingleCoil(uint8_t slaveAddress,
                                     coilState == true
                                     ? static_cast<uint16_t>(COIL_ON)
                                     : static_cast<uint16_t>(COIL_OFF),
-                                    MB_TRANSACTION_TIMEOUTE);
+                                    readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,
                                                                 uint16_t regValue)
 {
     return writeSlaveSingleRegister(slaveAddress, PRESET_SINGLE_REGISTER, regAddress,
-                                    regValue, MB_TRANSACTION_TIMEOUTE);
+                                    regValue, readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                                                    uint16_t address, uint16_t value, uint32_t timeoute)
+                                                                    uint16_t address, uint16_t value, uint32_t timeout)
 {
     QByteArray commandBuff;
     QByteArray replyBuff;
@@ -315,7 +316,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveSingleRegister(uint8_t slav
     /*
      * Receive reply
      */
-    result = receiveReply(&replyBuff, timeoute, commandBuff.size(), slaveAddress, function);
+    result = receiveReply(&replyBuff, timeout, commandBuff.size(), slaveAddress, function);
     if (result != MB_OK) {
         return result;
     }
@@ -334,12 +335,12 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::presetMultipleRegister(uint8_t slaveA
                                                                   QVector<uint16_t> regValue)
 {
     return writeSlaveMultipleRegisters(slaveAddress, PRESET_MULTIPLE_REGISTER,
-                                       regStartAddress, regValue, MB_TRANSACTION_TIMEOUTE);
+                                       regStartAddress, regValue, readTimeout);
 
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                                                       uint16_t address, QVector<uint16_t> value, uint32_t timeoute)
+                                                                       uint16_t address, QVector<uint16_t> value, uint32_t timeout)
 {
     QByteArray commandBuff;
     QByteArray tempReadBuff;
@@ -387,5 +388,11 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t s
     /*
      * Receive reply
      */
-    return receiveReply(&commandBuff, timeoute, rxSize, slaveAddress, function);
+    return receiveReply(&commandBuff, timeout, rxSize, slaveAddress, function);
+}
+
+void ModbusRtuMaster::setReadReplyTimeout(int timeout)
+{
+    readTimeout = timeout;
+    qDebug()<<"readTimeout: "<<readTimeout;
 }

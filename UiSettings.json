@@ -1,7 +1,8 @@
 {
     "Language":
     {
-        "UA": {
+        "UA":
+        {
             "TC":
             [
                 {"Name": "ТК1 Імпульсне", "RelayStr1": ["", ""],             "RelayStr2": ["", ""]},
@@ -18,5 +19,43 @@
                 {"Name": "ТУ3 Статическое", "RelayStr1": ["Реле 2", "Реле 2"], "RelayStr2": ["ВЫКЛ", "ВКЛ"]}
             ]
         }
+    },
+    "Port":
+    {
+        "BrList": ["2400", "4800", "9600", "19200", "38400", "57600"],
+        "ParityList": ["None", "Even", "Odd"],
+        "StopBitsList": ["1", "2"],
+        "BrDefault": "19200",
+        "ParityDefault": "None",
+        "StopBitsDefault": "1"
+    },
+    "Modbus":
+    {
+        "SilentIntervalList": ["50", "40", "30", "10", "5", "3"],
+        "SilentIntervalDefault": "10",
+        "SilentIntervalMin": "0",
+        "SilentIntervalMax": "100",
+        "TimeoutReplyDefault": "0",
+        "TimeoutReplyMin": "0",
+        "TimeoutReplyMax": "100",
+        "SilentIntervalDefaultPc": "10",
+        "SilentIntervalMinPc": "0",
+        "SilentIntervalMaxPc": "100",
+        "TimeoutReplyDefaultPc": "500",
+        "TimeoutReplyMinPc": "0",
+        "TimeoutReplyMaxPc": "1000",
+        "AddressDefault": "1"
+    },
+    "TS":
+    {
+        "DebounceDefault": "20",
+        "DebounceMin": "20",
+        "DebounceMax": "100"
+    },
+    "TC":
+    {
+        "PulsDurationDefault": "1000",
+        "PulsDurationMin": "100",
+        "PulsDurationMax": "4000"
     }
 }

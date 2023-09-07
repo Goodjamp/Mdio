@@ -132,9 +132,7 @@ private:
 
 public:
     Communication(){}
-
     ~Communication(){}
-
 
 public:
     typedef struct {
@@ -143,10 +141,10 @@ public:
         int configurationYear;
         struct {
             int baudRate;
-            int silentInterval;
-            int replyDelay;
             SerialCommunication::SerialPortParity parity;
             SerialCommunication::SerialPortStopBits stopBits;
+            int silentInterval;
+            int replyDelay;
         } communication;
         struct {
             int debounsInterval;
@@ -206,7 +204,8 @@ public slots:
     void connectSlaveSlot(std::function<void(bool result)> cb,
                           QString port, int baudRate,
                           SerialCommunication::SerialPortParity parity,
-                          SerialCommunication::SerialPortStopBits stopBits);
+                          SerialCommunication::SerialPortStopBits stopBits,
+                          int readReplyTimeoute);
     void disconnectSlaveSlot(void);
     void writeConfigurationSlot(std::function<void(bool result)> cb,
                                 int slaveAddress, SlaveConfiguration configuration);

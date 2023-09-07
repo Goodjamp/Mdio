@@ -22,36 +22,34 @@
 #define STR_CAST(str)    static_cast<QString>(str)
 #define SW_NAME          STR_CAST("МВВ-4-2 конфігуратор")
 
-void Mdio::updateLanguage(QString language)
+void Mdio::getSettingsFromJson()
 {
-    QFile uiSettingsJson(":/UiSettings.json");
-    QByteArray uiSettingsRaw;
+    QFile jsonFile(":/UiSettings.json");
+    QByteArray jsonContent;
     QJsonDocument uiDescrJson;
-    QJsonObject rootObj;
-    QJsonArray temJsonArray;
-    QJsonArray relayStateString;
-    QJsonObject temObj;
 
-    QStringList strListRelayStr1;
-    QStringList strListRelayStr2;
+    /*
+     * Rread JSON file with UI text settings
+     */
+    jsonFile.open(QFile::ReadOnly);
+    jsonContent = jsonFile.readAll();
+    jsonFile.close();
 
-    uiSettingsJson.open(QFile::ReadOnly);
+    uiDescrJson = QJsonDocument::fromJson(jsonContent);
+    rootJsonObj = uiDescrJson.object();
 
-    uiSettingsRaw = uiSettingsJson.readAll();
-    uiDescrJson = QJsonDocument::fromJson(uiSettingsRaw);
-    rootObj = uiDescrJson.object();
-    temJsonArray = rootObj.take("Language").toObject().take(language).toObject().take("TC").toArray();
-    for (int k = 0; k < temJsonArray.size(); k++) {
-        strListRelayStr1.clear();
-        strListRelayStr2.clear();
-        tcMonitorList[k]->setName(temJsonArray[k].toObject().take("Name").toString());
-        foreach(auto item, temJsonArray[k].toObject().take("RelayStr1").toArray().toVariantList()) {
-           strListRelayStr1.push_back(item.toString());
-        }
-        foreach(auto item, temJsonArray[k].toObject().take("RelayStr2").toArray().toVariantList()) {
-           strListRelayStr2.push_back(item.toString());
-        }
-        tcMonitorList[k]->setTextStateList(strListRelayStr1, strListRelayStr2);
+    /*
+     * Default (initial) connection settings
+     */
+    lastConnectionUserSettings.br = rootJsonObj.value("Port").toObject().value("BrDefault").toString();
+    lastConnectionUserSettings.parity = rootJsonObj.value("Port").toObject().value("ParityDefault").toString();
+    lastConnectionUserSettings.stopBits = rootJsonObj.value("Port").toObject().value("StopBitsDefault").toString();
+    lastConnectionUserSettings.address = rootJsonObj.value("Modbus").toObject().value("AddressDefault").toString();
+    lastConnectionUserSettings.replyTimeout = rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefaultPc").toString();
+    lastConnectionUserSettings.silentInterval = rootJsonObj.value("Modbus").toObject().value("SilentIntervalDefaultPc").toString();
+    lastConnectionUserSettings.port = "";
+    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("SilentIntervalList").toArray().toVariantList()){
+        silentIntervalLIst.push_back(item.toString());
     }
 }
 
@@ -90,8 +88,11 @@ void Mdio::skipAllSettings()
     ui->leSilentInterval->setText("");
 }
 
-void Mdio::initCustomUi()
+void Mdio::initCustomUi(QString language)
 {
+    QJsonArray temJsonArray;
+    QStringList strListRelayStr1;
+    QStringList strListRelayStr2;
     relayCOntrolButtonsList = new QButtonGroup();
     QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
     QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
@@ -118,6 +119,19 @@ void Mdio::initCustomUi()
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
+    temJsonArray = rootJsonObj.value("Language").toObject().value(language).toObject().value("TC").toArray();
+    for (int k = 0; k < temJsonArray.size(); k++) {
+        strListRelayStr1.clear();
+        strListRelayStr2.clear();
+        tcMonitorList[k]->setName(temJsonArray[k].toObject().value("Name").toString());
+        foreach(auto item, temJsonArray[k].toObject().value("RelayStr1").toArray().toVariantList()) {
+           strListRelayStr1.push_back(item.toString());
+        }
+        foreach(auto item, temJsonArray[k].toObject().value("RelayStr2").toArray().toVariantList()) {
+           strListRelayStr2.push_back(item.toString());
+        }
+        tcMonitorList[k]->setTextStateList(strListRelayStr1, strListRelayStr2);
+    }
     /*
      * Add TeleSignalisation configuration items
      */
@@ -148,19 +162,24 @@ void Mdio::initCustomUi()
                    + QString::number(VERSION_BUILD));
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
-    ui->cbBaudRate->addItems(brValueToStrLUT.values());
-    ui->cbStopBits->addItems(stopBitsSerialToStrLUT.values());
-    ui->cbParity->addItems(paritySerialToStrLUT.values());
+    foreach(auto item, rootJsonObj.value("Port").toObject().value("BrList").toArray().toVariantList()) {
+        brStrList.push_back(item.toString());
+    }
+    foreach(auto item, rootJsonObj.value("Port").toObject().value("ParityList").toArray().toVariantList()) {
+        parityStr.push_back(item.toString());
+    }
+    foreach(auto item, rootJsonObj.value("Port").toObject().value("StopBitsList").toArray().toVariantList()) {
+        stopBitsStrList.push_back(item.toString());
+    }
+
+    ui->cbBaudRate->addItems(brStrList);
+    ui->cbStopBits->addItems(stopBitsStrList);
+    ui->cbParity->addItems(parityStr);
 
     ui->pbVoltageOnTcStatus->setEnabled(false);
     ui->pbEepromStatus->setEnabled(false);
     ui->pbTransactionStatus->setEnabled(false);
     ui->pbEepromClearStatus->setEnabled(false);
-
-    /*
-     * Set UI text settings according to the target language
-     */
-    updateLanguage("UA");
 
     /*
      * Add all UI element to control enabling
@@ -198,12 +217,16 @@ Mdio::Mdio(QWidget *parent)
     commmunicationThread = new QThread();
     communicaiton = new Communication();
     readStateTimer = new QTimer();
-    readStateTimer->setInterval(READ_STATE_PERIOD_MS);
+    readStateTimer->setInterval(READ_SLAVE_STATE_PERIOD_MS);
 
     connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
+
+    /*
+     * Read JSON with settings
+     */
+    getSettingsFromJson();
     resetSlaveInformation();
-    resetConnectionSettings();
-    initCustomUi();
+    initCustomUi("UA");
     updateUiConnectionStatusStr();
     updateUiDeviceMetaInfStr();
 
@@ -253,15 +276,6 @@ Mdio::Mdio(QWidget *parent)
      * function, called from the external thread to the Mdio thread.
      */
     connect(this, &Mdio::updateUiStateSignal, this, &Mdio::updateUiStateSlot);
-
-    /*
-     * Default (initial) connection settings
-     */
-    lastConnectionUserSettings.address = DEFAULT_CONNECT_SLAVE_ADDRESS;
-    lastConnectionUserSettings.brIndex = DEFAULT_CONNECT_BR_INDEX;
-    lastConnectionUserSettings.parityIndex = DEFAULT_CONNECT_PARITY_INDEX;
-    lastConnectionUserSettings.stopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
-    lastConnectionUserSettings.portIndex = 0;
 }
 
 Mdio::~Mdio()
@@ -277,14 +291,14 @@ void Mdio::updateUiConnectionStatusStr(void)
     if (isSlaveConnect == true) {
         connectionSettingsStr = connectPort
                                 + " "
-                                + brValueToStrLUT.values()[connectBrIndex]
+                                + lastConnectionUserSettings.br
                                 + " "
                                 + "8"
-                                + paritySerialToStrLUT.values()[connectParityIndex][0]
-                                + stopBitsSerialToStrLUT.values()[connectStopBitsIndex]
+                                + lastConnectionUserSettings.parity
+                                + lastConnectionUserSettings.stopBits
                                 + " "
                                 + "Адр."
-                                + QString::number(connectSlaveAddress);
+                                + lastConnectionUserSettings.address;
     } else {
         connectionSettingsStr = "ВІД'ЄДНАНИЙ";
     }
@@ -309,25 +323,25 @@ void Mdio::updateUiDeviceMetaInfStr(void)
 
 bool Mdio::updateUiConfiguration(void)
 {
-    if (brValueToStrLUT.contains(connectDeviceConf.communication.baudRate) == false) {
+    if (brStrList.contains(QString::number(connectDeviceConf.communication.baudRate)) == false) {\
         errorMessage("Помилка конфігурації", "Помилка швидкості");
         return false;
     }
-    if (paritySerialToStrLUT.contains(connectDeviceConf.communication.parity) == false) {
+    if (parityUiToSerilaLUT.key(connectDeviceConf.communication.parity, "Error") == "Error") {
         errorMessage("Помилка конфігурації", "Помилка паритету");
         return false;
     }
-    if (paritySerialToStrLUT.contains(connectDeviceConf.communication.parity) == false) {
-        errorMessage("Помилка конфігурації", "Помилка паритету");
+    if (stopUiToSerilaLUT.key(connectDeviceConf.communication.stopBits, "Error") == "Error") {
+        errorMessage("Помилка конфігурації", "Помилка стоп-біт");
         return false;
     }
 
     /*
      * Show configuration on the UI
      */
-    ui->cbBaudRate->setCurrentText(brValueToStrLUT.value(connectDeviceConf.communication.baudRate));
-    ui->cbParity->setCurrentText(paritySerialToStrLUT.value(connectDeviceConf.communication.parity));
-    ui->cbStopBits->setCurrentText(stopBitsSerialToStrLUT.value(connectDeviceConf.communication.stopBits));
+    ui->cbBaudRate->setCurrentText(QString::number(connectDeviceConf.communication.baudRate));
+    ui->cbParity->setCurrentText(parityUiToSerilaLUT.key(connectDeviceConf.communication.parity, "Error"));
+    ui->cbStopBits->setCurrentText(stopUiToSerilaLUT.key(connectDeviceConf.communication.stopBits, "Error"));
     ui->leReplyDelay->setText(QString::number(connectDeviceConf.communication.replyDelay));
     ui->leSilentInterval->setText(QString::number(connectDeviceConf.communication.silentInterval));
     ui->leDebounceInterval->setText(QString::number(connectDeviceConf.signalisation.debounsInterval));
@@ -354,21 +368,12 @@ void Mdio::errorMessage(QString headr, QString detailed)
     errorAddressMessage->show();
 }
 
-void Mdio::resetConnectionSettings(void)
-{
-    connectPort = "";
-    connectBrIndex = DEFAULT_CONNECT_BR_INDEX;
-    connectParityIndex = DEFAULT_CONNECT_PARITY_INDEX;
-    connectStopBitsIndex = DEFAULT_CONNECT_STOP_BITS_INDEX;
-    connectSlaveAddress = DEFAULT_CONNECT_SLAVE_ADDRESS;
-}
-
 void Mdio::resetSlaveInformation(void)
 {
-    connectDeviceVersion = DEFAULT_CONNECT_VERSION;
-    lastConfigurationYear = DEFAULT_CONNECT_YEAR;
-    lastConfigurationMonth = DEFAULT_CONNECT_MONTH;
-    lastConfigurationDay = DEFAULT_CONNECT_DATE;
+    connectDeviceVersion = 0;
+    lastConfigurationYear = 0;
+    lastConfigurationMonth = 0;
+    lastConfigurationDay = 0;
     isSlaveConnect = false;
 }
 
@@ -376,11 +381,17 @@ void Mdio::saveConnectionSettings(DialogConnectionSettings::UserSettingsList con
 {
     QStringList comList = Communication::getPortsList();
 
-    connectPort = comList[connectionSettings.portIndex];
-    connectBrIndex =connectionSettings.brIndex;
-    connectParityIndex =connectionSettings.parityIndex;
-    connectStopBitsIndex =connectionSettings.stopBitsIndex;
-    connectSlaveAddress =connectionSettings.address;
+    connectPort = connectionSettings.port;
+    connectBr = connectionSettings.br.toInt();
+    connectParity = parityUiToSerilaLUT.value(connectionSettings.parity);
+    connectStopBits = stopUiToSerilaLUT.value(connectionSettings.stopBits);
+    connectSlaveAddress = connectionSettings.address.toInt();
+    connectSilentInterval = connectionSettings.silentInterval.toInt();
+    connectReplyTimeout = connectionSettings.replyTimeout.toInt();
+
+    /*
+     * Caching user settings for the nex DialogConnectSettings calling
+     */
     lastConnectionUserSettings = connectionSettings;
 
     needConnectSlave = true;
@@ -488,35 +499,20 @@ void Mdio::readStateResult(bool result, Communication::SlaveState state)
 
 void Mdio::connectWithSettings()
 {
-    SerialCommunication::SerialPortParity parity;
-    SerialCommunication::SerialPortStopBits stopBits;
     QStringList comList = Communication::getPortsList();
 
-    if (comList.indexOf(connectPort) == -1) {
+    if (comList.contains(connectPort) == false) {
         errorMessage("Помилка конфігурації",
                      "СOM порт не доступний");
         return;
     }
 
-    /*
-     * Open connection
-     */
-    if(parityUiToSerilaLUT.contains(connectParityIndex)) {
-        parity = parityUiToSerilaLUT.value(connectParityIndex);
-    } else {
-        return;
-    }
-
-    if(stopUiToSerilaLUT.contains(connectStopBitsIndex)) {
-        stopBits = stopUiToSerilaLUT.value(connectStopBitsIndex);
-    } else {
-        return;
-    }
     emit connectSlave(CB_WRAP_1(Mdio, connectSlaveResult),
                       connectPort,
-                      brValueToStrLUT.keys()[connectBrIndex],
-                      parity,
-                      stopBits);
+                      connectBr,
+                      connectParity,
+                      connectStopBits,
+                      connectReplyTimeout + connectSilentInterval);
     /*
      * Waite to complete connection
      */
@@ -561,14 +557,8 @@ void Mdio::on_pbConnectionSettings_clicked()
     QStringList comList = Communication::getPortsList();
 
     dialoConnectUiFillList.comList = comList;
-    dialoConnectUiFillList.brList = brValueToStrLUT.values();
-    dialoConnectUiFillList.brDefault = DEFAULT_CONNECT_BR_INDEX;
-    dialoConnectUiFillList.parityList = paritySerialToStrLUT.values();
-    dialoConnectUiFillList.parityDefault = DEFAULT_CONNECT_PARITY_INDEX;
-    dialoConnectUiFillList.stopBitsList = stopBitsSerialToStrLUT.values();
-    dialoConnectUiFillList.stopBitsDefault = DEFAULT_CONNECT_STOP_BITS_INDEX;
-    if (lastConnectionUserSettings.portIndex >= comList.size()) {
-        lastConnectionUserSettings.portIndex = 0;
+    if (comList.contains(lastConnectionUserSettings.port) == false) {
+        lastConnectionUserSettings.port = comList.size() > 0 ? comList[0] : "";
     }
 
     DialogConnectionSettings dialogConnectionSettings(dialoConnectUiFillList,
@@ -603,11 +593,16 @@ void Mdio::on_pbApplySettings_clicked()
         errorMessage("Помилка конфігурації",
                      "Час затримки відповіді не заданий");
         return;
-    } else if (VALUE_IN_RANGE(ui->leReplyDelay->text().toUInt(),
-                       SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
+    } else if (VALUE_IN_RANGE(ui->leReplyDelay->text().toInt(),
+                              rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMin").toString().toInt(),
+                              rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMax").toString().toInt())
+               == false ) {
         errorMessage("Помилка конфігурації",
-                     "Час затримки відповіді повинено бути в діапазоні [" + QString::number(REPLAY_DELAY_MIN_MS)
-                     + "-" + QString::number(REPLAY_DELAY_MAX_MS) + "] мс");
+                     "Час затримки відповіді повинено бути в діапазоні ["
+                     + rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMin").toString()
+                     + "-"
+                     + rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMax").toString()
+                     + "] мс");
         return;
     }
 
@@ -616,11 +611,16 @@ void Mdio::on_pbApplySettings_clicked()
         errorMessage("Помилка конфігурації",
                      "Інтервал тиші не заданий");
         return;
-    } else if (VALUE_IN_RANGE(ui->leSilentInterval->text().toUInt(),
-                       SILENT_INTERVAL_MIN_MS, SILENT_INTERVAL_MAX_MS) == false ) {
+    } else if (VALUE_IN_RANGE(ui->leSilentInterval->text().toInt(),
+                              rootJsonObj.value("Modbus").toObject().value("SilentIntervalMin").toString().toInt(),
+                              rootJsonObj.value("Modbus").toObject().value("SilentIntervalMax").toString().toInt())
+               == false ) {
         errorMessage("Помилка конфігурації",
-                     "Інтервал тиші повинено бути в діапазоні [" + QString::number(SILENT_INTERVAL_MIN_MS)
-                     + "-" + QString::number(SILENT_INTERVAL_MAX_MS) + "] мс");
+                     "Інтервал тиші повинено бути в діапазоні ["
+                     + rootJsonObj.value("Modbus").toObject().value("SilentIntervalMin").toString()
+                     + "-"
+                     + rootJsonObj.value("Modbus").toObject().value("SilentIntervalMax").toString()
+                     + "] мс");
         return;
     }
 
@@ -628,11 +628,16 @@ void Mdio::on_pbApplySettings_clicked()
         errorMessage("Помилка конфігурації",
                      "Тривалість брязкіту не заданий");
         return;
-    } else if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toUInt(),
-                       DEBOUNCE_INTARVAL_MIN_MS, DEBOUNCE_INTARVAL_MAX_MS) == false ) {
+    } else if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toInt(),
+                              rootJsonObj.value("TS").toObject().value("DebounceMin").toString().toInt(),
+                              rootJsonObj.value("TS").toObject().value("DebounceMax").toString().toInt())
+               == false ) {
         errorMessage("Помилка конфігурації",
-                     "Тривалість брязкіту повинно бути в діапазоні [" + QString::number(DEBOUNCE_INTARVAL_MIN_MS)
-                     + "-" + QString::number(DEBOUNCE_INTARVAL_MAX_MS) + "] мс");
+                     "Тривалість брязкіту повинно бути в діапазоні ["
+                     + rootJsonObj.value("TS").toObject().value("DebounceMin").toString()
+                     + "-"
+                     + rootJsonObj.value("TS").toObject().value("DebounceMax").toString()
+                     + "] мс");
         return;
     }
 
@@ -640,11 +645,16 @@ void Mdio::on_pbApplySettings_clicked()
         errorMessage("Помилка конфігурації",
                      "Тривалість імпульсу ТК не заданий");
         return;
-    } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toUInt(),
-                       PULS_DURATION_MIN_MS, PULS_DURATION_MMAX_MS) == false ) {
+    } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toInt(),
+                              rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString().toInt(),
+                              rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString().toInt())
+               == false ) {
         errorMessage("Помилка конфігурації",
-                     "Тривалість імпульсу ТК повинно бути в діапазоні [" + QString::number(PULS_DURATION_MIN_MS)
-                     + "-" + QString::number(PULS_DURATION_MMAX_MS) + "] мс");
+                     "Тривалість імпульсу ТК повинно бути в діапазоні ["
+                     + rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString()
+                     + "-"
+                     + rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString()
+                     + "] мс");
         return;
     }
 
@@ -675,9 +685,9 @@ void Mdio::on_pbApplySettings_clicked()
      * Read user configuration and serialiase it to the SlaveConfiguration
      * structure
      */
-    configuration.communication.baudRate = brValueToStrLUT.key(ui->cbBaudRate->currentText());
-    configuration.communication.parity = paritySerialToStrLUT.key(ui->cbParity->currentText());
-    configuration.communication.stopBits = stopBitsSerialToStrLUT.key(ui->cbStopBits->currentText());
+    configuration.communication.baudRate = ui->cbBaudRate->currentText().toInt();
+    configuration.communication.parity = parityUiToSerilaLUT.value(ui->cbParity->currentText());
+    configuration.communication.stopBits = stopUiToSerilaLUT.value(ui->cbStopBits->currentText());
     configuration.communication.replyDelay = ui->leReplyDelay->text().toInt();
     configuration.communication.silentInterval = ui->leSilentInterval->text().toInt();
     configuration.signalisation.debounsInterval = ui->leDebounceInterval->text().toInt();
@@ -801,13 +811,13 @@ void Mdio::tcSetTcSlot(int index, bool enable)
 
 void Mdio::on_pbSetDefaultSettings_clicked()
 {
-    ui->cbBaudRate->setCurrentIndex(DEFAULT_CONNECT_BR_INDEX);
-    ui->cbParity->setCurrentIndex(DEFAULT_CONNECT_PARITY_INDEX);
-    ui->cbStopBits->setCurrentIndex(DEFAULT_CONNECT_STOP_BITS_INDEX);
-    ui->leSilentInterval->setText(QString::number(DEFAULT_SILENT_INTERVAL));
-    ui->leReplyDelay->setText(QString::number(DEFAULT_REPLY_DELAY));
-    ui->leDebounceInterval->setText(QString::number(DEFAULT_DEBOUNCE_INTERVAL));
-    ui->lePulsDuration->setText(QString::number(DEFAULT_PULS_DURATION));
+    ui->cbBaudRate->setCurrentText(rootJsonObj.value("Port").toObject().value("BrDefault").toString());
+    ui->cbParity->setCurrentText(rootJsonObj.value("Port").toObject().value("ParityDefault").toString());
+    ui->cbStopBits->setCurrentText(rootJsonObj.value("Port").toObject().value("StopBitsDefault").toString());
+    ui->leSilentInterval->setText(rootJsonObj.value("Modbus").toObject().value("SilentIntervalDefault").toString());
+    ui->leReplyDelay->setText(rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefault").toString());
+    ui->leDebounceInterval->setText(rootJsonObj.value("TS").toObject().value("DebounceDefault").toString());
+    ui->lePulsDuration->setText(rootJsonObj.value("TC").toObject().value("PulsDurationDefault").toString());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }
@@ -816,4 +826,13 @@ void Mdio::on_pbSetDefaultSettings_clicked()
 void Mdio::on_pbConnect_clicked()
 {
     connectWithSettings();
+}
+
+void Mdio::on_cbBaudRate_currentIndexChanged(int index)
+{
+    if (index >= silentIntervalLIst.size()
+        || index < 0) {
+        return;
+    }
+    ui->leSilentInterval->setText(silentIntervalLIst[index]);
 }

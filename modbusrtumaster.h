@@ -72,16 +72,17 @@ private:
     };
 
     uint16_t crc(QByteArray *buff);
+    int readTimeout;
 
     /*
      * Hight level read function:
-     * - read with timeoute
+     * - read with timeout
      * - test size
      * - test crc
      * - test slave address
      * - test target function
      */
-    MbStatus receiveReply(QByteArray *rxData, int timeoute,
+    MbStatus receiveReply(QByteArray *rxData, int timeout,
                          int targetSize, uint8_t slaveAddress,
                          uint8_t function);
 
@@ -95,13 +96,13 @@ private:
     template <typename T>
     MbStatus readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
                              uint16_t address, uint16_t number, QVector<T> &state,
-                             uint32_t timeoute);
+                             uint32_t timeout);
 
     MbStatus writeSlaveSingleRegister(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                      uint16_t address, uint16_t value, uint32_t timeoute);
+                                      uint16_t address, uint16_t value, uint32_t timeout);
 
     MbStatus writeSlaveMultipleRegisters(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                         uint16_t address, QVector<uint16_t> value, uint32_t timeoute);
+                                         uint16_t address, QVector<uint16_t> value, uint32_t timeout);
 
 public:
 
@@ -119,6 +120,11 @@ public:
 
         return static_cast<QString>("Wrong status");
     }
+
+    /*
+     * Services
+     */
+    void setReadReplyTimeout(int timeout);
 
     /*
      * Read

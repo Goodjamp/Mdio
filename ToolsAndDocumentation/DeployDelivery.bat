@@ -26,3 +26,7 @@ xcopy Mdio\ToolsAndDocumentation\MdioDelivery MdioDelivery /S /E /Y /I
 copy Build\release\Mdio.exe MdioDelivery\Mdio.exe
 
 rmdir /S /Q Build
+
+del /f  MdioDelivery*.zip
+
+Mdio\ToolsAndDocumentation\7-Zip\7zG.exe a -tzip MdioDelivery.zip MdioDelivery

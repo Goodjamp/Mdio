@@ -14,8 +14,12 @@ try:
         tagContent = tagFile.read()
         tagFile.close()
         tagList = re.findall(r'\d{1,2}.\d{1,2}.\d{1,3}', tagContent)
-        buildNumberText = re.findall(r'\d{1,3}', tagList[len(tagList) - 1])
-        buildNumberInt = int(buildNumberText[len(buildNumberText) - 1], 10) + 1
+        buildNumberInt = 0
+        for k in range(0, len(tagList) - 1):
+            buildNumberText = re.findall(r'\d{1,3}', tagList[k])
+            if buildNumberInt < int(buildNumberText[len(buildNumberText) - 1], 10):
+                buildNumberInt = int(buildNumberText[len(buildNumberText) - 1], 10)
+        buildNumberInt += 1
         print("buildNumberInt ", buildNumberInt)
 
         # processing Version.h file.

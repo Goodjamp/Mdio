@@ -7,7 +7,7 @@ TsSettings::TsSettings(int index, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->lTS->setText("TC" + QString::number(index));
-    ui->cbTS->setCurrentText("Не задано");
+    ui->cbTS->setCurrentIndex(-1);
 }
 
 TsSettings::~TsSettings()
@@ -28,9 +28,6 @@ void TsSettings::setInvert(bool invert)
 void  TsSettings::setEnableCb(bool enable)
 {
     ui->cbTS->setEnabled(enable);
-    if (enable == false) {
-        ui->cbTS->setCurrentIndex(-1);
-    }
 }
 
 bool TsSettings::isConfigurationSeted()

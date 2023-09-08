@@ -741,6 +741,7 @@ void Mdio::on_pbReadSettings_clicked()
     }
 
     updateUiConfiguration();
+    updateUiDeviceMetaInfStr();
 }
 
 void Mdio::updateUiCommunicationStatisticStr(void)

@@ -137,7 +137,8 @@ private:
     QSpacerItem *tsStatusLayoutSpacer;
     QThread *commmunicationThread;
     QTimer *readStateTimer;
-    QButtonGroup *relayCOntrolButtonsList;
+    QButtonGroup *relayControlListTc1;
+    QButtonGroup *relayControlListTc2;
     QVector<QWidget *> settingsItemsList;
     int stateRequestCnt;
     int stateReplyCnt;

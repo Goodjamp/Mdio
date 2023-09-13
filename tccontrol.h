@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QString>
 #include <QPushButton>
+#include <QButtonGroup>
 
 namespace Ui {
 class TcControl;
@@ -22,6 +23,7 @@ public:
     void setTextStateList(QStringList textListStr1, QStringList textListStr2);
     QPushButton *getOnButtonPointer();
     QPushButton *getOffButtonPointer();
+    void unchekAllButton();
 
 signals:
     void setState(int index, bool enable);
@@ -35,6 +37,7 @@ private:
     int userIndex;
     QStringList stateTextListStr1;
     QStringList stateTextListStr2;
+    QButtonGroup *bgRelayControl;// = new QButtonGroup();
     int stateIndex;
 };
 

@@ -12,6 +12,9 @@ TcControl::TcControl(QString name, int index, QWidget *parent) :
     userIndex = index;
 
     ui->lTcName->setText(name);
+    bgRelayControl = new QButtonGroup();
+    bgRelayControl->addButton(ui->pbOn);
+    bgRelayControl->addButton(ui->pbOff);
     stateIndex = 0;
 }
 
@@ -54,15 +57,22 @@ void TcControl::setStateTextIndication(int targetStateIndex)
     stateIndex = targetStateIndex;
 }
 
-
 void TcControl::on_pbOn_clicked()
 {
     emit setState(userIndex, true);
 }
 
-
 void TcControl::on_pbOff_clicked()
 {
     emit setState(userIndex, false);
+}
+
+
+void TcControl::unchekAllButton()
+{
+    bgRelayControl->setExclusive(false);
+    ui->pbOn->setChecked(false);
+    ui->pbOff->setChecked(false);
+    bgRelayControl->setExclusive(true);
 }
 

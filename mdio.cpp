@@ -93,7 +93,8 @@ void Mdio::initCustomUi(QString language)
     QJsonArray temJsonArray;
     QStringList strListRelayStr1;
     QStringList strListRelayStr2;
-    relayCOntrolButtonsList = new QButtonGroup();
+    relayControlListTc1 = new QButtonGroup();
+    relayControlListTc2 = new QButtonGroup();
     QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
     QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
 
@@ -113,9 +114,8 @@ void Mdio::initCustomUi(QString language)
                                            k,
                                            this));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList[tcMonitorList.size() - 1]);
-        relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOffButtonPointer());
-        relayCOntrolButtonsList->addButton(tcMonitorList[tcMonitorList.size() - 1]->getOnButtonPointer());
     }
+
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
@@ -178,7 +178,6 @@ void Mdio::initCustomUi(QString language)
 
     ui->pbVoltageOnTcStatus->setEnabled(false);
     ui->pbEepromStatus->setEnabled(false);
-    ui->pbTransactionStatus->setEnabled(false);
     ui->pbEepromClearStatus->setEnabled(false);
 
     /*
@@ -760,15 +759,19 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 
 
         /*
-         * Update Tele signalisarion and status indication
+         * Update Tele signalisation and status indication
          */
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-            tsStatus[k]->setStatus(state.signalisation[k]);
+            if (state.error220 == false) {
+                tsStatus[k]->setStatus(state.signalisation[k] ? TsStatus::TS_OK_ON : TsStatus::TS_OK_OFF);
+            } else {
+                tsStatus[k]->setStatus(TsStatus::TS_ERROR);
+            }
+
         }
 
         ui->pbVoltageOnTcStatus->setChecked(state.error220);
         ui->pbEepromStatus->setChecked(state.errorEeprom);
-        ui->pbTransactionStatus->setChecked(state.errorTransaction);
         ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
 
         /*
@@ -799,9 +802,12 @@ void Mdio::readSlaveState(void)
 void Mdio::tcSetTcSlot(int index, bool enable)
 {
     if (index == 0) {
+        tcMonitorList[1]->unchekAllButton();
+        tcMonitorList[2]->unchekAllButton();
         emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, enable);
     } else {
-        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);
+        tcMonitorList[0]->unchekAllButton();
+        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);\
     }
 
     if (processingCommunicatitonResult("Телекерування",

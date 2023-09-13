@@ -131,7 +131,6 @@ QPushButton#pbPuls:checked
 QPushButton#pbConnectionStatus,
 QPushButton#pbEepromClearStatus,
 QPushButton#pbEepromStatus,
-QPushButton#pbTransactionStatus,
 QPushButton#pbVoltageOnTcStatus
 {
     border-radius: 12px;
@@ -141,7 +140,6 @@ QPushButton#pbVoltageOnTcStatus
 QPushButton#pbConnectionStatus:checked,
 QPushButton#pbEepromClearStatus:checked,
 QPushButton#pbEepromStatus:checked,
-QPushButton#pbTransactionStatus:checked,
 QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);
 }
@@ -176,14 +174,24 @@ QPushButton#pbTsState
 {
     border-style: outset;
     border-radius: 4px;
+}
+
+QPushButton[tsState = Ok_Off]
+{
     background-color:rgb(50, 200, 50);
     image: url(:/Resources/Off_resize_v2.png);
 }
 
-QPushButton#pbTsState:checked
+QPushButton[tsState = Ok_On]
 {
     background-color:rgb(255, 100, 100);
     image: url(:/Resources/On_resize_v2.png);
+}
+
+QPushButton[tsState = Error]
+{
+    background-color:rgb(180, 180, 180);
+    image: url(:/Resources/Off_resize_v2.png);
 }
 
 QFrame#fPortSettings,

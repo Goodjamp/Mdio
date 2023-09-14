@@ -131,6 +131,7 @@ QPushButton#pbPuls:checked
 QPushButton#pbConnectionStatus,
 QPushButton#pbEepromClearStatus,
 QPushButton#pbEepromStatus,
+QPushButton#pbConfigurationError,
 QPushButton#pbVoltageOnTcStatus
 {
     border-radius: 12px;
@@ -139,6 +140,7 @@ QPushButton#pbVoltageOnTcStatus
 
 QPushButton#pbConnectionStatus:checked,
 QPushButton#pbEepromClearStatus:checked,
+QPushButton#pbConfigurationError:checked,
 QPushButton#pbEepromStatus:checked,
 QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);

@@ -775,6 +775,7 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         ui->pbVoltageOnTcStatus->setChecked(state.error220);
         ui->pbEepromStatus->setChecked(state.errorEeprom);
         ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
+        ui->pbConfigurationError->setChecked(state.errorConfiguration);
 
         /*
          * Update Tele control indication

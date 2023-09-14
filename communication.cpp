@@ -231,7 +231,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     }
     state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
-    state.errorTransaction =  status[ADDR_COIL_TRANSACTION_ERROR - baseCoilAddress];
+    state.errorConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR - baseCoilAddress];
     state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
 
     /*

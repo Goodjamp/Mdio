@@ -203,6 +203,8 @@ void Mdio::initCustomUi(QString language)
     disableSettingsControl();
     skipAllSettings();
     ui->pbConnect->setEnabled(false);
+
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 

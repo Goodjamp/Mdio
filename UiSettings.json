@@ -57,5 +57,11 @@
         "PulsDurationDefault": "1000",
         "PulsDurationMin": "100",
         "PulsDurationMax": "4000"
+    },
+    "DoubleTs":
+    {
+        "DoubleTsSwitchTimeDefault": "500",
+        "DoubleTsSwitchTimeMin": "100",
+        "DoubleTsSwitchTimeMax": "10000"
     }
 }

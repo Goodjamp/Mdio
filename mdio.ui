@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>400</height>
+    <width>900</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>830</width>
-    <height>400</height>
+    <width>900</width>
+    <height>480</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>830</width>
-    <height>380</height>
+    <width>945</width>
+    <height>480</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -514,35 +514,6 @@
               </item>
               <item>
                <layout class="QGridLayout" name="glConnectionInternal_2">
-                <item row="0" column="2">
-                 <widget class="QLineEdit" name="leDebounceInterval">
-                  <property name="minimumSize">
-                   <size>
-                    <width>40</width>
-                    <height>25</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>40</width>
-                    <height>25</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>20</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
                 <item row="0" column="0">
                  <widget class="QLabel" name="lBounceTimeoute">
                   <property name="minimumSize">
@@ -570,6 +541,40 @@
                   </property>
                  </widget>
                 </item>
+                <item row="1" column="2">
+                 <widget class="QLineEdit" name="leDoubleTsSwitchTime">
+                  <property name="minimumSize">
+                   <size>
+                    <width>45</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>40</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lDoubleTsSwitchTime">
+                  <property name="text">
+                   <string>Час перемикання
+подвійних ТС, мс</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QLabel" name="label_13">
+                  <property name="text">
+                   <string>(100-10000)</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="1">
                  <spacer name="horizontalSpacer_7">
                   <property name="orientation">
@@ -594,6 +599,35 @@
                   </property>
                   <property name="text">
                    <string>(20-100)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLineEdit" name="leDebounceInterval">
+                  <property name="minimumSize">
+                   <size>
+                    <width>45</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>40</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>20</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                  </widget>
                 </item>

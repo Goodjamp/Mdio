@@ -1,6 +1,9 @@
 #include "mdio.h"
 #include "ui_mdio.h"
 
+
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QFile>
 #include <QDebug>
 #include <QMap>
@@ -14,6 +17,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
+#include <QFrame>
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
 #include "Version.h"
@@ -61,6 +65,9 @@ void Mdio::enableSettingsControl()
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(true);
     }
+    foreach(auto item, tsTypeControlList) {
+        item->setEnabled(true);
+    }
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
 }
@@ -73,6 +80,10 @@ void Mdio::disableSettingsControl()
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(false);
     }
+    foreach(auto item, tsTypeControlList) {
+        item->setEnabled(false);
+    }
+
     ui->pbConnect->setEnabled(true);
     ui->pbConnectionSettings->setEnabled(true);
 }
@@ -86,6 +97,85 @@ void Mdio::skipAllSettings()
     ui->lePulsDuration->setText("");
     ui->leReplyDelay->setText("");
     ui->leSilentInterval->setText("");
+    ui->leDoubleTsSwitchTime->setText("");
+}
+
+void Mdio::addTsBinaryGroupUi(void)
+{
+    QHBoxLayout *serviceLayoute;
+    QSize size(120, 25);
+
+    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+        teleSignalBinaryFrameList.push_back(new QFrame());
+
+        /*
+         * Apply style to the TS frame as Simple TS
+         */
+
+        teleSignalBinaryFrameList.last()->setProperty("tsBinary", false);
+        teleSignalBinaryFrameList.last()->style()->unpolish(teleSignalBinaryFrameList.last());
+        teleSignalBinaryFrameList.last()->style()->polish(teleSignalBinaryFrameList.last());
+
+
+        teleSignalBinaryLayoutList.push_back(new QVBoxLayout);
+        teleSignalBinaryFrameList.last()->setLayout(teleSignalBinaryLayoutList.last());
+
+
+        ui->vlTeleSignalSettings->addWidget(teleSignalBinaryFrameList.last());
+
+
+        /*
+         * Add TS settings number K
+         */
+        tsSetingsList.append(new TsSettings(k + 1));
+        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
+        k++;
+
+        /*
+         * Add simple/binary TS settings type
+         */
+        tsTypeControlList.append(new QComboBox());
+        tsTypeControlList.last()->addItems({"Одинарні", "Подвійні"});
+        tsTypeControlList.last()->setFixedSize(size);
+        tsTypeControlList.last()->setCurrentIndex(-1);
+        serviceLayoute = new QHBoxLayout();
+        serviceLayoute->addItem(new QSpacerItem(20, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+        serviceLayoute->addWidget(tsTypeControlList.last());
+        teleSignalBinaryLayoutList.last()->addLayout(serviceLayoute);
+
+        /*
+         * Add TS settings number K + 1
+         */
+        tsSetingsList.append(new TsSettings(k + 1));
+        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
+    }
+
+    foreach(auto item, tsTypeControlList) {
+          connect(item, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Mdio::on_cbTsType_currentIndexChanged);
+    }
+
+    tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
+}
+
+void Mdio::on_cbTsType_currentIndexChanged(int index)
+{
+    QObject *senderObj = sender();
+    static bool state = true;
+
+    for (uint32_t k = 0; k < tsTypeControlList.size(); k++) {
+        if (senderObj == tsTypeControlList[k]) {
+            /*
+             * Apply style according to the TS state
+             */
+            teleSignalBinaryFrameList[k]->setProperty("tsBinary", index == 1);
+            teleSignalBinaryFrameList[k]->style()->unpolish(teleSignalBinaryFrameList[k]);
+            teleSignalBinaryFrameList[k]->style()->polish(teleSignalBinaryFrameList[k]);
+            qDebug()<<"State = "<<state;
+            qDebug()<<"Sender search Ok";
+            break;
+        }
+    }
 }
 
 void Mdio::initCustomUi(QString language)
@@ -105,15 +195,14 @@ void Mdio::initCustomUi(QString language)
     ui->leReplyDelay->setValidator(numericValidator3D);
     ui->leDebounceInterval->setValidator(numericValidator3D);
     ui->lePulsDuration->setValidator(numericValidator4D);
+    ui->leDoubleTsSwitchTime->setValidator(numericValidator4D);
 
     /*
      * Add TeleControl status/control items
      */
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-        tcMonitorList.append(new TcControl("",
-                                           k,
-                                           this));
-        ui->vlTcControlMonitorInternal->addWidget(tcMonitorList[tcMonitorList.size() - 1]);
+        tcMonitorList.append(new TcControl("", k, this));
+        ui->vlTcControlMonitorInternal->addWidget(tcMonitorList.last());
     }
 
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -132,15 +221,35 @@ void Mdio::initCustomUi(QString language)
         }
         tcMonitorList[k]->setTextStateList(strListRelayStr1, strListRelayStr2);
     }
+
     /*
      * Add TeleSignalisation configuration items
      */
+    /*
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+        teleSignalBinaryFrameList.push_back(new QFrame);
+        teleSignalBinaryFrameList.last()->setProperty("tsBinary", true);
+        teleSignalBinaryFrameList.last()->style()->unpolish(teleSignalBinaryFrameList.last());
+        teleSignalBinaryFrameList.last()->style()->polish(teleSignalBinaryFrameList.last());
+
+        teleSignalBinaryLayoutList.push_back(new QVBoxLayout);
+        teleSignalBinaryFrameList.last()->setLayout(teleSignalBinaryLayoutList.last());
+
+        ui->vlTeleSignalSettings->addWidget(teleSignalBinaryFrameList.last());
+
+
         tsSetingsList.append(new TsSettings(k + 1));
-        ui->vlTeleSignalSettings->addWidget(tsSetingsList[tsSetingsList.size() - 1]);
+        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
+        tsTypeControlList.append(new QComboBox());
+        teleSignalBinaryLayoutList.last()->addWidget(tsTypeControlList.last());
+        k++;
+        tsSetingsList.append(new TsSettings(k + 1));
+        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
     }
     tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
+    */
+    addTsBinaryGroupUi();
 
     /*
      * Add TeleSignalisation status items
@@ -148,7 +257,7 @@ void Mdio::initCustomUi(QString language)
 
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         tsStatus.append(new TsStatus(k + 1));
-        ui->vlTeleSignalStatus->addWidget(tsStatus[tsStatus.size() - 1]);
+        ui->vlTeleSignalStatus->addWidget(tsStatus.last());
     }
     tsStatusLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTeleSignalStatus->addItem(tsStatusLayoutSpacer);
@@ -195,6 +304,7 @@ void Mdio::initCustomUi(QString language)
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbSetDefaultSettings));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leDoubleTsSwitchTime));
     foreach(auto item, tcMonitorList) {
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
@@ -828,6 +938,7 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     ui->leReplyDelay->setText(rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefault").toString());
     ui->leDebounceInterval->setText(rootJsonObj.value("TS").toObject().value("DebounceDefault").toString());
     ui->lePulsDuration->setText(rootJsonObj.value("TC").toObject().value("PulsDurationDefault").toString());
+    ui->lePulsDuration->setText(rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeDefault").toString());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }

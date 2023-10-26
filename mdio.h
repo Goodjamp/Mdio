@@ -1,6 +1,7 @@
 #ifndef MDIO_H
 #define MDIO_H
 
+#include <QVBoxLayout>
 #include <QMainWindow>
 #include <QThread>
 #include <QDebug>
@@ -18,6 +19,7 @@
 #include "tssettings.h"
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
+#include <QComboBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -73,6 +75,7 @@ private:
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed, bool openPort);
     void resetSlaveInformation(void);
+    void addTsBinaryGroupUi(void);
 
     /*
      * The groupe of CB functin from the Communication class
@@ -84,7 +87,6 @@ private:
     void writeConfigurationResult(bool result);
     void readStateResult(bool result, Communication::SlaveState state);
     void setTeleControlResult(bool result);
-
 
 private slots:
     /*
@@ -109,6 +111,8 @@ private slots:
     void on_pbReload_clicked();
 
     void on_pbReadSettings_clicked();
+
+    void on_cbTsType_currentIndexChanged(int index);
 
 /*
  * The pair of the signal/slot updateUiStateSignal/updateUiStateSlot is used to
@@ -140,6 +144,9 @@ private:
     QButtonGroup *relayControlListTc1;
     QButtonGroup *relayControlListTc2;
     QVector<QWidget *> settingsItemsList;
+    QVector<QFrame *> teleSignalBinaryFrameList;
+    QVector<QVBoxLayout *> teleSignalBinaryLayoutList;
+    QVector<QComboBox *> tsTypeControlList;
     int stateRequestCnt;
     int stateReplyCnt;
 

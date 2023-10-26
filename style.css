@@ -196,6 +196,19 @@ QPushButton[tsState = Error]
     image: url(:/Resources/Off_resize_v2.png);
 }
 
+QFrame[tsBinary = false]
+{
+    border-radius: 4px;
+    background-color:rgb(200, 200, 250);
+}
+
+QFrame[tsBinary = true]
+{
+    border-radius: 4px;
+    background-color:rgb(20, 130, 240);
+}
+
+
 QFrame#fPortSettings,
 QFrame#fModbusSettings
 {

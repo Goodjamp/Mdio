@@ -23,8 +23,10 @@
 #include "Version.h"
 
 
-#define STR_CAST(str)    static_cast<QString>(str)
-#define SW_NAME          STR_CAST("МВВ-4-2 конфігуратор")
+#define STR_CAST(str)     static_cast<QString>(str)
+#define SW_NAME           STR_CAST("МВВ-4-2 конфігуратор")
+#define TS_TEXT_SIMPLE    "Одинарні"
+#define TS_TEXT_DOUBLE    "Подвійні"
 
 void Mdio::getSettingsFromJson()
 {
@@ -135,7 +137,7 @@ void Mdio::addTsBinaryGroupUi(void)
          * Add simple/binary TS settings type
          */
         tsTypeControlList.append(new QComboBox());
-        tsTypeControlList.last()->addItems({"Одинарні", "Подвійні"});
+        tsTypeControlList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_DOUBLE});
         tsTypeControlList.last()->setFixedSize(size);
         tsTypeControlList.last()->setCurrentIndex(-1);
         serviceLayoute = new QHBoxLayout();
@@ -161,9 +163,12 @@ void Mdio::addTsBinaryGroupUi(void)
 void Mdio::on_cbTsType_currentIndexChanged(int index)
 {
     QObject *senderObj = sender();
-    static bool state = true;
+    static bool isSimpleTs = false;
 
-    for (uint32_t k = 0; k < tsTypeControlList.size(); k++) {
+    for (int k = 0; k < tsTypeControlList.size(); k++) {
+        if (tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE) {
+            isSimpleTs = true;
+        }
         if (senderObj == tsTypeControlList[k]) {
             /*
              * Apply style according to the TS state
@@ -171,11 +176,15 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
             teleSignalBinaryFrameList[k]->setProperty("tsBinary", index == 1);
             teleSignalBinaryFrameList[k]->style()->unpolish(teleSignalBinaryFrameList[k]);
             teleSignalBinaryFrameList[k]->style()->polish(teleSignalBinaryFrameList[k]);
-            qDebug()<<"State = "<<state;
+            qDebug()<<"State = "<<isSimpleTs;
             qDebug()<<"Sender search Ok";
-            break;
         }
     }
+
+    /*
+     * Update active state of the DoubleTsSwitchingTime configuration
+     */
+     ui->leDoubleTsSwitchTime->setEnabled(isSimpleTs);
 }
 
 void Mdio::initCustomUi(QString language)
@@ -458,6 +467,14 @@ bool Mdio::updateUiConfiguration(void)
     ui->leDebounceInterval->setText(QString::number(connectDeviceConf.signalisation.debounsInterval));
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
+    }
+    for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
+        tsTypeControlList[k]->setCurrentText(connectDeviceConf.signalisation.isDouble[k]
+                                             ? TS_TEXT_DOUBLE
+                                             : TS_TEXT_SIMPLE);
+        if (connectDeviceConf.signalisation.isDouble[k]) {
+            ui->leDoubleTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.doubleTsSwitchingTime));
+        }
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
 
@@ -769,6 +786,31 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
+    /*
+     * Checking the setting for Double TS.
+     * If at minimum one pair TS is configured as the Double, the DoubleTsSwitchTime must be set.
+     */
+    foreach(auto item, tsTypeControlList) {
+        if(item->currentText() == TS_TEXT_DOUBLE) {
+            if (ui->leDoubleTsSwitchTime->text().isDetached()) {
+                errorMessage("Помилка конфігурації",
+                             "Час перемикання подвійних ТС не заданий");
+                return;
+            } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toInt(),
+                                      rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString().toInt(),
+                                      rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString().toInt())
+                       == false ) {
+                errorMessage("Помилка конфігурації",
+                             "Час перемикання подвійних ТС повинно бути в діапазоні ["
+                             + rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMin").toString()
+                             + "-"
+                             + rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMax").toString()
+                             + "] мс");
+                return;
+            }
+        }
+    }
+
     if (ui->cbBaudRate->currentIndex() == -1) {
         errorMessage("Помилка конфігурації",
                      "Швидкість не задана");
@@ -796,16 +838,39 @@ void Mdio::on_pbApplySettings_clicked()
      * Read user configuration and serialiase it to the SlaveConfiguration
      * structure
      */
+
+    /*
+     *  Communication settings
+     */
     configuration.communication.baudRate = ui->cbBaudRate->currentText().toInt();
     configuration.communication.parity = parityUiToSerilaLUT.value(ui->cbParity->currentText());
     configuration.communication.stopBits = stopUiToSerilaLUT.value(ui->cbStopBits->currentText());
     configuration.communication.replyDelay = ui->leReplyDelay->text().toInt();
     configuration.communication.silentInterval = ui->leSilentInterval->text().toInt();
+
+    /*
+     *  Tele Signalisation settings
+     */
     configuration.signalisation.debounsInterval = ui->leDebounceInterval->text().toInt();
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
+    for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
+        configuration.signalisation.isDouble[k] = tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE;
+        if (configuration.signalisation.isDouble[k]) {
+            configuration.signalisation.doubleTsSwitchingTime = ui->leDoubleTsSwitchTime->text().toInt();
+        }
+
+    }
+
+    /*
+     *  Tele Control settings
+     */
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
+
+    /*
+     *  Configuration date
+     */
     configuration.configurationYear = QDate::currentDate().year() - 2000;
     configuration.configurationMonth = QDate::currentDate().month();
     configuration.configurationDay = QDate::currentDate().day();

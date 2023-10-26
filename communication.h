@@ -19,6 +19,7 @@
 #define CALL_CB(x,...)        if (x != NULL) {x(__VA_ARGS__);}
 
 #define TELESIGNAL_NUMBERS              4
+#define TELESIGNAL_DOUBLE_NUMBERS       2
 #define TELECONTRO_STATIC_NUMBERS       2
 #define TELECONTROL_PULS_NUMBERS        1
 #define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTRO_STATIC_NUMBERS)
@@ -53,6 +54,7 @@
 #define INVERS_SETTINGS_TI2_POS         1
 #define INVERS_SETTINGS_TI3_POS         2
 #define INVERS_SETTINGS_TI4_POS         3
+
 
 /*
  * Class B is a wrapper for the Modbus class + Communication class (A) implementation.
@@ -103,19 +105,18 @@ private:
          */
         ADDR_REG_TS_DEBOUNCE_DELAY = 0x03EE,
         ADDR_REG_TS_INVERSION_SETTINGS = 0x03EF,
+        ADDR_REG_TS_DOUBLE_SWITCHING_TIME = 0x03F0,
+        ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS = 0x03F1,
 
         /*
          * Tele control settings
          */
-        ADDR_REG_TC_PULS_DURATION = 0x03F0,
-
-        ADDR_REG_TC_EEPROM_RELAY_1 = 0x03F1,
-        ADDR_REG_TC_EEPROM_RELAY_2 = 0x03F2,
+        ADDR_REG_TC_PULS_DURATION = 0x03F2,
 
         /*
          * Reset device control
          */
-        ADDR_REG_RESET = 0x03F3,
+        ADDR_REG_RESET = 0x03F5,
     } AddrReg;
 
     typedef enum {
@@ -149,6 +150,8 @@ public:
         struct {
             int debounsInterval;
             bool isInvers[TELESIGNAL_NUMBERS];
+            int doubleTsSwitchingTime;
+            bool isDouble[TELESIGNAL_DOUBLE_NUMBERS];
         } signalisation;
         struct {
             int pulsDuration;

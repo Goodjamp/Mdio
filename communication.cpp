@@ -76,6 +76,13 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
                 configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
+        configReg[ADDR_REG_TS_DOUBLE_SWITCHING_TIME - baseConfReg] = configuration.signalisation.doubleTsSwitchingTime;
+        configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] = 0;
+        for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
+            if (configuration.signalisation.isDouble[k] == false) {
+                configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
+            }
+        }
 
         /*
          * Serialiase tele control settings
@@ -143,6 +150,10 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
             configuration.signalisation.debounsInterval = configReg[ADDR_REG_TS_DEBOUNCE_DELAY - baseConfReg];
             for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
                 configuration.signalisation.isInvers[k] = (1 & (configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 0;
+            }
+            configuration.signalisation.doubleTsSwitchingTime = configReg[ADDR_REG_TS_DOUBLE_SWITCHING_TIME - baseConfReg];
+            for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
+                configuration.signalisation.isDouble[k] = (1 & (configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] >> k)) == 0;
             }
 
             /*

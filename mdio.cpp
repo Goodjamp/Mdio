@@ -26,7 +26,7 @@
 #define STR_CAST(str)     static_cast<QString>(str)
 #define SW_NAME           STR_CAST("МВВ-4-2 конфігуратор")
 #define TS_TEXT_SIMPLE    "Одинарні"
-#define TS_TEXT_DOUBLE    "Подвійні"
+#define TS_TEXT_BINARY    "Подвійні"
 
 void Mdio::getSettingsFromJson()
 {
@@ -70,7 +70,7 @@ void Mdio::enableSettingsControl()
     foreach(auto item, tsTypeControlList) {
         item->setEnabled(true);
     }
-    ui->leDoubleTsSwitchTime->setEnabled(false);
+    ui->leBinaryTsSwitchTime->setEnabled(false);
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
 }
@@ -100,7 +100,7 @@ void Mdio::skipAllSettings()
     ui->lePulsDuration->setText("");
     ui->leReplyDelay->setText("");
     ui->leSilentInterval->setText("");
-    ui->leDoubleTsSwitchTime->setText("");
+    ui->leBinaryTsSwitchTime->setText("");
 }
 
 void Mdio::addTsBinaryGroupUi(void)
@@ -138,7 +138,7 @@ void Mdio::addTsBinaryGroupUi(void)
          * Add simple/binary TS settings type
          */
         tsTypeControlList.append(new QComboBox());
-        tsTypeControlList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_DOUBLE});
+        tsTypeControlList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_BINARY});
         tsTypeControlList.last()->setFixedSize(size);
         tsTypeControlList.last()->setCurrentIndex(-1);
         serviceLayoute = new QHBoxLayout();
@@ -167,7 +167,7 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
     bool isSimpleTs = false;
 
     for (int k = 0; k < tsTypeControlList.size(); k++) {
-        if (tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE) {
+        if (tsTypeControlList[k]->currentText() == TS_TEXT_BINARY) {
             isSimpleTs = true;
         }
         if (senderObj == tsTypeControlList[k]) {
@@ -183,9 +183,9 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
     }
 
     /*
-     * Update active state of the DoubleTsSwitchingTime configuration
+     * Update active state of the BinaryTsSwitchingTime configuration
      */
-     ui->leDoubleTsSwitchTime->setEnabled(isSimpleTs);
+     ui->leBinaryTsSwitchTime->setEnabled(isSimpleTs);
 }
 
 void Mdio::initCustomUi(QString language)
@@ -206,7 +206,7 @@ void Mdio::initCustomUi(QString language)
     ui->leReplyDelay->setValidator(numericValidator3D);
     ui->leDebounceInterval->setValidator(numericValidator3D);
     ui->lePulsDuration->setValidator(numericValidator4D);
-    ui->leDoubleTsSwitchTime->setValidator(numericValidator5D);
+    ui->leBinaryTsSwitchTime->setValidator(numericValidator5D);
 
     /*
      * Add TeleControl status/control items
@@ -315,7 +315,7 @@ void Mdio::initCustomUi(QString language)
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbSetDefaultSettings));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->leDoubleTsSwitchTime));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leBinaryTsSwitchTime));
     foreach(auto item, tcMonitorList) {
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
@@ -470,12 +470,12 @@ bool Mdio::updateUiConfiguration(void)
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
     }
-    for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
-        tsTypeControlList[k]->setCurrentText(connectDeviceConf.signalisation.isDouble[k]
-                                             ? TS_TEXT_DOUBLE
+    for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
+        tsTypeControlList[k]->setCurrentText(connectDeviceConf.signalisation.isBinary[k]
+                                             ? TS_TEXT_BINARY
                                              : TS_TEXT_SIMPLE);
-        if (connectDeviceConf.signalisation.isDouble[k]) {
-            ui->leDoubleTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.doubleTsSwitchingTime));
+        if (connectDeviceConf.signalisation.isBinary[k]) {
+            ui->leBinaryTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.binaryTsSwitchingTime));
         }
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
@@ -789,24 +789,24 @@ void Mdio::on_pbApplySettings_clicked()
     }
 
     /*
-     * Checking the setting for Double TS.
-     * If at minimum one pair TS is configured as the Double, the DoubleTsSwitchTime must be set.
+     * Checking the setting for Binary TS.
+     * If at minimum one pair TS is configured as the Binary, the BinaryTsSwitchingTime must be set.
      */
     foreach(auto item, tsTypeControlList) {
-        if(item->currentText() == TS_TEXT_DOUBLE) {
-            if (ui->leDoubleTsSwitchTime->text().isDetached()) {
+        if(item->currentText() == TS_TEXT_BINARY) {
+            if (ui->leBinaryTsSwitchTime->text().isDetached()) {
                 errorMessage("Помилка конфігурації",
                              "Час перемикання подвійних ТС не заданий");
                 return;
-            } else if (VALUE_IN_RANGE(ui->leDoubleTsSwitchTime->text().toInt(),
-                                      rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMin").toString().toInt(),
-                                      rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMax").toString().toInt())
+            } else if (VALUE_IN_RANGE(ui->leBinaryTsSwitchTime->text().toInt(),
+                                      rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString().toInt(),
+                                      rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString().toInt())
                        == false ) {
                 errorMessage("Помилка конфігурації",
                              "Час перемикання подвійних ТС повинно бути в діапазоні ["
-                             + rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMin").toString()
+                             + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString()
                              + "-"
-                             + rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMax").toString()
+                             + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString()
                              + "] мс");
                 return;
             }
@@ -857,10 +857,10 @@ void Mdio::on_pbApplySettings_clicked()
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
-    for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
-        configuration.signalisation.isDouble[k] = (tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE);
-        if (configuration.signalisation.isDouble[k]) {
-            configuration.signalisation.doubleTsSwitchingTime = ui->leDoubleTsSwitchTime->text().toInt();
+    for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
+        configuration.signalisation.isBinary[k] = (tsTypeControlList[k]->currentText() == TS_TEXT_BINARY);
+        if (configuration.signalisation.isBinary[k]) {
+            configuration.signalisation.binaryTsSwitchingTime = ui->leBinaryTsSwitchTime->text().toInt();
         }
 
     }
@@ -1005,7 +1005,7 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     ui->leReplyDelay->setText(rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefault").toString());
     ui->leDebounceInterval->setText(rootJsonObj.value("TS").toObject().value("DebounceDefault").toString());
     ui->lePulsDuration->setText(rootJsonObj.value("TC").toObject().value("PulsDurationDefault").toString());
-    ui->leDoubleTsSwitchTime->setText(rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeDefault").toString());
+    ui->leBinaryTsSwitchTime->setText(rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeDefault").toString());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }

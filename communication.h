@@ -19,7 +19,7 @@
 #define CALL_CB(x,...)        if (x != NULL) {x(__VA_ARGS__);}
 
 #define TELESIGNAL_NUMBERS              4
-#define TELESIGNAL_DOUBLE_NUMBERS       2
+#define TELESIGNAL_BINARY_NUMBERS       2
 #define TELECONTRO_STATIC_NUMBERS       2
 #define TELECONTROL_PULS_NUMBERS        1
 #define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTRO_STATIC_NUMBERS)
@@ -105,8 +105,8 @@ private:
          */
         ADDR_REG_TS_DEBOUNCE_DELAY = 0x03EE,
         ADDR_REG_TS_INVERSION_SETTINGS = 0x03EF,
-        ADDR_REG_TS_DOUBLE_SWITCHING_TIME = 0x03F0,
-        ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS = 0x03F1,
+        ADDR_REG_TS_BINARY_SWITCHING_TIME = 0x03F0,
+        ADDR_REG_TS_BINATY_SWITCHING_SETTINGS = 0x03F1,
 
         /*
          * Tele control settings
@@ -150,8 +150,8 @@ public:
         struct {
             int debounsInterval;
             bool isInvers[TELESIGNAL_NUMBERS];
-            int doubleTsSwitchingTime;
-            bool isDouble[TELESIGNAL_DOUBLE_NUMBERS];
+            int binaryTsSwitchingTime;
+            bool isBinary[TELESIGNAL_BINARY_NUMBERS];
         } signalisation;
         struct {
             int pulsDuration;

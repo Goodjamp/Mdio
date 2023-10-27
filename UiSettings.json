@@ -58,10 +58,10 @@
         "PulsDurationMin": "100",
         "PulsDurationMax": "4000"
     },
-    "DoubleTs":
+    "BinaryTs":
     {
-        "DoubleTsSwitchTimeDefault": "500",
-        "DoubleTsSwitchTimeMin": "100",
-        "DoubleTsSwitchTimeMax": "10000"
+        "BinaryTsSwitchTimeDefault": "500",
+        "BinaryTsSwitchTimeMin": "100",
+        "BinaryTsSwitchTimeMax": "10000"
     }
 }

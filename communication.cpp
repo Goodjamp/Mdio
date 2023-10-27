@@ -76,11 +76,11 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
                 configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
-        configReg[ADDR_REG_TS_DOUBLE_SWITCHING_TIME - baseConfReg] = configuration.signalisation.doubleTsSwitchingTime;
-        configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] = 0;
-        for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
-            if (configuration.signalisation.isDouble[k] == true) {
-                configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
+        configReg[ADDR_REG_TS_BINARY_SWITCHING_TIME - baseConfReg] = configuration.signalisation.binaryTsSwitchingTime;
+        configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] = 0;
+        for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
+            if (configuration.signalisation.isBinary[k] == true) {
+                configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
 
@@ -151,9 +151,9 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
             for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
                 configuration.signalisation.isInvers[k] = (1 & (configReg[ADDR_REG_TS_INVERSION_SETTINGS - baseConfReg] >> k)) == 0;
             }
-            configuration.signalisation.doubleTsSwitchingTime = configReg[ADDR_REG_TS_DOUBLE_SWITCHING_TIME - baseConfReg];
-            for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
-                configuration.signalisation.isDouble[k] = (1 & (configReg[ADDR_REG_TS_DOUBLE_SWITCHING_SETTINGS - baseConfReg] >> k)) == 1;
+            configuration.signalisation.binaryTsSwitchingTime = configReg[ADDR_REG_TS_BINARY_SWITCHING_TIME - baseConfReg];
+            for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
+                configuration.signalisation.isBinary[k] = (1 & (configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] >> k)) == 1;
             }
 
             /*

@@ -558,6 +558,9 @@
                   <property name="text">
                    <string/>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
@@ -729,8 +732,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Тривалість імп.ТК,
- мс</string>
+                   <string>Тривалість імп.ТК, мс</string>
                   </property>
                  </widget>
                 </item>

@@ -70,6 +70,7 @@ void Mdio::enableSettingsControl()
     foreach(auto item, tsTypeControlList) {
         item->setEnabled(true);
     }
+    ui->leDoubleTsSwitchTime->setEnabled(false);
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
 }
@@ -163,7 +164,7 @@ void Mdio::addTsBinaryGroupUi(void)
 void Mdio::on_cbTsType_currentIndexChanged(int index)
 {
     QObject *senderObj = sender();
-    static bool isSimpleTs = false;
+    bool isSimpleTs = false;
 
     for (int k = 0; k < tsTypeControlList.size(); k++) {
         if (tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE) {
@@ -196,6 +197,7 @@ void Mdio::initCustomUi(QString language)
     relayControlListTc2 = new QButtonGroup();
     QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
     QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
+    QRegExpValidator *numericValidator5D = new QRegExpValidator((QRegExp)"\\d{1,5}", this);
 
     /*
      * Add validation to the numeric UI items
@@ -204,7 +206,7 @@ void Mdio::initCustomUi(QString language)
     ui->leReplyDelay->setValidator(numericValidator3D);
     ui->leDebounceInterval->setValidator(numericValidator3D);
     ui->lePulsDuration->setValidator(numericValidator4D);
-    ui->leDoubleTsSwitchTime->setValidator(numericValidator4D);
+    ui->leDoubleTsSwitchTime->setValidator(numericValidator5D);
 
     /*
      * Add TeleControl status/control items
@@ -735,7 +737,7 @@ void Mdio::on_pbApplySettings_clicked()
     }
 
 
-    if (ui->leReplyDelay->text().isDetached()) {
+    if (ui->leSilentInterval->text().isDetached()) {
         errorMessage("Помилка конфігурації",
                      "Інтервал тиші не заданий");
         return;
@@ -752,7 +754,7 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
-    if (ui->leReplyDelay->text().isDetached()) {
+    if (ui->leDebounceInterval->text().isDetached()) {
         errorMessage("Помилка конфігурації",
                      "Тривалість брязкіту не заданий");
         return;
@@ -769,7 +771,7 @@ void Mdio::on_pbApplySettings_clicked()
         return;
     }
 
-    if (ui->leReplyDelay->text().isDetached()) {
+    if (ui->lePulsDuration->text().isDetached()) {
         errorMessage("Помилка конфігурації",
                      "Тривалість імпульсу ТК не заданий");
         return;
@@ -796,9 +798,9 @@ void Mdio::on_pbApplySettings_clicked()
                 errorMessage("Помилка конфігурації",
                              "Час перемикання подвійних ТС не заданий");
                 return;
-            } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toInt(),
-                                      rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString().toInt(),
-                                      rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString().toInt())
+            } else if (VALUE_IN_RANGE(ui->leDoubleTsSwitchTime->text().toInt(),
+                                      rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMin").toString().toInt(),
+                                      rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeMax").toString().toInt())
                        == false ) {
                 errorMessage("Помилка конфігурації",
                              "Час перемикання подвійних ТС повинно бути в діапазоні ["
@@ -856,7 +858,7 @@ void Mdio::on_pbApplySettings_clicked()
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
     for (uint32_t k = 0; k < TELESIGNAL_DOUBLE_NUMBERS; k++) {
-        configuration.signalisation.isDouble[k] = tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE;
+        configuration.signalisation.isDouble[k] = (tsTypeControlList[k]->currentText() == TS_TEXT_DOUBLE);
         if (configuration.signalisation.isDouble[k]) {
             configuration.signalisation.doubleTsSwitchingTime = ui->leDoubleTsSwitchTime->text().toInt();
         }
@@ -1003,9 +1005,12 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     ui->leReplyDelay->setText(rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefault").toString());
     ui->leDebounceInterval->setText(rootJsonObj.value("TS").toObject().value("DebounceDefault").toString());
     ui->lePulsDuration->setText(rootJsonObj.value("TC").toObject().value("PulsDurationDefault").toString());
-    ui->lePulsDuration->setText(rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeDefault").toString());
+    ui->leDoubleTsSwitchTime->setText(rootJsonObj.value("DoubleTs").toObject().value("DoubleTsSwitchTimeDefault").toString());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
+    }
+    foreach(auto item, tsTypeControlList) {
+        item->setCurrentIndex(0);
     }
 }
 

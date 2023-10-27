@@ -1,22 +1,22 @@
 The *МВВ-4-2-конфігуратор* software is use to configure *МВВ-4-2* module
 
-The special algorithm of deployment was designed.
-Toolchain:
+To make a building for the deployment of the new version of SW the DeployDelivery.bat could be used.
+Required toolchain:
 - Qt (qmake.exe and mingw32-make.exe (mingw81_32))
 - git
-- python versin 3, regexp module
+- python version 3, regexp module
 
-Typicaly the qmake.exe placed by the next path: C:\Qt\Qt_version\mingw81_32\bin
-Typicaly the mingw32-make.exe placed by the next path: C:\Qt\Qt_version\mingw81_32\bin OR C:\Qt\Tools\mingw810_32\bin
+The  DeployDelivery.bat has a next signature:
+DeployDelivery.bat arg1 arg2
+arg1 - path to the folder with *qmake.exe* (without \) . Typically the qmake.exe is placed on the: C:\Qt\Qt_version\mingw81_32\bin
+arg1 - path to the folder with *mingw32-make.exe* (without \). Typically the *mingw32-make.exe* on the: C:\Qt\Tools\mingw810_32\bin
 
-The SW version is based on the last tag. The last tag is incremented on the process of deployment building and added as a new tag.
-To make a deployment build make a next steps:
+The last git tag is used to create the SW version. The last tag is incremented in the building process and added as a new tag.
 
-#update tags list from the repositorium
+To make a build take the next steps:
+#update tags list from the repositories
 git fetch --tags
-
 #run builder
-ToolsAndDocumentation\DeployDelivery.bat C:\Path\to\the\folder\with\*qmake.exe* file (without \)  C:\Path\to\the\folder\with\*mingw32-make.exe* file (without \)
-
-#push new tag to repositorium
+ToolsAndDocumentation\DeployDelivery.bat C:\Qt\Qt_version\mingw81_32\bin C:\Qt\Tools\mingw810_32\bin
+#push the new tag to repositories
 git push --tags

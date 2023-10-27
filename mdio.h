@@ -75,7 +75,8 @@ private:
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed, bool openPort);
     void resetSlaveInformation(void);
-    void addTsBinaryGroupUi(void);
+    void addTsConfigBinaryGroupUi(void);
+    void addTsStatusBinaryGroupUi(void);
 
     /*
      * The groupe of CB functin from the Communication class
@@ -144,9 +145,11 @@ private:
     QButtonGroup *relayControlListTc1;
     QButtonGroup *relayControlListTc2;
     QVector<QWidget *> settingsItemsList;
-    QVector<QFrame *> teleSignalBinaryFrameList;
-    QVector<QVBoxLayout *> teleSignalBinaryLayoutList;
-    QVector<QComboBox *> tsTypeControlList;
+    QVector<QFrame *> teleSignalConfigBinaryFrameList;
+    QVector<QVBoxLayout *> teleSignalConfigBinaryLayoutList;
+    QVector<QComboBox *> tsTypeConfigList;
+    QVector<QFrame *> teleSignalStatusBinaryFrameList;
+    QVector<QVBoxLayout *> teleSignalStatusBinaryLayoutList;
     int stateRequestCnt;
     int stateReplyCnt;
 

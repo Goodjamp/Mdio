@@ -67,7 +67,7 @@ void Mdio::enableSettingsControl()
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(true);
     }
-    foreach(auto item, tsTypeControlList) {
+    foreach(auto item, tsTypeConfigList) {
         item->setEnabled(true);
     }
     ui->leBinaryTsSwitchTime->setEnabled(false);
@@ -83,7 +83,7 @@ void Mdio::disableSettingsControl()
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(false);
     }
-    foreach(auto item, tsTypeControlList) {
+    foreach(auto item, tsTypeConfigList) {
         item->setEnabled(false);
     }
 
@@ -103,57 +103,56 @@ void Mdio::skipAllSettings()
     ui->leBinaryTsSwitchTime->setText("");
 }
 
-void Mdio::addTsBinaryGroupUi(void)
+void Mdio::addTsConfigBinaryGroupUi(void)
 {
     QHBoxLayout *serviceLayoute;
     QSize size(120, 25);
 
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        teleSignalBinaryFrameList.push_back(new QFrame());
+        teleSignalConfigBinaryFrameList.push_back(new QFrame());
 
         /*
          * Apply style to the TS frame as Simple TS (by default)
          */
-
-        teleSignalBinaryFrameList.last()->setProperty("tsBinary", false);
-        teleSignalBinaryFrameList.last()->style()->unpolish(teleSignalBinaryFrameList.last());
-        teleSignalBinaryFrameList.last()->style()->polish(teleSignalBinaryFrameList.last());
-
-
-        teleSignalBinaryLayoutList.push_back(new QVBoxLayout);
-        teleSignalBinaryFrameList.last()->setLayout(teleSignalBinaryLayoutList.last());
+        teleSignalConfigBinaryFrameList.last()->setProperty("tsBinary", false);
+        teleSignalConfigBinaryFrameList.last()->style()->unpolish(teleSignalConfigBinaryFrameList.last());
+        teleSignalConfigBinaryFrameList.last()->style()->polish(teleSignalConfigBinaryFrameList.last());
 
 
-        ui->vlTeleSignalSettings->addWidget(teleSignalBinaryFrameList.last());
+        teleSignalConfigBinaryLayoutList.push_back(new QVBoxLayout);
+        teleSignalConfigBinaryFrameList.last()->setLayout(teleSignalConfigBinaryLayoutList.last());
+
+
+        ui->vlTeleSignalSettings->addWidget(teleSignalConfigBinaryFrameList.last());
 
 
         /*
          * Add TS settings number K
          */
         tsSetingsList.append(new TsSettings(k + 1));
-        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
+        teleSignalConfigBinaryLayoutList.last()->addWidget(tsSetingsList.last());
         k++;
 
         /*
          * Add simple/binary TS settings type
          */
-        tsTypeControlList.append(new QComboBox());
-        tsTypeControlList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_BINARY});
-        tsTypeControlList.last()->setFixedSize(size);
-        tsTypeControlList.last()->setCurrentIndex(-1);
+        tsTypeConfigList.append(new QComboBox());
+        tsTypeConfigList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_BINARY});
+        tsTypeConfigList.last()->setFixedSize(size);
+        tsTypeConfigList.last()->setCurrentIndex(-1);
         serviceLayoute = new QHBoxLayout();
         serviceLayoute->addItem(new QSpacerItem(20, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
-        serviceLayoute->addWidget(tsTypeControlList.last());
-        teleSignalBinaryLayoutList.last()->addLayout(serviceLayoute);
+        serviceLayoute->addWidget(tsTypeConfigList.last());
+        teleSignalConfigBinaryLayoutList.last()->addLayout(serviceLayoute);
 
         /*
          * Add TS settings number K + 1
          */
         tsSetingsList.append(new TsSettings(k + 1));
-        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
+        teleSignalConfigBinaryLayoutList.last()->addWidget(tsSetingsList.last());
     }
 
-    foreach(auto item, tsTypeControlList) {
+    foreach(auto item, tsTypeConfigList) {
           connect(item, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Mdio::on_cbTsType_currentIndexChanged);
     }
 
@@ -161,22 +160,69 @@ void Mdio::addTsBinaryGroupUi(void)
     ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
 }
 
+
+void Mdio::addTsStatusBinaryGroupUi(void)
+{
+    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+        teleSignalStatusBinaryFrameList.push_back(new QFrame());
+
+        /*
+         * Apply style to the TS frame as Simple TS (by default)
+         */
+        teleSignalStatusBinaryFrameList.last()->setProperty("tsBinary", false);
+        teleSignalStatusBinaryFrameList.last()->style()->unpolish(teleSignalStatusBinaryFrameList.last());
+        teleSignalStatusBinaryFrameList.last()->style()->polish(teleSignalStatusBinaryFrameList.last());
+
+
+        teleSignalStatusBinaryLayoutList.push_back(new QVBoxLayout);
+        teleSignalStatusBinaryFrameList.last()->setLayout(teleSignalStatusBinaryLayoutList.last());
+
+
+        ui->vlTeleSignalStatus->addWidget(teleSignalStatusBinaryFrameList.last());
+
+
+        /*
+         * Add TS status number K
+         */
+        tsStatus.append(new TsStatus(k + 1));
+        teleSignalStatusBinaryLayoutList.last()->addWidget(tsStatus.last());
+        k++;
+
+
+        /*
+         * Add TS status number K + 1
+         */
+        tsStatus.append(new TsStatus(k + 1));
+        teleSignalStatusBinaryLayoutList.last()->addWidget(tsStatus.last());
+    }
+
+    tsStatusLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->vlTeleSignalStatus->addItem(tsStatusLayoutSpacer);
+}
+
+
 void Mdio::on_cbTsType_currentIndexChanged(int index)
 {
     QObject *senderObj = sender();
     bool isSimpleTs = false;
 
-    for (int k = 0; k < tsTypeControlList.size(); k++) {
-        if (tsTypeControlList[k]->currentText() == TS_TEXT_BINARY) {
+    for (int k = 0; k < tsTypeConfigList.size(); k++) {
+        if (tsTypeConfigList[k]->currentText() == TS_TEXT_BINARY) {
             isSimpleTs = true;
         }
-        if (senderObj == tsTypeControlList[k]) {
+        if (senderObj == tsTypeConfigList[k]) {
             /*
              * Apply style according to the TS state
              */
-            teleSignalBinaryFrameList[k]->setProperty("tsBinary", index == 1);
-            teleSignalBinaryFrameList[k]->style()->unpolish(teleSignalBinaryFrameList[k]);
-            teleSignalBinaryFrameList[k]->style()->polish(teleSignalBinaryFrameList[k]);
+            teleSignalConfigBinaryFrameList[k]->setProperty("tsBinary", index == 1);
+            teleSignalConfigBinaryFrameList[k]->style()->unpolish(teleSignalConfigBinaryFrameList[k]);
+            teleSignalConfigBinaryFrameList[k]->style()->polish(teleSignalConfigBinaryFrameList[k]);
+
+            teleSignalStatusBinaryFrameList[k]->setProperty("tsBinary", index == 1);
+            teleSignalStatusBinaryFrameList[k]->style()->unpolish(teleSignalStatusBinaryFrameList[k]);
+            teleSignalStatusBinaryFrameList[k]->style()->polish(teleSignalStatusBinaryFrameList[k]);
+
+
             qDebug()<<"State = "<<isSimpleTs;
             qDebug()<<"Sender search Ok";
         }
@@ -236,43 +282,22 @@ void Mdio::initCustomUi(QString language)
     /*
      * Add TeleSignalisation configuration items
      */
-    /*
-    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        teleSignalBinaryFrameList.push_back(new QFrame);
-        teleSignalBinaryFrameList.last()->setProperty("tsBinary", true);
-        teleSignalBinaryFrameList.last()->style()->unpolish(teleSignalBinaryFrameList.last());
-        teleSignalBinaryFrameList.last()->style()->polish(teleSignalBinaryFrameList.last());
 
-        teleSignalBinaryLayoutList.push_back(new QVBoxLayout);
-        teleSignalBinaryFrameList.last()->setLayout(teleSignalBinaryLayoutList.last());
-
-        ui->vlTeleSignalSettings->addWidget(teleSignalBinaryFrameList.last());
-
-
-        tsSetingsList.append(new TsSettings(k + 1));
-        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
-        tsTypeControlList.append(new QComboBox());
-        teleSignalBinaryLayoutList.last()->addWidget(tsTypeControlList.last());
-        k++;
-        tsSetingsList.append(new TsSettings(k + 1));
-        teleSignalBinaryLayoutList.last()->addWidget(tsSetingsList.last());
-    }
-    tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->vlTeleSignalSettings->addItem(tsLayoutSpacer);
-    */
-    addTsBinaryGroupUi();
+    addTsConfigBinaryGroupUi();
 
     /*
      * Add TeleSignalisation status items
      */
 
+    /*
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         tsStatus.append(new TsStatus(k + 1));
         ui->vlTeleSignalStatus->addWidget(tsStatus.last());
     }
     tsStatusLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTeleSignalStatus->addItem(tsStatusLayoutSpacer);
-
+    */
+    addTsStatusBinaryGroupUi();
     /*
      *  Title bar: icon name
      */
@@ -471,7 +496,7 @@ bool Mdio::updateUiConfiguration(void)
         tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
     }
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
-        tsTypeControlList[k]->setCurrentText(connectDeviceConf.signalisation.isBinary[k]
+        tsTypeConfigList[k]->setCurrentText(connectDeviceConf.signalisation.isBinary[k]
                                              ? TS_TEXT_BINARY
                                              : TS_TEXT_SIMPLE);
         if (connectDeviceConf.signalisation.isBinary[k]) {
@@ -792,7 +817,7 @@ void Mdio::on_pbApplySettings_clicked()
      * Checking the setting for Binary TS.
      * If at minimum one pair TS is configured as the Binary, the BinaryTsSwitchingTime must be set.
      */
-    foreach(auto item, tsTypeControlList) {
+    foreach(auto item, tsTypeConfigList) {
         if(item->currentText() == TS_TEXT_BINARY) {
             if (ui->leBinaryTsSwitchTime->text().isDetached()) {
                 errorMessage("Помилка конфігурації",
@@ -858,7 +883,7 @@ void Mdio::on_pbApplySettings_clicked()
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
-        configuration.signalisation.isBinary[k] = (tsTypeControlList[k]->currentText() == TS_TEXT_BINARY);
+        configuration.signalisation.isBinary[k] = (tsTypeConfigList[k]->currentText() == TS_TEXT_BINARY);
         if (configuration.signalisation.isBinary[k]) {
             configuration.signalisation.binaryTsSwitchingTime = ui->leBinaryTsSwitchTime->text().toInt();
         }
@@ -1009,7 +1034,7 @@ void Mdio::on_pbSetDefaultSettings_clicked()
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }
-    foreach(auto item, tsTypeControlList) {
+    foreach(auto item, tsTypeConfigList) {
         item->setCurrentIndex(0);
     }
 }

@@ -112,7 +112,7 @@ void Mdio::addTsBinaryGroupUi(void)
         teleSignalBinaryFrameList.push_back(new QFrame());
 
         /*
-         * Apply style to the TS frame as Simple TS
+         * Apply style to the TS frame as Simple TS (by default)
          */
 
         teleSignalBinaryFrameList.last()->setProperty("tsBinary", false);

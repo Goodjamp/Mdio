@@ -861,13 +861,13 @@
              <widget class="QPushButton" name="pbSetDefaultSettings">
               <property name="minimumSize">
                <size>
-                <width>120</width>
+                <width>160</width>
                 <height>25</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>160</width>
                 <height>25</height>
                </size>
               </property>
@@ -932,13 +932,13 @@
              <widget class="QPushButton" name="pbReload">
               <property name="minimumSize">
                <size>
-                <width>120</width>
+                <width>160</width>
                 <height>25</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>160</width>
                 <height>25</height>
                </size>
               </property>
@@ -1509,13 +1509,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbConnectionSettings">
         <property name="minimumSize">
          <size>
-          <width>150</width>
+          <width>170</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>170</width>
           <height>30</height>
          </size>
         </property>
@@ -1564,13 +1564,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbConnect">
         <property name="minimumSize">
          <size>
-          <width>90</width>
+          <width>100</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>90</width>
+          <width>100</width>
           <height>30</height>
          </size>
         </property>
@@ -1590,13 +1590,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbDisconnect">
         <property name="minimumSize">
          <size>
-          <width>90</width>
+          <width>100</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>90</width>
+          <width>100</width>
           <height>30</height>
          </size>
         </property>

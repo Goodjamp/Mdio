@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
+    <width>600</width>
     <height>250</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>520</width>
+    <width>600</width>
     <height>250</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>520</width>
+    <width>600</width>
     <height>250</height>
    </size>
   </property>
@@ -81,13 +81,13 @@
            <widget class="QLabel" name="label">
             <property name="minimumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
@@ -133,13 +133,13 @@
            <widget class="QLabel" name="lParity">
             <property name="minimumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
@@ -162,13 +162,13 @@
            <widget class="QLabel" name="lBaudRate">
             <property name="minimumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
@@ -237,13 +237,13 @@
            <widget class="QLabel" name="lStopBits">
             <property name="minimumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>85</width>
+              <width>120</width>
               <height>25</height>
              </size>
             </property>
@@ -329,13 +329,13 @@
          <widget class="QLabel" name="label_3">
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>250</width>
             <height>25</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>200</width>
+            <width>250</width>
             <height>25</height>
            </size>
           </property>
@@ -450,13 +450,13 @@
            <widget class="QLabel" name="lAddress">
             <property name="minimumSize">
              <size>
-              <width>140</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>140</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>
@@ -479,13 +479,13 @@
            <widget class="QLabel" name="lAddress_2">
             <property name="minimumSize">
              <size>
-              <width>150</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>150</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>
@@ -508,13 +508,13 @@
            <widget class="QLabel" name="lAddress_3">
             <property name="minimumSize">
              <size>
-              <width>140</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>140</width>
+              <width>180</width>
               <height>25</height>
              </size>
             </property>

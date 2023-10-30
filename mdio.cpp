@@ -54,8 +54,14 @@ void Mdio::getSettingsFromJson()
     lastConnectionUserSettings.replyTimeout = rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefaultPc").toString();
     lastConnectionUserSettings.silentInterval = rootJsonObj.value("Modbus").toObject().value("SilentIntervalDefaultPc").toString();
     lastConnectionUserSettings.port = "";
-    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("SilentIntervalList").toArray().toVariantList()){
-        silentIntervalLIst.push_back(item.toString());
+    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaDefaultList").toArray().toVariantList()){
+        silentIntervaDefaultList.push_back(item.toString());
+    }
+    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaMinList").toArray().toVariantList()){
+        silentIntervaMinList.push_back(item.toString());
+    }
+    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaMaxList").toArray().toVariantList()){
+        silentIntervaMaxList.push_back(item.toString());
     }
 }
 
@@ -738,6 +744,7 @@ void Mdio::on_pbConnectionSettings_clicked()
 void Mdio::on_pbApplySettings_clicked()
 {
     Communication::SlaveConfiguration configuration;
+    int brCbIndex = ui->cbBaudRate->currentIndex();
 
 
     /*
@@ -767,14 +774,14 @@ void Mdio::on_pbApplySettings_clicked()
                      "Інтервал тиші не заданий");
         return;
     } else if (VALUE_IN_RANGE(ui->leSilentInterval->text().toInt(),
-                              rootJsonObj.value("Modbus").toObject().value("SilentIntervalMin").toString().toInt(),
-                              rootJsonObj.value("Modbus").toObject().value("SilentIntervalMax").toString().toInt())
+                              silentIntervaMinList[brCbIndex].toInt(),
+                              silentIntervaMaxList[brCbIndex].toInt())
                == false ) {
         errorMessage("Помилка конфігурації",
                      "Інтервал тиші повинено бути в діапазоні ["
-                     + rootJsonObj.value("Modbus").toObject().value("SilentIntervalMin").toString()
+                     + silentIntervaMinList[brCbIndex]
                      + "-"
-                     + rootJsonObj.value("Modbus").toObject().value("SilentIntervalMax").toString()
+                     + silentIntervaMaxList[brCbIndex]
                      + "] мс");
         return;
     }
@@ -1046,9 +1053,14 @@ void Mdio::on_pbConnect_clicked()
 
 void Mdio::on_cbBaudRate_currentIndexChanged(int index)
 {
-    if (index >= silentIntervalLIst.size()
+    if (index >= silentIntervaDefaultList.size()
         || index < 0) {
         return;
     }
-    ui->leSilentInterval->setText(silentIntervalLIst[index]);
+    ui->leSilentInterval->setText(silentIntervaDefaultList[index]);
+    ui->lSilentIntervalRange->setText(" ("
+                                      + silentIntervaMinList[index]
+                                      + "-"
+                                      + silentIntervaMaxList[index]
+                                      + ")");
 }

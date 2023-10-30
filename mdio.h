@@ -181,7 +181,9 @@ private:
     QStringList brStrList;
     QStringList parityStr;
     QStringList stopBitsStrList;
-    QStringList silentIntervalLIst;
+    QStringList silentIntervaDefaultList;
+    QStringList silentIntervaMinList;
+    QStringList silentIntervaMaxList;
 
     QJsonObject rootJsonObj;
 

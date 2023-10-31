@@ -501,13 +501,11 @@ bool Mdio::updateUiConfiguration(void)
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
     }
+    ui->leBinaryTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.binaryTsSwitchingTime));
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
         tsTypeConfigList[k]->setCurrentText(connectDeviceConf.signalisation.isBinary[k]
                                              ? TS_TEXT_BINARY
                                              : TS_TEXT_SIMPLE);
-        if (connectDeviceConf.signalisation.isBinary[k]) {
-            ui->leBinaryTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.binaryTsSwitchingTime));
-        }
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
 
@@ -889,6 +887,12 @@ void Mdio::on_pbApplySettings_clicked()
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         configuration.signalisation.isInvers[k] = tsSetingsList[k]->isInvert();
     }
+
+    /*
+     *  Set the correct value of the binaryTsSwitchingTime. If the user configures any of the tele signalisation input to the Binary mode,
+     *  the binaryTsSwitchingTime value will be overwritten by the user settings
+     */
+    configuration.signalisation.binaryTsSwitchingTime = rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeDefault").toString().toInt();
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
         configuration.signalisation.isBinary[k] = (tsTypeConfigList[k]->currentText() == TS_TEXT_BINARY);
         if (configuration.signalisation.isBinary[k]) {

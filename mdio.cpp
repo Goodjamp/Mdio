@@ -656,14 +656,14 @@ void Mdio::readStateResult(bool result, Communication::SlaveState state)
     emit this->updateUiStateSignal(result, state);
 }
 
-void Mdio::connectWithSettings()
+bool Mdio::connectWithSettings()
 {
     QStringList comList = Communication::getPortsList();
 
     if (comList.contains(connectPort) == false) {
         errorMessage("Помилка конфігурації",
                      "СOM порт не доступний");
-        return;
+        return false;
     }
 
     emit connectSlave(CB_WRAP_1(Mdio, connectSlaveResult),
@@ -677,7 +677,7 @@ void Mdio::connectWithSettings()
      */
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                         "Порт недоступний", true) == false) {
-        return;
+        return false;
     }
 
     /*
@@ -686,7 +686,7 @@ void Mdio::connectWithSettings()
     emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка зчитування метаінформації", false) == false) {
-        return;
+        return false;
     }
 
     /*
@@ -708,6 +708,8 @@ void Mdio::connectWithSettings()
      * Enable UI items
      */
     enableSettingsControl();
+
+    return true;
 }
 
 void Mdio::on_pbConnectionSettings_clicked()
@@ -736,7 +738,9 @@ void Mdio::on_pbConnectionSettings_clicked()
         return;
     }
 
-    connectWithSettings();
+    if (connectWithSettings()) {
+        readSettings();
+    }
 }
 
 void Mdio::on_pbApplySettings_clicked()
@@ -943,7 +947,7 @@ void Mdio::on_pbReload_clicked()
     }
 }
 
-void Mdio::on_pbReadSettings_clicked()
+void Mdio::readSettings()
 {
     /*
      * Read configuration
@@ -956,6 +960,11 @@ void Mdio::on_pbReadSettings_clicked()
 
     updateUiConfiguration();
     updateUiDeviceMetaInfStr();
+}
+
+void Mdio::on_pbReadSettings_clicked()
+{
+    readSettings();
 }
 
 void Mdio::updateUiCommunicationStatisticStr(void)
@@ -1051,7 +1060,9 @@ void Mdio::on_pbSetDefaultSettings_clicked()
 
 void Mdio::on_pbConnect_clicked()
 {
-    connectWithSettings();
+    if (connectWithSettings()) {
+        readSettings();
+    }
 }
 
 void Mdio::on_cbBaudRate_currentIndexChanged(int index)

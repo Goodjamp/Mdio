@@ -62,7 +62,7 @@ signals:
                              int slaveAddress);
 
 private:
-    void connectWithSettings();
+    bool connectWithSettings();
     void enableSettingsControl();
     void disableSettingsControl();
     void skipAllSettings();
@@ -77,6 +77,7 @@ private:
     void resetSlaveInformation(void);
     void addTsConfigBinaryGroupUi(void);
     void addTsStatusBinaryGroupUi(void);
+    void readSettings();
 
     /*
      * The groupe of CB functin from the Communication class

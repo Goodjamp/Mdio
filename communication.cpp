@@ -230,9 +230,22 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     uint16_t baseTcAddress;
 
     /*
-     * Read global status
+     * Read 220V in circuit
      */
     baseCoilAddress = ADDR_COIL_220_V_ERROR;
+    readCoilsNumber = ADDR_COIL_220_V_ERROR - baseCoilAddress + 1;
+    result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
+    if (result != ModbusRtuMaster::MB_OK) {
+        CALL_CB(cb, false, state);
+        qDebug()<<"readStateSlot read 220_V error:"<<modbus->getStatusString(result);
+        return;
+    }
+    state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
+
+    /*
+     *  Read EEPROM_ERROR and EEPROM_CLEAR status
+     */
+    baseCoilAddress = ADDR_COIL_EEPROM_ERROR;
     readCoilsNumber = ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress + 1;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
@@ -240,9 +253,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         qDebug()<<"readStateSlot read globalStatusReg error:"<<modbus->getStatusString(result);
         return;
     }
-    state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
-    state.errorConfiguration =  status[ADDR_COIL_CONFIGURATION_ERROR - baseCoilAddress];
     state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
 
     /*

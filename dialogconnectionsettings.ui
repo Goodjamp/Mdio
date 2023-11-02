@@ -605,7 +605,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Використати</string>
+        <string>Підключити</string>
        </property>
       </widget>
      </item>

@@ -126,7 +126,6 @@ private:
         ADDR_COIL_TC_4 = 3,
 
         ADDR_COIL_220_V_ERROR = 4,
-        ADDR_COIL_CONFIGURATION_ERROR = 5,
         ADDR_COIL_EEPROM_ERROR = 6,
         ADDR_COIL_EEPROM_CLEAR_ERROR = 7
     } AddrCoil;
@@ -160,7 +159,6 @@ public:
 
     typedef struct {
         bool error220;
-        bool errorConfiguration;
         bool errorEeprom;
         bool errorEepromClear;
         bool signalisation[TELESIGNAL_NUMBERS];

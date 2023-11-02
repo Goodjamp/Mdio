@@ -228,6 +228,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
         /*
          * Deserialiaze the binary information type
          */
+        state.clear();
         while (number) {
             rest = (number > 8) ? 8 : number;
             for (uint32_t k = 0; k < rest; k++) {

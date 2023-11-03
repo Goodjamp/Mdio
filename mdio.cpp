@@ -1004,7 +1004,7 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
          * The communicaiotn return 3 registers (1 puls and 2 static)
          */
         for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-            tcMonitorList[k]->setStateTextIndication(state.control[k] ? 0 : 1);
+            tcMonitorList[k]->setStateTextIndication(state.control[k]);
         }
 
         /*

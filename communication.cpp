@@ -299,11 +299,11 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
      * Test and apply the context of telecontrol registers
      */
     if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_PULS_ON) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = true;
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_PULS_STATE_ON;
     } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_PULS_OFF) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = false;
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_PULS_STATE_OFF;
     } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_UNDEFINED) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = false;
+        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
     } else {
         qDebug()<<"readStateSlot puls telecontrol value error";
         CALL_CB(cb, false, state);
@@ -312,13 +312,13 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     for (uint32_t k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
         if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
             == ModbusRtuMaster::COIL_ON) {
-            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = true;
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = Communication::TELECONTROL_PULS_STATE_ON;
         } else if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
                    == ModbusRtuMaster::COIL_OFF) {
-            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = false;
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = Communication::TELECONTROL_PULS_STATE_OFF;
         } else if (teleControl[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k]
                    == TELECONTROL_UNDEFINED) {
-            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = false;
+            state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
         } else {
             qDebug()<<"readStateSlot telecontrol value error";
             CALL_CB(cb, false, state);

@@ -135,6 +135,12 @@ public:
     ~Communication(){}
 
 public:
+    typedef enum {
+        TELECONTROL_PULS_STATE_ON,
+        TELECONTROL_PULS_STATE_OFF,
+        TELECONTROL_PULS_STATE_UNDEFINED,
+    } TelecontrolState;
+
     typedef struct {
         int configurationDay;
         int configurationMonth;
@@ -162,7 +168,7 @@ public:
         bool errorEeprom;
         bool errorEepromClear;
         bool signalisation[TELESIGNAL_NUMBERS];
-        bool control[TELECONTROL_TOTAL_NUMBERS];
+        TelecontrolState control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;
 
     typedef struct {

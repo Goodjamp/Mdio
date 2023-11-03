@@ -745,13 +745,13 @@
                   <property name="minimumSize">
                    <size>
                     <width>140</width>
-                    <height>30</height>
+                    <height>40</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
                     <width>140</width>
-                    <height>30</height>
+                    <height>40</height>
                    </size>
                   </property>
                   <property name="font">
@@ -762,8 +762,8 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Тривалість імпульсу
-ТК, мс</string>
+                   <string>Тривалість
+імпульсу ТК, мс</string>
                   </property>
                  </widget>
                 </item>

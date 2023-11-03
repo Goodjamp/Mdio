@@ -116,13 +116,13 @@
          <widget class="QLabel" name="lStateTextStr1">
           <property name="minimumSize">
            <size>
-            <width>60</width>
+            <width>100</width>
             <height>30</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>60</width>
+            <width>100</width>
             <height>30</height>
            </size>
           </property>
@@ -146,13 +146,13 @@
          <widget class="QLabel" name="lStateTextStr2">
           <property name="minimumSize">
            <size>
-            <width>60</width>
+            <width>100</width>
             <height>30</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>60</width>
+            <width>100</width>
             <height>30</height>
            </size>
           </property>

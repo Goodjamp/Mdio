@@ -502,7 +502,14 @@ bool Mdio::updateUiConfiguration(void)
         tsSetingsList[k]->setInvert(connectDeviceConf.signalisation.isInvers[k]);
     }
     ui->leBinaryTsSwitchTime->setText(QString::number(connectDeviceConf.signalisation.binaryTsSwitchingTime));
+
+
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
+        /*
+         * Set the tsTypeConfigList[k] current index equal to -1 to guranted that the on_cbTsType_currentIndexChanged CB
+         * will be called
+         */
+        tsTypeConfigList[k]->setCurrentIndex(-1);
         tsTypeConfigList[k]->setCurrentText(connectDeviceConf.signalisation.isBinary[k]
                                              ? TS_TEXT_BINARY
                                              : TS_TEXT_SIMPLE);

@@ -395,5 +395,4 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::writeSlaveMultipleRegisters(uint8_t s
 void ModbusRtuMaster::setReadReplyTimeout(int timeout)
 {
     readTimeout = timeout;
-    qDebug()<<"readTimeout: "<<readTimeout;
 }

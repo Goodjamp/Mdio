@@ -227,10 +227,6 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
             teleSignalStatusBinaryFrameList[k]->setProperty("tsBinary", index == 1);
             teleSignalStatusBinaryFrameList[k]->style()->unpolish(teleSignalStatusBinaryFrameList[k]);
             teleSignalStatusBinaryFrameList[k]->style()->polish(teleSignalStatusBinaryFrameList[k]);
-
-
-            qDebug()<<"State = "<<isSimpleTs;
-            qDebug()<<"Sender search Ok";
         }
     }
 
@@ -586,7 +582,10 @@ void Mdio::connectSlaveResult(bool result)
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"Connect rez:"<<result;
+    if (result == false) {
+        qDebug()<<"Error connect";
+    }
+
     communicationSyncSem.release(1);
 
 }
@@ -597,7 +596,10 @@ void  Mdio::writeConfigurationResult(bool result)
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"writeConfigurationResult result: "<<result;
+
+    if (result == false) {
+        qDebug()<<"Error write Configuration";
+    }
     communicationSyncSem.release(1);
 }
 
@@ -607,7 +609,10 @@ void Mdio::setTeleControlResult(bool result)
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"setTeleControlResult result: "<<result;
+    if (result == false) {
+        qDebug()<<"Error set tele control";
+    }
+
     communicationSyncSem.release(1);
 }
 
@@ -618,12 +623,13 @@ void Mdio::readMetaInformationResult(bool result, Communication::MetaInformation
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"Read meta information result: "<<result;
     if (result == true) {
         connectDeviceVersion = metaInformation.fwVersion;
         lastConfigurationDay = metaInformation.configurationDay;
         lastConfigurationMonth = metaInformation.configurationMonth;
         lastConfigurationYear = metaInformation.configurationYear;
+    } else {
+        qDebug()<<"Error read meta information ";
     }
     communicationSyncSem.release(1);
 }
@@ -634,9 +640,11 @@ void  Mdio::readConfigurationResult(bool result, Communication::SlaveConfigurati
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"readConfigurationResult result: "<<result;
+
     if (result == true) {
         connectDeviceConf = configuration;
+    } else {
+        qDebug()<<"Error read configuration";
     }
     communicationSyncSem.release(1);
 }
@@ -648,7 +656,6 @@ void Mdio::reloadResult(bool result)
      * Release (give) semaphore to unblok code that waite to complete
      */
     communicationResult = result;
-    qDebug()<<"reloadResult result: "<<result;
     if (result == true) {
         /*
          * Do we need apply new communicaiotn settings ?
@@ -659,7 +666,10 @@ void Mdio::reloadResult(bool result)
 
 void Mdio::readStateResult(bool result, Communication::SlaveState state)
 {
-    qDebug()<<"readStateResult result: "<<result;
+    if (result == false) {
+        qDebug()<<"Error read state";
+    }
+
     emit this->updateUiStateSignal(result, state);
 }
 

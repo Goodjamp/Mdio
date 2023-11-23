@@ -75,7 +75,7 @@ bool SerialCommunication::close()
 bool SerialCommunication::write(QByteArray &writeData)
 {
     if (port->isOpen() == false) {
-        qDebug()<<"Port close";
+        qDebug()<<"Error write: port close";
         return false;
     }
     if (writeData.size() == 0) {
@@ -92,7 +92,7 @@ bool SerialCommunication::write(QByteArray &writeData)
 bool SerialCommunication::read(QByteArray &readBuff)
 {
     if (port->isOpen() == false) {
-        qDebug()<<"Port close";
+        qDebug()<<"Error read: port close";
         return false;
     }
     readBuff.clear();

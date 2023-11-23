@@ -93,10 +93,10 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
         if (result == ModbusRtuMaster::MB_OK) {
             resultWriteConfiguration = true;
         } else {
-           qDebug()<<"writeConfigurationSlot write configuration error:"<<modbus->getStatusString(result);
+           qDebug()<<"Error writeConfigurationSlot write configuration: "<<modbus->getStatusString(result);
         }
     } else {
-        qDebug()<<"writeConfigurationSlot paity or stopBits error";
+        qDebug()<<"Error writeConfigurationSlot paity or stopBits error";
     }
 
     CALL_CB(cb, resultWriteConfiguration);
@@ -162,10 +162,10 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
             configuration.control.pulsDuration = configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg];
             resulReadConfiguration = true;
         } else {
-            qDebug()<<"readConfigurationSlot parity or stop bits error:";
+            qDebug()<<"Error readConfigurationSlot parity or stop bits error:";
         }
     } else {
-        qDebug()<<"readConfigurationSlot read configuration error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error readConfigurationSlot read configuration: "<<modbus->getStatusString(result);
     }
 
     CALL_CB(cb, resulReadConfiguration, configuration);
@@ -189,7 +189,7 @@ void Communication::readMetaInformationSlot(std::function<void(bool result, Meta
     result = modbus->readHoldingRegisters(slaveAddress, baseReg, registersNumbers, readData);
 
     if (result != ModbusRtuMaster::MB_OK) {
-        qDebug()<<"readMetaInformationSlot error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error readMetaInformationSlot: "<<modbus->getStatusString(result);
         CALL_CB(cb, false, metaInformation);
         return;
     }
@@ -212,7 +212,7 @@ void Communication::reloadSlot(std::function<void(bool result)> cb,
     if (result == ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, true);
     } else {
-        qDebug()<<"reloadSlot error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error reloadSlot: "<<modbus->getStatusString(result);
         CALL_CB(cb, false);
     }
 }
@@ -237,7 +237,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
-        qDebug()<<"readStateSlot read 220_V error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error readStateSlot read 220_V: "<<modbus->getStatusString(result);
         return;
     }
     state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
@@ -250,7 +250,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
-        qDebug()<<"readStateSlot read globalStatusReg error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error readStateSlot read globalStatusReg: "<<modbus->getStatusString(result);
         return;
     }
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
@@ -258,7 +258,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with
-     * exception. So, in this case we can skip reading the tele-signal information
+     * exception. Therefore we read the tele-signal information only if STATUS_220 == false
      */
     if (state.error220 == false) {
         /*
@@ -269,7 +269,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, teleSignal);
         if (result != ModbusRtuMaster::MB_OK) {
             CALL_CB(cb, false, state);
-            qDebug()<<"readStateSlot read read signals error:"<<modbus->getStatusString(result);
+            qDebug()<<"Error readStateSlot read read signals: "<<modbus->getStatusString(result);
             return;
         }
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
@@ -291,7 +291,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     result = modbus->readInputRegisters(slaveAddress, baseTcAddress, TELECONTROL_TOTAL_NUMBERS, teleControl);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
-        qDebug()<<"readStateSlot read tele control error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error readStateSlot read tele control: "<<modbus->getStatusString(result);
         return;
     }
 
@@ -305,7 +305,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_UNDEFINED) {
         state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
     } else {
-        qDebug()<<"readStateSlot puls telecontrol value error";
+        qDebug()<<"Error readStateSlot puls telecontrol value error";
         CALL_CB(cb, false, state);
         return;
     }
@@ -320,7 +320,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
                    == TELECONTROL_UNDEFINED) {
             state.control[ADDR_REG_TELE_CONTROL_2 - baseTcAddress + k] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
         } else {
-            qDebug()<<"readStateSlot telecontrol value error";
+            qDebug()<<"Error readStateSlot telecontrol value error";
             CALL_CB(cb, false, state);
             return;
         }
@@ -334,13 +334,13 @@ void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
 ModbusRtuMaster::MbStatus result;
 
     if (index > TELECONTRO_STATIC_NUMBERS) {
-        qDebug()<<"setTeleControlSlot index value error: "<<index;
+        qDebug()<<"Error setTeleControlSlot index value error: "<<index;
         CALL_CB(cb, false);
         return;
     }
     result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable);
     if (result != ModbusRtuMaster::MB_OK) {
-        qDebug()<<"setTeleControlSlot send error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error setTeleControlSlot send: "<<modbus->getStatusString(result);
     }
     CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }
@@ -355,7 +355,7 @@ void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
                                           ? static_cast<uint16_t>(TELECONTROL_PULS_ON)
                                           : static_cast<uint16_t>(TELECONTROL_PULS_OFF));
     if (result != ModbusRtuMaster::MB_OK) {
-        qDebug()<<"setTeleControlPulsSlot send error:"<<modbus->getStatusString(result);
+        qDebug()<<"Error setTeleControlPulsSlot send: "<<modbus->getStatusString(result);
     }
     CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }

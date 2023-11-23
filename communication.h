@@ -82,9 +82,9 @@ private:
         /*
          * Tele control registers
          */
-        ADDR_REG_TELE_CONTROL_1 = 0x0009,
-        ADDR_REG_TELE_CONTROL_2 = 0x000A,
-        ADDR_REG_TELE_CONTROL_3 = 0x000B,
+        ADDR_REG_TELE_CONTROL_1 = 519,
+        ADDR_REG_TELE_CONTROL_2 = 521,
+        ADDR_REG_TELE_CONTROL_3 = 522,
 
         /*
          * settings registers
@@ -120,10 +120,10 @@ private:
     } AddrReg;
 
     typedef enum {
-        ADDR_COIL_TC_1 = 0,
-        ADDR_COIL_TC_2 = 1,
-        ADDR_COIL_TC_3 = 2,
-        ADDR_COIL_TC_4 = 3,
+        ADDR_COIL_TC_1 = 506,
+        ADDR_COIL_TC_2 = 507,
+        ADDR_COIL_TC_3 = 508,
+        ADDR_COIL_TC_4 = 509,
 
         ADDR_COIL_220_V_ERROR = 4,
         ADDR_COIL_EEPROM_ERROR = 6,

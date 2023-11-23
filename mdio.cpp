@@ -1036,7 +1036,6 @@ void Mdio::readSlaveState(void)
     emit readState(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
     stateRequestCnt++;
     updateUiCommunicationStatisticStr();
-    //ui->pbConnectionStatus->
     ui->pbConnectionStatus->setChecked(false);
 }
 

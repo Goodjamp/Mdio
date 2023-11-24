@@ -302,7 +302,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_UNDEFINED) {
         state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
     } else {
-        qDebug()<<"Error readStateSlot puls telecontrol value error";
+        qDebug()<<"Error readStateSlot puls telecontrol value";
         CALL_CB(cb, false, state);
         return;
     }
@@ -323,13 +323,13 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
      */
     for (uint32_t k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
         if (teleControl[k] == ModbusRtuMaster::COIL_ON) {
-            state.control[k] = Communication::TELECONTROL_PULS_STATE_ON;
+            state.control[k + 1] = Communication::TELECONTROL_PULS_STATE_ON;
         } else if (teleControl[k] == ModbusRtuMaster::COIL_OFF) {
-            state.control[k] = Communication::TELECONTROL_PULS_STATE_OFF;
+            state.control[k + 1] = Communication::TELECONTROL_PULS_STATE_OFF;
         } else if (teleControl[k] == TELECONTROL_UNDEFINED) {
-            state.control[k] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
+            state.control[k + 1] = Communication::TELECONTROL_PULS_STATE_UNDEFINED;
         } else {
-            qDebug()<<"Error readStateSlot telecontrol value error";
+            qDebug()<<"Error readStateSlot static telecontrol value";
             CALL_CB(cb, false, state);
             return;
         }
@@ -349,7 +349,7 @@ ModbusRtuMaster::MbStatus result;
     }
     result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable);
     if (result != ModbusRtuMaster::MB_OK) {
-        qDebug()<<"Error setTeleControlSlot send: "<<modbus->getStatusString(result);
+        qDebug()<<"Error setTeleControlSlot reply: "<<modbus->getStatusString(result);
     }
     CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }
@@ -364,7 +364,7 @@ void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
                                           ? static_cast<uint16_t>(TELECONTROL_PULS_ON)
                                           : static_cast<uint16_t>(TELECONTROL_PULS_OFF));
     if (result != ModbusRtuMaster::MB_OK) {
-        qDebug()<<"Error setTeleControlPulsSlot send: "<<modbus->getStatusString(result);
+        qDebug()<<"Error setTeleControlPulsSlot reply: "<<modbus->getStatusString(result);
     }
     CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
 }

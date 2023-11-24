@@ -106,7 +106,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
         if (rxData->at(MB_FUNCTION_CODE_POS) == static_cast<char>(MB_EXCEPTION_CODE(function))) {
             return MB_RX_EXEPTION;
         } else {
-            return MB_ADDRESS_ERROR;
+            return MB_FUNCTION_ERROR;
         }
     }
 
@@ -217,6 +217,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
         return MB_BYTES_NUMBER_ERROR;
     }
 
+    state.clear();
     /*
      * Deserializing payload depend pn the function
      */
@@ -228,7 +229,6 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
         /*
          * Deserialiaze the binary information type
          */
-        state.clear();
         while (number) {
             rest = (number > 8) ? 8 : number;
             for (uint32_t k = 0; k < rest; k++) {

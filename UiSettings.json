@@ -51,7 +51,7 @@
     "TS":
     {
         "DebounceDefault": "20",
-        "DebounceMin": "1",
+        "DebounceMin": "0",
         "DebounceMax": "100"
     },
     "BinaryTs":

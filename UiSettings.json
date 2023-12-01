@@ -51,19 +51,19 @@
     "TS":
     {
         "DebounceDefault": "20",
-        "DebounceMin": "20",
+        "DebounceMin": "1",
         "DebounceMax": "100"
-    },
-    "TC":
-    {
-        "PulsDurationDefault": "1000",
-        "PulsDurationMin": "100",
-        "PulsDurationMax": "4000"
     },
     "BinaryTs":
     {
         "BinaryTsSwitchTimeDefault": "500",
         "BinaryTsSwitchTimeMin": "100",
         "BinaryTsSwitchTimeMax": "10000"
+    },
+    "TC":
+    {
+        "PulsDurationDefault": "1000",
+        "PulsDurationMin": "100",
+        "PulsDurationMax": "4000"
     }
 }

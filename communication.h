@@ -24,8 +24,6 @@
 #define TELECONTROL_PULS_NUMBERS        1
 #define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTRO_STATIC_NUMBERS)
 #define RESET_MAGIC_NUMBER              0X55FF
-#define TELECONTROL_PULS_ON             0x0002
-#define TELECONTROL_PULS_OFF            0x0001
 #define TELECONTROL_UNDEFINED           0xFFFF
 
 #define STATUS_220_POS                  0
@@ -136,9 +134,9 @@ public:
 
 public:
     typedef enum {
-        TELECONTROL_PULS_STATE_ON,
-        TELECONTROL_PULS_STATE_OFF,
-        TELECONTROL_PULS_STATE_UNDEFINED,
+        TELECONTROL_STATE_ON,
+        TELECONTROL_STATE_OFF,
+        TELECONTROL_STATE_UNDEFINED,
     } TelecontrolState;
 
     typedef struct {

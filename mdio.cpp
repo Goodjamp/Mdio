@@ -259,6 +259,11 @@ void Mdio::initCustomUi(QString language)
     /*
      * Add TeleControl status/control items
      */
+    ui->lTcPulsDurationRange->setText("("
+                                      + rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString()
+                                      + "-"
+                                      + rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString()
+                                      + ")");
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("", k, this));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList.last());
@@ -284,7 +289,16 @@ void Mdio::initCustomUi(QString language)
     /*
      * Add TeleSignalisation configuration items
      */
-
+    ui->lTsDebounceTimeRange->setText("("
+                                      + rootJsonObj.value("TS").toObject().value("DebounceMin").toString()
+                                      + "-"
+                                      + rootJsonObj.value("TS").toObject().value("DebounceMax").toString()
+                                      + ")");
+    ui->lTsDoubleSwitchTimeRange->setText("("
+                                          + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString()
+                                          + "-"
+                                          + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString()
+                                          + ")");
     addTsConfigBinaryGroupUi();
 
     /*
@@ -694,6 +708,7 @@ bool Mdio::connectWithSettings()
      */
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                         "Порт недоступний", true) == false) {
+        disconnectSlave();
         return false;
     }
 
@@ -703,6 +718,7 @@ bool Mdio::connectWithSettings()
     emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка зчитування метаінформації", false) == false) {
+        disconnectSlave();
         return false;
     }
 

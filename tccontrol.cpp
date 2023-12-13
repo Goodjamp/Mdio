@@ -40,6 +40,16 @@ QPushButton *TcControl::getOffButtonPointer()
     return ui->pbOff;
 }
 
+void TcControl::setOnButtonState(bool state)
+{
+    ui->pbOn->setChecked(state);
+}
+
+void TcControl::setOffButtonState(bool state)
+{
+    ui->pbOff->setChecked(state);
+}
+
 TcControl::~TcControl()
 {
     delete ui;

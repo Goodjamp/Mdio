@@ -723,6 +723,13 @@ bool Mdio::connectWithSettings()
     }
 
     /*
+     * Read state only for update TC button state
+     */
+    updateTcButtonState = true;
+    emit readState(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
+
+
+    /*
      * Start timer to read the slave state
      */
     stateRequestCnt = 0;
@@ -1044,6 +1051,34 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
          * Update blinker
          */
         ui->pbConnectionStatus->setChecked(true);
+
+        /*
+         * If this function call firs time after connection, we need update the state of the
+         * button on the pannel of the TC control
+         */
+        if (updateTcButtonState == true) {
+            updateTcButtonState = false;
+
+            for (int k = 1; k < TELECONTROL_TOTAL_NUMBERS; k++) {
+                switch (state.control[k]) {
+                case Communication::TELECONTROL_STATE_ON:
+                    tcMonitorList[k]->setOnButtonState(true);
+                    tcMonitorList[k]->setOffButtonState(false);
+                    break;
+
+                case Communication::TELECONTROL_STATE_OFF:
+                    tcMonitorList[k]->setOnButtonState(false);
+                    tcMonitorList[k]->setOffButtonState(true);
+                    break;
+
+                case Communication::TELECONTROL_STATE_UNDEFINED:
+                    tcMonitorList[k]->setOnButtonState(false);
+                    tcMonitorList[k]->setOffButtonState(false);
+                    break;
+                }
+            }
+
+        }
     }
 }
 

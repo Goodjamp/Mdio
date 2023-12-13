@@ -23,6 +23,8 @@ public:
     void setTextStateList(QStringList textListStr1, QStringList textListStr2);
     QPushButton *getOnButtonPointer();
     QPushButton *getOffButtonPointer();
+    void setOnButtonState(bool state);
+    void setOffButtonState(bool state);
     void unchekAllButton();
 
 signals:

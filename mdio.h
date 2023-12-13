@@ -156,6 +156,7 @@ private:
 
     bool needConnectSlave;
     bool isSlaveConnect;
+    bool updateTcButtonState;
 
     /*
      * Connect to slave port (COM port) settings

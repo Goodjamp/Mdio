@@ -305,14 +305,6 @@ void Mdio::initCustomUi(QString language)
      * Add TeleSignalisation status items
      */
 
-    /*
-    for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-        tsStatus.append(new TsStatus(k + 1));
-        ui->vlTeleSignalStatus->addWidget(tsStatus.last());
-    }
-    tsStatusLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->vlTeleSignalStatus->addItem(tsStatusLayoutSpacer);
-    */
     addTsStatusBinaryGroupUi();
     /*
      *  Title bar: icon name
@@ -1059,6 +1051,15 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         if (updateTcButtonState == true) {
             updateTcButtonState = false;
 
+            /*
+             * For the puls TC type (TC0) we skip current state all the time
+             */
+            tcMonitorList[0]->setOnButtonState(false);
+            tcMonitorList[0]->setOffButtonState(false);
+
+            /*
+             * For the other TC we need set actual state
+             */
             for (int k = 1; k < TELECONTROL_TOTAL_NUMBERS; k++) {
                 switch (state.control[k]) {
                 case Communication::TELECONTROL_STATE_ON:

@@ -219,3 +219,10 @@ QFrame#fModbusSettings
     border-color: rgb(0, 0, 0);
 }
 
+QFrame#fCommunicationInd
+{
+    border: solid;
+    border-width: 2px;
+    border-radius: 4px;
+    border-color: rgb(120, 120, 250);
+}

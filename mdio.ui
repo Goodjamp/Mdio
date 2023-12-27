@@ -67,8 +67,17 @@
           <string>Налаштування</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>4</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="vlConnectionExternal">
               <property name="spacing">
@@ -90,7 +99,7 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>11</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -100,6 +109,13 @@
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -195,13 +211,13 @@
                    <widget class="QLabel" name="lSilentIntervalRange">
                     <property name="minimumSize">
                      <size>
-                      <width>80</width>
+                      <width>75</width>
                       <height>25</height>
                      </size>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>80</width>
+                      <width>75</width>
                       <height>25</height>
                      </size>
                     </property>
@@ -245,7 +261,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>115</width>
+                    <width>500</width>
                     <height>40</height>
                    </size>
                   </property>
@@ -272,7 +288,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>115</width>
+                    <width>500</width>
                     <height>25</height>
                    </size>
                   </property>
@@ -298,7 +314,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>1000</width>
+                    <width>500</width>
                     <height>40</height>
                    </size>
                   </property>
@@ -345,7 +361,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>0</string>
+                     <string>100</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -356,13 +372,13 @@
                    <widget class="QLabel" name="label_11">
                     <property name="minimumSize">
                      <size>
-                      <width>80</width>
+                      <width>75</width>
                       <height>25</height>
                      </size>
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>80</width>
+                      <width>75</width>
                       <height>25</height>
                      </size>
                     </property>
@@ -406,7 +422,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>115</width>
+                    <width>500</width>
                     <height>25</height>
                    </size>
                   </property>
@@ -455,7 +471,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>115</width>
+                    <width>500</width>
                     <height>25</height>
                    </size>
                   </property>
@@ -545,7 +561,7 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>11</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -555,6 +571,13 @@
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -740,7 +763,7 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>11</pointsize>
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -750,6 +773,13 @@
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -1471,13 +1501,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbConnectionSettings">
         <property name="minimumSize">
          <size>
-          <width>170</width>
+          <width>180</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>170</width>
+          <width>180</width>
           <height>30</height>
          </size>
         </property>
@@ -1526,13 +1556,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbConnect">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>105</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>105</width>
           <height>30</height>
          </size>
         </property>
@@ -1552,13 +1582,13 @@ EEPROM</string>
        <widget class="QPushButton" name="pbDisconnect">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>105</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>105</width>
           <height>30</height>
          </size>
         </property>

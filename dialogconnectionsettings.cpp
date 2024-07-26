@@ -75,9 +75,9 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
     ui->leReplyTimeout->setText(currentSettings.replyTimeout);
 
     setWindowTitle("Параметри з'єднання з ПК");
-    ui->leAddress->setValidator(new QRegExpValidator((QRegExp)"\\d{1,3}", this));
-    ui->leSilentInterval->setValidator(new QRegExpValidator((QRegExp)"\\d{1,3}", this));
-    ui->leReplyTimeout->setValidator(new QRegExpValidator((QRegExp)"\\d{1,4}", this));
+    ui->leAddress->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this));
+    ui->leSilentInterval->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this));
+    ui->leReplyTimeout->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,4}", this));
 
     using ::operator|;
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);

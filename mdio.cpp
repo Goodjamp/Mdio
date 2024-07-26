@@ -12,7 +12,7 @@
 #include <QMessageBox>
 #include <QValidator>
 #include <QByteArray>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -243,9 +243,9 @@ void Mdio::initCustomUi(QString language)
     QStringList strListRelayStr2;
     relayControlListTc1 = new QButtonGroup();
     relayControlListTc2 = new QButtonGroup();
-    QRegExpValidator *numericValidator3D = new QRegExpValidator((QRegExp)"\\d{1,3}", this);
-    QRegExpValidator *numericValidator4D = new QRegExpValidator((QRegExp)"\\d{1,4}", this);
-    QRegExpValidator *numericValidator5D = new QRegExpValidator((QRegExp)"\\d{1,5}", this);
+    QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this);
+    QRegularExpressionValidator *numericValidator4D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,4}", this);
+    QRegularExpressionValidator *numericValidator5D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,5}", this);
 
     /*
      * Add validation to the numeric UI items

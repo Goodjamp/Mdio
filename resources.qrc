@@ -7,6 +7,6 @@
         <file>Resources/Rela_RC1_Off.png</file>
         <file>Resources/Relay_Off.png</file>
         <file>Resources/Relay_On.png</file>
-        <file>UiSettings.json</file>
+        <file>Settings.json</file>
     </qresource>
 </RCC>

@@ -24,7 +24,8 @@ SOURCES += \
     serialcommunication.cpp \
     tccontrol.cpp \
     tssettings.cpp \
-    tsstatus.cpp
+    tsstatus.cpp \
+    SwDefaultSettings.cpp
 
 HEADERS += \
     communication.h \
@@ -35,7 +36,8 @@ HEADERS += \
     tccontrol.h \
     tssettings.h \
     tsstatus.h \
-    Version.h
+    Version.h \
+    SwDefaultSettings.h
 
 FORMS += \
     dialogconnectionsettings.ui \

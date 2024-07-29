@@ -6,53 +6,18 @@
 #include <QDebug>
 #include <QFile>
 #include <QByteArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 
-#include <QJsonArray>
-
+#include "SwDefaultSettings.h"
 
 #define VALUE_IN_RANGE(value, min, max)    (((value) >= (min)) && ((value) <= (max)))
 
 void DialogConnectionSettings::getSettingsFromJson()
 {
-    QFile jsonFile(":/UiSettings.json");
-    QByteArray jsonContent;
-    QJsonDocument uiDescrJson;
-    QJsonArray temJsonArray;
-    QJsonArray relayStateString;
-    QJsonObject temObj;
+    SwDefaultSettings defaultSettings;
 
-    QStringList tempList;
-
-    /*
-     * Read JSON file with UI text settings / data
-     */
-    jsonFile.open(QFile::ReadOnly);
-    jsonContent = jsonFile.readAll();
-    jsonFile.close();
-
-    uiDescrJson = QJsonDocument::fromJson(jsonContent);
-    jsonRootObj = uiDescrJson.object();
-    temObj = jsonRootObj.value("Port").toObject();
-
-    foreach(auto item, temObj.value("BrList").toArray().toVariantList()) {
-        tempList.push_back(item.toString());
-    }
-    ui->cbBaudRate->addItems(tempList);
-
-    tempList.clear();
-    foreach(auto item, temObj.value("ParityList").toArray().toVariantList()) {
-        tempList.push_back(item.toString());
-    }
-    ui->cbParity->addItems(tempList);
-
-    tempList.clear();
-    foreach(auto item, temObj.value("StopBitsList").toArray().toVariantList()) {
-        tempList.push_back(item.toString());
-    }
-    ui->cbStopBits->addItems(tempList);
+    ui->cbBaudRate->addItems(defaultSettings.getBrList());
+    ui->cbParity->addItems(defaultSettings.getParityList());
+    ui->cbStopBits->addItems(defaultSettings.getStopBitList());
 }
 
 DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
@@ -83,16 +48,6 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
-void DialogConnectionSettings::setDefaultUi()
-{
-    ui->cbBaudRate->setCurrentText(jsonRootObj.value("Port").toObject().value("BrDefault").toString());
-    ui->cbParity->setCurrentText(jsonRootObj.value("Port").toObject().value("ParityDefault").toString());
-    ui->cbStopBits->setCurrentText(jsonRootObj.value("Port").toObject().value("StopBitsDefault").toString());
-    ui->leAddress->setText(jsonRootObj.value("Modbus").toObject().value("AddressDefault").toString());
-    ui->leSilentInterval->setText(jsonRootObj.value("Modbus").toObject().value("SilentIntervalDefaultPc").toString());
-    ui->leReplyTimeout->setText(jsonRootObj.value("Modbus").toObject().value("TimeoutReplyDefaultPc").toString());
-}
-
 DialogConnectionSettings::~DialogConnectionSettings()
 {
     delete ui;
@@ -116,6 +71,7 @@ void DialogConnectionSettings::errorMessage(QString headr, QString detailed)
 
 void DialogConnectionSettings::on_pbApply_clicked()
 {
+    SwDefaultSettings defaultSettings;
     if (ui->leAddress->text().toUInt() > 255) {
         QMessageBox *errorAddressMessage = new QMessageBox(QMessageBox::Warning,
                                                            "Помилка адреси пристрою",
@@ -128,27 +84,27 @@ void DialogConnectionSettings::on_pbApply_clicked()
         UserSettingsList currentSettings;
 
         if (VALUE_IN_RANGE(ui->leReplyTimeout->text().toInt(),
-                           jsonRootObj.value("Modbus").toObject().value("TimeoutReplyMinPc").toString().toInt(),
-                           jsonRootObj.value("Modbus").toObject().value("TimeoutReplyMaxPc").toString().toInt())
+                           defaultSettings.getTimeoutReplyMinPc().toInt(),
+                           defaultSettings.getTimeoutReplyMaxPc().toInt())
                            == false) {
             errorMessage("Помилка конфігурації",
                          "Час таймаут повинен бути в діапазоні ["
-                         +jsonRootObj.value("Modbus").toObject().value("TimeoutReplyMinPc").toString()
+                         + defaultSettings.getTimeoutReplyMinPc()
                          + "-"
-                         + jsonRootObj.value("Modbus").toObject().value("TimeoutReplyMaxPc").toString()
+                         + defaultSettings.getTimeoutReplyMaxPc()
                          + "] мс");
             return;
         }
 
         if (VALUE_IN_RANGE(ui->leSilentInterval->text().toInt(),
-                           jsonRootObj.value("Modbus").toObject().value("SilentIntervalMinPc").toString().toInt(),
-                           jsonRootObj.value("Modbus").toObject().value("SilentIntervalMaxPc").toString().toInt())
+                           defaultSettings.getSilentIntervalMinPc().toInt(),
+                           defaultSettings.getSilentIntervalMaxPc().toInt())
                            == false) {
             errorMessage("Помилка конфігурації",
                          "Час тиші повинено бути в діапазоні ["
-                         +jsonRootObj.value("Modbus").toObject().value("SilentIntervalMinPc").toString()
+                         +defaultSettings.getSilentIntervalMinPc()
                          + "-"
-                         + jsonRootObj.value("Modbus").toObject().value("SilentIntervalMaxPc").toString()
+                         + defaultSettings.getSilentIntervalMaxPc()
                          + "] мс");
             return;
         }
@@ -174,5 +130,12 @@ void DialogConnectionSettings::on_pbClose_clicked()
 
 void DialogConnectionSettings::on_byDefault_clicked()
 {
-    setDefaultUi();
+    SwDefaultSettings defaultSettings;
+
+    ui->cbBaudRate->setCurrentText(defaultSettings.getBrDefault());
+    ui->cbParity->setCurrentText(defaultSettings.getParityDefault());
+    ui->cbStopBits->setCurrentText(defaultSettings.getStopBitsDefault());
+    ui->leAddress->setText(defaultSettings.getAddressDefault());
+    ui->leSilentInterval->setText(defaultSettings.getSilentIntervalDefaultPc());
+    ui->leReplyTimeout->setText(defaultSettings.getTimeoutReplyDefaultPc());
 }

@@ -67,7 +67,7 @@ private:
     void disableSettingsControl();
     void skipAllSettings();
     void getSettingsFromJson();
-    void initCustomUi(QString language);
+    void initCustomUi();
     void updateUiConnectionStatusStr(void);
     void updateUiDeviceMetaInfStr(void);
     void updateUiCommunicationStatisticStr(void);
@@ -186,8 +186,6 @@ private:
     QStringList silentIntervaDefaultList;
     QStringList silentIntervaMinList;
     QStringList silentIntervaMaxList;
-
-    QJsonObject rootJsonObj;
 
     /*
      * Services variable. Used to move readed settings from CallBack method to the showUimethod

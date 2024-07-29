@@ -21,6 +21,7 @@
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
 #include "Version.h"
+#include <SwDefaultSettings.h>
 
 
 #define STR_CAST(str)     static_cast<QString>(str)
@@ -30,39 +31,21 @@
 
 void Mdio::getSettingsFromJson()
 {
-    QFile jsonFile(":/UiSettings.json");
-    QByteArray jsonContent;
-    QJsonDocument uiDescrJson;
-
-    /*
-     * Rread JSON file with UI text settings
-     */
-    jsonFile.open(QFile::ReadOnly);
-    jsonContent = jsonFile.readAll();
-    jsonFile.close();
-
-    uiDescrJson = QJsonDocument::fromJson(jsonContent);
-    rootJsonObj = uiDescrJson.object();
+    SwDefaultSettings defaultSettings;
 
     /*
      * Default (initial) connection settings
      */
-    lastConnectionUserSettings.br = rootJsonObj.value("Port").toObject().value("BrDefault").toString();
-    lastConnectionUserSettings.parity = rootJsonObj.value("Port").toObject().value("ParityDefault").toString();
-    lastConnectionUserSettings.stopBits = rootJsonObj.value("Port").toObject().value("StopBitsDefault").toString();
-    lastConnectionUserSettings.address = rootJsonObj.value("Modbus").toObject().value("AddressDefault").toString();
-    lastConnectionUserSettings.replyTimeout = rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefaultPc").toString();
-    lastConnectionUserSettings.silentInterval = rootJsonObj.value("Modbus").toObject().value("SilentIntervalDefaultPc").toString();
+    lastConnectionUserSettings.br = defaultSettings.getBrDefault();
+    lastConnectionUserSettings.parity = defaultSettings.getParityDefault();
+    lastConnectionUserSettings.stopBits = defaultSettings.getStopBitsDefault();
+    lastConnectionUserSettings.address = defaultSettings.getAddressDefault();
+    lastConnectionUserSettings.replyTimeout = defaultSettings.getTimeoutReplyDefaultPc();
+    lastConnectionUserSettings.silentInterval = defaultSettings.getSilentIntervalDefaultPc();
     lastConnectionUserSettings.port = "";
-    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaDefaultList").toArray().toVariantList()){
-        silentIntervaDefaultList.push_back(item.toString());
-    }
-    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaMinList").toArray().toVariantList()){
-        silentIntervaMinList.push_back(item.toString());
-    }
-    foreach(auto item, rootJsonObj.value("Modbus").toObject().value("silentIntervaMaxList").toArray().toVariantList()){
-        silentIntervaMaxList.push_back(item.toString());
-    }
+    silentIntervaDefaultList = defaultSettings.getSilentIntervaList();
+    silentIntervaMinList = defaultSettings.getSilentIntervaMinList();
+    silentIntervaMaxList = defaultSettings.getSilentIntervaMaxList();
 }
 
 void Mdio::enableSettingsControl()
@@ -236,11 +219,9 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
      ui->leBinaryTsSwitchTime->setEnabled(isSimpleTs);
 }
 
-void Mdio::initCustomUi(QString language)
+void Mdio::initCustomUi()
 {
-    QJsonArray temJsonArray;
-    QStringList strListRelayStr1;
-    QStringList strListRelayStr2;
+    SwDefaultSettings defaultSettings;
     relayControlListTc1 = new QButtonGroup();
     relayControlListTc2 = new QButtonGroup();
     QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this);
@@ -260,9 +241,9 @@ void Mdio::initCustomUi(QString language)
      * Add TeleControl status/control items
      */
     ui->lTcPulsDurationRange->setText("("
-                                      + rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString()
+                                      + defaultSettings.getPulsDurationMin()
                                       + "-"
-                                      + rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString()
+                                      + defaultSettings.getPulsDurationMax()
                                       + ")");
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("", k, this));
@@ -272,32 +253,23 @@ void Mdio::initCustomUi(QString language)
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
-    temJsonArray = rootJsonObj.value("Language").toObject().value(language).toObject().value("TC").toArray();
-    for (int k = 0; k < temJsonArray.size(); k++) {
-        strListRelayStr1.clear();
-        strListRelayStr2.clear();
-        tcMonitorList[k]->setName(temJsonArray[k].toObject().value("Name").toString());
-        foreach(auto item, temJsonArray[k].toObject().value("RelayStr1").toArray().toVariantList()) {
-           strListRelayStr1.push_back(item.toString());
-        }
-        foreach(auto item, temJsonArray[k].toObject().value("RelayStr2").toArray().toVariantList()) {
-           strListRelayStr2.push_back(item.toString());
-        }
-        tcMonitorList[k]->setTextStateList(strListRelayStr1, strListRelayStr2);
+    QVector<SwDefaultSettings::MonitorDesr> monitorDescriptor = defaultSettings.getMonitorDesсr();
+    for (int k = 0; k < defaultSettings.getMonitorDesсr().size(); k++) {
+        tcMonitorList[k]->setTextStateList(monitorDescriptor[k].rel1State, monitorDescriptor[k].rel2State);
     }
 
     /*
      * Add TeleSignalisation configuration items
      */
     ui->lTsDebounceTimeRange->setText("("
-                                      + rootJsonObj.value("TS").toObject().value("DebounceMin").toString()
+                                      + defaultSettings.getDebounceMin()
                                       + "-"
-                                      + rootJsonObj.value("TS").toObject().value("DebounceMax").toString()
+                                      + defaultSettings.getDebounceMax()
                                       + ")");
     ui->lTsDoubleSwitchTimeRange->setText("("
-                                          + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString()
+                                          + defaultSettings.getSwitchTimeMin()
                                           + "-"
-                                          + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString()
+                                          + defaultSettings.getSwitchTimeMax()
                                           + ")");
     addTsConfigBinaryGroupUi();
 
@@ -315,15 +287,9 @@ void Mdio::initCustomUi(QString language)
                    + QString::number(VERSION_BUILD));
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
-    foreach(auto item, rootJsonObj.value("Port").toObject().value("BrList").toArray().toVariantList()) {
-        brStrList.push_back(item.toString());
-    }
-    foreach(auto item, rootJsonObj.value("Port").toObject().value("ParityList").toArray().toVariantList()) {
-        parityStr.push_back(item.toString());
-    }
-    foreach(auto item, rootJsonObj.value("Port").toObject().value("StopBitsList").toArray().toVariantList()) {
-        stopBitsStrList.push_back(item.toString());
-    }
+    brStrList = defaultSettings.getBrList();
+    parityStr = defaultSettings.getParityList();
+    stopBitsStrList = defaultSettings.getStopBitList();
 
     ui->cbBaudRate->addItems(brStrList);
     ui->cbStopBits->addItems(stopBitsStrList);
@@ -381,7 +347,7 @@ Mdio::Mdio(QWidget *parent)
      */
     getSettingsFromJson();
     resetSlaveInformation();
-    initCustomUi("UA");
+    initCustomUi();
     updateUiConnectionStatusStr();
     updateUiDeviceMetaInfStr();
 
@@ -777,6 +743,7 @@ void Mdio::on_pbConnectionSettings_clicked()
 
 void Mdio::on_pbApplySettings_clicked()
 {
+    SwDefaultSettings defaultSettings;
     Communication::SlaveConfiguration configuration;
     int brCbIndex = ui->cbBaudRate->currentIndex();
 
@@ -790,14 +757,12 @@ void Mdio::on_pbApplySettings_clicked()
                      "Час затримки відповіді не заданий");
         return;
     } else if (VALUE_IN_RANGE(ui->leReplyDelay->text().toInt(),
-                              rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMin").toString().toInt(),
-                              rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMax").toString().toInt())
+                              defaultSettings.getTimeoutReplyMin().toInt(),
+                              defaultSettings.getTimeoutReplyMax().toInt())
                == false ) {
         errorMessage("Помилка конфігурації",
                      "Час затримки відповіді повинено бути в діапазоні ["
-                     + rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMin").toString()
-                     + "-"
-                     + rootJsonObj.value("Modbus").toObject().value("TimeoutReplyMax").toString()
+                     + defaultSettings.getTimeoutReplyMin() + "-" + defaultSettings.getTimeoutReplyMax()
                      + "] мс");
         return;
     }
@@ -813,9 +778,7 @@ void Mdio::on_pbApplySettings_clicked()
                == false ) {
         errorMessage("Помилка конфігурації",
                      "Інтервал тиші повинено бути в діапазоні ["
-                     + silentIntervaMinList[brCbIndex]
-                     + "-"
-                     + silentIntervaMaxList[brCbIndex]
+                     + silentIntervaMinList[brCbIndex] + "-" + silentIntervaMaxList[brCbIndex]
                      + "] мс");
         return;
     }
@@ -825,14 +788,12 @@ void Mdio::on_pbApplySettings_clicked()
                      "Тривалість брязкіту не заданий");
         return;
     } else if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toInt(),
-                              rootJsonObj.value("TS").toObject().value("DebounceMin").toString().toInt(),
-                              rootJsonObj.value("TS").toObject().value("DebounceMax").toString().toInt())
+                              defaultSettings.getDebounceMin().toInt(),
+                              defaultSettings.getDebounceMax().toInt())
                == false ) {
         errorMessage("Помилка конфігурації",
                      "Тривалість брязкіту повинно бути в діапазоні ["
-                     + rootJsonObj.value("TS").toObject().value("DebounceMin").toString()
-                     + "-"
-                     + rootJsonObj.value("TS").toObject().value("DebounceMax").toString()
+                     + defaultSettings.getDebounceMin() + "-" + defaultSettings.getDebounceMax()
                      + "] мс");
         return;
     }
@@ -842,14 +803,12 @@ void Mdio::on_pbApplySettings_clicked()
                      "Тривалість імпульсу ТК не заданий");
         return;
     } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toInt(),
-                              rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString().toInt(),
-                              rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString().toInt())
+                              defaultSettings.getPulsDurationMin().toInt(),
+                              defaultSettings.getPulsDurationMax().toInt())
                == false ) {
         errorMessage("Помилка конфігурації",
                      "Тривалість імпульсу ТК повинно бути в діапазоні ["
-                     + rootJsonObj.value("TC").toObject().value("PulsDurationMin").toString()
-                     + "-"
-                     + rootJsonObj.value("TC").toObject().value("PulsDurationMax").toString()
+                     + defaultSettings.getPulsDurationMin() + "-" + defaultSettings.getPulsDurationMax()
                      + "] мс");
         return;
     }
@@ -865,14 +824,12 @@ void Mdio::on_pbApplySettings_clicked()
                              "Час перемикання подвійних ТС не заданий");
                 return;
             } else if (VALUE_IN_RANGE(ui->leBinaryTsSwitchTime->text().toInt(),
-                                      rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString().toInt(),
-                                      rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString().toInt())
+                                      defaultSettings.getSwitchTimeMin().toInt(),
+                                      defaultSettings.getSwitchTimeMax().toInt())
                        == false ) {
                 errorMessage("Помилка конфігурації",
                              "Час перемикання подвійних ТС повинно бути в діапазоні ["
-                             + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMin").toString()
-                             + "-"
-                             + rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeMax").toString()
+                             + defaultSettings.getSwitchTimeMin() + "-" + defaultSettings.getSwitchTimeMax()
                              + "] мс");
                 return;
             }
@@ -928,7 +885,7 @@ void Mdio::on_pbApplySettings_clicked()
      *  Set the correct value of the binaryTsSwitchingTime. If the user configures any of the tele signalisation input to the Binary mode,
      *  the binaryTsSwitchingTime value will be overwritten by the user settings
      */
-    configuration.signalisation.binaryTsSwitchingTime = rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeDefault").toString().toInt();
+    configuration.signalisation.binaryTsSwitchingTime = defaultSettings.getSwitchTimeDefault().toInt();
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
         configuration.signalisation.isBinary[k] = (tsTypeConfigList[k]->currentText() == TS_TEXT_BINARY);
         if (configuration.signalisation.isBinary[k]) {
@@ -1110,14 +1067,16 @@ void Mdio::tcSetTcSlot(int index, bool enable)
 
 void Mdio::on_pbSetDefaultSettings_clicked()
 {
-    ui->cbBaudRate->setCurrentText(rootJsonObj.value("Port").toObject().value("BrDefault").toString());
-    ui->cbParity->setCurrentText(rootJsonObj.value("Port").toObject().value("ParityDefault").toString());
-    ui->cbStopBits->setCurrentText(rootJsonObj.value("Port").toObject().value("StopBitsDefault").toString());
-    ui->leSilentInterval->setText(rootJsonObj.value("Modbus").toObject().value("SilentIntervalDefault").toString());
-    ui->leReplyDelay->setText(rootJsonObj.value("Modbus").toObject().value("TimeoutReplyDefault").toString());
-    ui->leDebounceInterval->setText(rootJsonObj.value("TS").toObject().value("DebounceDefault").toString());
-    ui->lePulsDuration->setText(rootJsonObj.value("TC").toObject().value("PulsDurationDefault").toString());
-    ui->leBinaryTsSwitchTime->setText(rootJsonObj.value("BinaryTs").toObject().value("BinaryTsSwitchTimeDefault").toString());
+    SwDefaultSettings defaultSettings;
+
+    ui->cbBaudRate->setCurrentText(defaultSettings.getBrDefault());
+    ui->cbParity->setCurrentText(defaultSettings.getParityDefault());
+    ui->cbStopBits->setCurrentText(defaultSettings.getStopBitsDefault());
+    ui->leSilentInterval->setText(defaultSettings.getSilentIntervalDefault());
+    ui->leReplyDelay->setText(defaultSettings.getTimeoutReplyDefault());
+    ui->leDebounceInterval->setText(defaultSettings.getDebounceDefault());
+    ui->lePulsDuration->setText(defaultSettings.getPulsDurationDefault());
+    ui->leBinaryTsSwitchTime->setText(defaultSettings.getSwitchTimeDefault());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }

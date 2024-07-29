@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QString>
 #include <QStringList>
-#include <QJsonObject>
 
 namespace Ui {
 class DialogConnectionSettings;
@@ -50,8 +49,6 @@ signals:
 
 private:
     Ui::DialogConnectionSettings *ui;
-
-    QJsonObject jsonRootObj;
 
     void errorMessage(QString headr, QString detailed);
 };

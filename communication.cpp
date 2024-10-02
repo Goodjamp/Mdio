@@ -1,5 +1,6 @@
+#include <QVector>
 #include "communication.h"
-#include "QVector"
+
 
 void Communication::startCommunication(void)
 {

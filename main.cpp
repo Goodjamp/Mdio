@@ -5,8 +5,8 @@
 #include <QThread>
 #include <QObject>
 #include <QMetaType>
+#include <QFile>
 #include "communication.h"
-#include "QFile"
 #include "serialcommunication.h"
 #include "stdbool.h"
 #include "communication.h"

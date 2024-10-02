@@ -8,19 +8,19 @@ The <b>МВВ-4-2-конфігуратор</b> software is use to configure <b>�
 To make a building for the deployment of the new version of SW the DeployDelivery.bat could be used.<br>
 Required toolchain:
 <ui>
-  <li>Qt (qmake.exe and mingw32-make.exe (mingw81_32))</li>
+  <li>Qt6 (qmake.exe and mingw32-make.exe (mingw KIT ))</li>
   <li>git</li>
-  <li>python version 3, regexp module</li>
+  <li>python version 3. Modules: regexp</li>
 </ui>
 <br>
 
 <h1> Deploying </h1>
 The  DeployDelivery.bat has a next signature:<br>
 <b>DeployDelivery.bat arg1 arg2</b><br>
-<b>arg1</b> - path to the folder with <b>qmake.exe</b> (without \) . Typically the qmake.exe is placed on the: <b>C:\Qt\Qt_version\mingw81_32\bin</b><br>
-<b>arg1</b> - path to the folder with <b>mingw32-make.exe</b> (without \). Typically the *mingw32-make.exe* on the: <b>C:\Qt\Tools\mingw810_32\bin</b><br>
+<b>arg1</b> - path to the folder with <b>qmake.exe</b> (without \) . Typically the qmake.exe is placed on the: <b>C:\Qt\Qt_version\mingwVersion\bin</b><br>
+<b>arg1</b> - path to the folder with <b>mingw32-make.exe</b> (without \). Typically the *mingw32-make.exe* on the: <b>C:\Qt\Tools\mingwVersion\bin</b><br>
 example using:<br>
-<b>DeployDelivery.bat C:\Qt\5.15.0\mingw81_32\bin C:\Qt\Tools\mingw810_32\bin</b><br>
+<b>DeployDelivery.bat C:\Qt\6.7.0\mingw_64\bin C:\Qt\Tools\mingw1120_64\bin</b><br>
 <br>
 <h1> Version control </h1>
 The last git tag is used to create the SW version. The last tag is incremented in the building process and added as a new tag.<br>

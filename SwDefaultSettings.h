@@ -19,7 +19,7 @@ public:
         QStringList rel2State;
     } MonitorDesr;
 
-    QVector<MonitorDesr> getMonitorDesсr()
+    QVector<MonitorDesr> getMonitorDescr()
     {
         QVector<MonitorDesr> argOut;
         MonitorDesr tempDesr;

@@ -14,12 +14,12 @@
 #include <QButtonGroup>
 #include <QWidget>
 #include <QJsonObject>
+#include <QComboBox>
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
-#include <QComboBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }

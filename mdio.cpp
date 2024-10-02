@@ -253,8 +253,8 @@ void Mdio::initCustomUi()
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
-    QVector<SwDefaultSettings::MonitorDesr> monitorDescriptor = defaultSettings.getMonitorDesсr();
-    for (int k = 0; k < defaultSettings.getMonitorDesсr().size(); k++) {
+    QVector<SwDefaultSettings::MonitorDesr> monitorDescriptor = defaultSettings.getMonitorDescr();
+    for (int k = 0; k < defaultSettings.getMonitorDescr().size(); k++) {
         tcMonitorList[k]->setTextStateList(monitorDescriptor[k].rel1State, monitorDescriptor[k].rel2State);
     }
 

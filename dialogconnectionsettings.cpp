@@ -4,7 +4,6 @@
 #include <QValidator>
 #include <QMessageBox>
 #include <QDebug>
-#include <QFile>
 #include <QByteArray>
 
 #include "SwDefaultSettings.h"

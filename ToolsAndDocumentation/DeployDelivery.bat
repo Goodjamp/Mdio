@@ -1,7 +1,7 @@
 :: The argument #1 must be path to the folder with qmake.exe file (without \)
 :: The argument #2 must be path to the folder with mingw32-make.exe file (without \)
 
-set QMakePath=%1\qmake.exe
+set QMakePath=%1\qmake6.exe
 set CompilerPath=%2\mingw32-make.exe
 
 cd ..\
@@ -20,7 +20,7 @@ mkdir Build
 
 cd Build
 
-%QMakePath% ..\Mdio\Mdio.pro -spec win32-g++ "CONFIG+=qtquickcompiler" && %CompilerPath% qmake_all
+%QMakePath% ..\Mdio\Mdio.pro -spec win32-g++ "CONFIG+=qml_debug" && %CompilerPath% qmake_all
 
 %CompilerPath% -j8
 

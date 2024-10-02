@@ -1,7 +1,7 @@
 #include "tsstatus.h"
 #include "ui_tsstatus.h"
 
-#include "QStyle"
+#include <QStyle>
 
 TsStatus::TsStatus(int index, QWidget *parent) :
     QWidget(parent),

@@ -15,7 +15,7 @@ try:
         tagFile.close()
         tagList = re.findall(r'\d{1,2}.\d{1,2}.\d{1,3}', tagContent)
         buildNumberInt = 0
-        for k in range(0, len(tagList) - 1):
+        for k in range(0, len(tagList)): # range create a sequence items. Important: range automaticaly decrease last number (0,6) return 1,2,3,4,5 (Not 6 !!)
             buildNumberText = re.findall(r'\d{1,3}', tagList[k])
             if buildNumberInt < int(buildNumberText[len(buildNumberText) - 1], 10):
                 buildNumberInt = int(buildNumberText[len(buildNumberText) - 1], 10)

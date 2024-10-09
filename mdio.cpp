@@ -13,52 +13,55 @@
 #include <QValidator>
 #include <QByteArray>
 #include <QRegularExpression>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QJsonArray>
 #include <QFrame>
+#include <QFile>
+#include <QFileDialog>>
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
 #include "Version.h"
-#include <SwDefaultSettings.h>
+#include "SwDefSettings.h"
+#include "SwSettings.h"
 
-
-#define STR_CAST(str)     static_cast<QString>(str)
-#define SW_NAME           STR_CAST("МВВ-4-2 конфігуратор")
-#define TS_TEXT_SIMPLE    "Одинарні"
-#define TS_TEXT_BINARY    "Подвійні"
+#define SETTINGS_FILE_EXTANTION    ".json"
+#define SETTINGS_FILE_NAME         "MBB"
+#define STR_CAST(str)              static_cast<QString>(str)
+#define SW_NAME                    STR_CAST("МВВ-4-2 конфігуратор")
+#define TS_TEXT_SIMPLE             "Одинарні"
+#define TS_TEXT_BINARY             "Подвійні"
 
 void Mdio::getSettingsFromJson()
 {
-    SwDefaultSettings defaultSettings;
-
     /*
      * Default (initial) connection settings
      */
-    lastConnectionUserSettings.br = defaultSettings.getBrDefault();
-    lastConnectionUserSettings.parity = defaultSettings.getParityDefault();
-    lastConnectionUserSettings.stopBits = defaultSettings.getStopBitsDefault();
-    lastConnectionUserSettings.address = defaultSettings.getAddressDefault();
-    lastConnectionUserSettings.replyTimeout = defaultSettings.getTimeoutReplyDefaultPc();
-    lastConnectionUserSettings.silentInterval = defaultSettings.getSilentIntervalDefaultPc();
+    lastConnectionUserSettings.br = SwDefSettings::getBrDefaultString();
+    lastConnectionUserSettings.parity = SwDefSettings::getParityDefault();
+    lastConnectionUserSettings.stopBits = SwDefSettings::getStopBitsDefaultStr();
+    lastConnectionUserSettings.address = SwDefSettings::getAddressDefault();
+    lastConnectionUserSettings.replyTimeout = SwDefSettings::getTimeoutReplyDefaultPc();
+    lastConnectionUserSettings.silentInterval = SwDefSettings::getSilentIntervalDefaultPc();
     lastConnectionUserSettings.port = "";
-    silentIntervaDefaultList = defaultSettings.getSilentIntervaList();
-    silentIntervaMinList = defaultSettings.getSilentIntervaMinList();
-    silentIntervaMaxList = defaultSettings.getSilentIntervaMaxList();
+    silentIntervaDefaultList = SwDefSettings::getSilentIntervalDefaultListString();
+    silentIntervaMinList = SwDefSettings::getSilentIntervaMinListString();
+    silentIntervaMaxList = SwDefSettings::getSilentIntervaMaxListString();
 }
 
+/*
+ * Device connected
+ */
 void Mdio::enableSettingsControl()
 {
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(true);
     }
+    /*
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(true);
     }
     foreach(auto item, tsTypeConfigList) {
         item->setEnabled(true);
     }
+    */
     ui->leBinaryTsSwitchTime->setEnabled(false);
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
@@ -69,17 +72,19 @@ void Mdio::disableSettingsControl()
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(false);
     }
+    /*
     foreach(auto item, tsSetingsList) {
          item->setEnableCb(false);
     }
     foreach(auto item, tsTypeConfigList) {
         item->setEnabled(false);
     }
-
+    */
     ui->pbConnect->setEnabled(true);
     ui->pbConnectionSettings->setEnabled(true);
 }
 
+/*
 void Mdio::skipAllSettings()
 {
     ui->cbBaudRate->setCurrentIndex(-1);
@@ -91,12 +96,17 @@ void Mdio::skipAllSettings()
     ui->leSilentInterval->setText("");
     ui->leBinaryTsSwitchTime->setText("");
 }
+*/
 
 void Mdio::addTsConfigBinaryGroupUi(void)
 {
     QHBoxLayout *serviceLayoute;
     QSize size(120, 25);
 
+    /*
+     * Add the Tele Signalisation configuration.
+     * The combination of 2 TS sinals represents the Binary Ts.
+     */
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         teleSignalConfigBinaryFrameList.push_back(new QFrame());
 
@@ -107,16 +117,13 @@ void Mdio::addTsConfigBinaryGroupUi(void)
         teleSignalConfigBinaryFrameList.last()->style()->unpolish(teleSignalConfigBinaryFrameList.last());
         teleSignalConfigBinaryFrameList.last()->style()->polish(teleSignalConfigBinaryFrameList.last());
 
-
         teleSignalConfigBinaryLayoutList.push_back(new QVBoxLayout);
         teleSignalConfigBinaryFrameList.last()->setLayout(teleSignalConfigBinaryLayoutList.last());
 
-
         ui->vlTeleSignalSettings->addWidget(teleSignalConfigBinaryFrameList.last());
 
-
         /*
-         * Add TS settings number K
+         * Add TS settings configuration #k
          */
         tsSetingsList.append(new TsSettings(k + 1));
         teleSignalConfigBinaryLayoutList.last()->addWidget(tsSetingsList.last());
@@ -135,7 +142,7 @@ void Mdio::addTsConfigBinaryGroupUi(void)
         teleSignalConfigBinaryLayoutList.last()->addLayout(serviceLayoute);
 
         /*
-         * Add TS settings number K + 1
+         * Add TS settings configuration #(k + 1)
          */
         tsSetingsList.append(new TsSettings(k + 1));
         teleSignalConfigBinaryLayoutList.last()->addWidget(tsSetingsList.last());
@@ -221,12 +228,11 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
 
 void Mdio::initCustomUi()
 {
-    SwDefaultSettings defaultSettings;
     relayControlListTc1 = new QButtonGroup();
     relayControlListTc2 = new QButtonGroup();
-    QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this);
-    QRegularExpressionValidator *numericValidator4D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,4}", this);
-    QRegularExpressionValidator *numericValidator5D = new QRegularExpressionValidator((QRegularExpression)"\\d{1,5}", this);
+    QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,3}", this);
+    QRegularExpressionValidator *numericValidator4D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,4}", this);
+    QRegularExpressionValidator *numericValidator5D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,5}", this);
 
     /*
      * Add validation to the numeric UI items
@@ -241,9 +247,9 @@ void Mdio::initCustomUi()
      * Add TeleControl status/control items
      */
     ui->lTcPulsDurationRange->setText("("
-                                      + defaultSettings.getPulsDurationMin()
+                                      + SwDefSettings::getPulsDurationMinString()
                                       + "-"
-                                      + defaultSettings.getPulsDurationMax()
+                                      + SwDefSettings::getPulsDurationMaxString()
                                       + ")");
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("", k, this));
@@ -253,8 +259,8 @@ void Mdio::initCustomUi()
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
 
-    QVector<SwDefaultSettings::MonitorDesr> monitorDescriptor = defaultSettings.getMonitorDescr();
-    for (int k = 0; k < defaultSettings.getMonitorDescr().size(); k++) {
+    QVector<SwDefSettings::MonitorDesr> monitorDescriptor = SwDefSettings::getMonitorDescr();
+    for (int k = 0; k < SwDefSettings::getMonitorDescr().size(); k++) {
         tcMonitorList[k]->setTextStateList(monitorDescriptor[k].rel1State, monitorDescriptor[k].rel2State);
     }
 
@@ -262,14 +268,14 @@ void Mdio::initCustomUi()
      * Add TeleSignalisation configuration items
      */
     ui->lTsDebounceTimeRange->setText("("
-                                      + defaultSettings.getDebounceMin()
+                                      + SwDefSettings::getDebounceMinString()
                                       + "-"
-                                      + defaultSettings.getDebounceMax()
+                                      + SwDefSettings::getDebounceMaxString()
                                       + ")");
     ui->lTsDoubleSwitchTimeRange->setText("("
-                                          + defaultSettings.getSwitchTimeMin()
+                                          + SwDefSettings::getSwitchTimeMinString()
                                           + "-"
-                                          + defaultSettings.getSwitchTimeMax()
+                                          + SwDefSettings::getSwitchTimeMaxString()
                                           + ")");
     addTsConfigBinaryGroupUi();
 
@@ -282,14 +288,12 @@ void Mdio::initCustomUi()
      *  Title bar: icon name
      */
     setWindowTitle(SW_NAME + " V"
-                   + QString::number(VERSION_MAJOR) + "."
-                   + QString::number(VERSION_MINOR) + "."
-                   + QString::number(VERSION_BUILD));
+                   + SW_VERSION_STR);
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
-    brStrList = defaultSettings.getBrList();
-    parityStr = defaultSettings.getParityList();
-    stopBitsStrList = defaultSettings.getStopBitList();
+    brStrList = SwDefSettings::getBrListString();
+    parityStr = SwDefSettings::getParityListString();
+    stopBitsStrList = SwDefSettings::getStopBitListString();
 
     ui->cbBaudRate->addItems(brStrList);
     ui->cbStopBits->addItems(stopBitsStrList);
@@ -302,29 +306,32 @@ void Mdio::initCustomUi()
     /*
      * Add all UI element to control enabling
      */
+    /*
     settingsItemsList.push_back(static_cast<QWidget *>(ui->cbBaudRate));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->cbParity));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->cbStopBits));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leSilentInterval));
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->leReplyDelay));
+
     settingsItemsList.push_back(static_cast<QWidget *>(ui->leDebounceInterval));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->lePulsDuration));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->leReplyDelay));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->leSilentInterval));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbApplySettings));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReadSettings));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));
-    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbSetDefaultSettings));
     settingsItemsList.push_back(static_cast<QWidget *>(ui->leBinaryTsSwitchTime));
+*/
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbApplySettings));       // Write to device
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReadSettings));        // Read from the device
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));              // Reload
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));          //
+    /*
+    settingsItemsList.push_back(static_cast<QWidget *>(ui->pbSetDefaultSettings));  //
+*/
     foreach(auto item, tcMonitorList) {
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
     }
 
-    disableSettingsControl();
-    skipAllSettings();
-    ui->pbConnect->setEnabled(false);
-
+    setDefaultSettings();
     ui->tabWidget->setCurrentIndex(0);
+    disableSettingsControl();
 }
 
 
@@ -407,7 +414,6 @@ Mdio::~Mdio()
 void Mdio::updateUiConnectionStatusStr(void)
 {
     QString connectionSettingsStr;
-    QStringList comList = Communication::getPortsList();
 
     if (isSlaveConnect == true) {
         connectionSettingsStr = connectPort
@@ -588,6 +594,24 @@ void Mdio::setTeleControlResult(bool result)
     communicationSyncSem.release(1);
 }
 
+void Mdio::setDefaultSettings()
+{
+    ui->cbBaudRate->setCurrentText(SwDefSettings::getBrDefaultString());
+    ui->cbParity->setCurrentText(SwDefSettings::getParityDefault());
+    ui->cbStopBits->setCurrentText(SwDefSettings::getStopBitsDefaultStr());
+    ui->leSilentInterval->setText(SwDefSettings::getSilentIntervalDefaultString());
+    ui->leReplyDelay->setText(SwDefSettings::getTimeoutReplyDefaultString());
+    ui->leDebounceInterval->setText(SwDefSettings::getDebounceDefaultString());
+    ui->lePulsDuration->setText(SwDefSettings::getPulsDurationDefaultString());
+    ui->leBinaryTsSwitchTime->setText(SwDefSettings::getSwitchTimeDefaultString());
+    foreach(auto item, tsSetingsList) {
+        item->setInvert(false);
+    }
+    foreach(auto item, tsTypeConfigList) {
+        item->setCurrentIndex(0);
+    }
+}
+
 
 void Mdio::readMetaInformationResult(bool result, Communication::MetaInformation metaInformation)
 {
@@ -741,126 +765,39 @@ void Mdio::on_pbConnectionSettings_clicked()
     }
 }
 
+void Mdio::verifyAndModifyNumber(QLineEdit *item, int min, int max, int def)
+{
+    QString text = item->text();
+
+    if (text.isEmpty()) {
+        item->setText(QString::number(def));
+    } else if(text.toInt() < min) {
+        item->setText(QString::number(min));
+    } else if(text.toInt() > max) {
+        item->setText(QString::number(max));
+    }
+}
+
+void Mdio::verifyNumber(QLineEdit *item, int min, int max)
+{
+    QString text = item->text();
+
+    if (text.isEmpty()
+        || text.toInt() < min
+        || text.toInt() > max) {
+        item->setStyleSheet("background-color: rgb(243, 193, 255);");
+    } else {
+        item->setStyleSheet("background-color: rgb(255, 255, 255);");
+    }
+}
+
 void Mdio::on_pbApplySettings_clicked()
 {
-    SwDefaultSettings defaultSettings;
     Communication::SlaveConfiguration configuration;
-    int brCbIndex = ui->cbBaudRate->currentIndex();
 
 
     /*
-     * Make a test of the user configuration
-     */
-
-    if (ui->leReplyDelay->text().isDetached()) {
-        errorMessage("Помилка конфігурації",
-                     "Час затримки відповіді не заданий");
-        return;
-    } else if (VALUE_IN_RANGE(ui->leReplyDelay->text().toInt(),
-                              defaultSettings.getTimeoutReplyMin().toInt(),
-                              defaultSettings.getTimeoutReplyMax().toInt())
-               == false ) {
-        errorMessage("Помилка конфігурації",
-                     "Час затримки відповіді повинено бути в діапазоні ["
-                     + defaultSettings.getTimeoutReplyMin() + "-" + defaultSettings.getTimeoutReplyMax()
-                     + "] мс");
-        return;
-    }
-
-
-    if (ui->leSilentInterval->text().isDetached()) {
-        errorMessage("Помилка конфігурації",
-                     "Інтервал тиші не заданий");
-        return;
-    } else if (VALUE_IN_RANGE(ui->leSilentInterval->text().toInt(),
-                              silentIntervaMinList[brCbIndex].toInt(),
-                              silentIntervaMaxList[brCbIndex].toInt())
-               == false ) {
-        errorMessage("Помилка конфігурації",
-                     "Інтервал тиші повинено бути в діапазоні ["
-                     + silentIntervaMinList[brCbIndex] + "-" + silentIntervaMaxList[brCbIndex]
-                     + "] мс");
-        return;
-    }
-
-    if (ui->leDebounceInterval->text().isDetached()) {
-        errorMessage("Помилка конфігурації",
-                     "Тривалість брязкіту не заданий");
-        return;
-    } else if (VALUE_IN_RANGE(ui->leDebounceInterval->text().toInt(),
-                              defaultSettings.getDebounceMin().toInt(),
-                              defaultSettings.getDebounceMax().toInt())
-               == false ) {
-        errorMessage("Помилка конфігурації",
-                     "Тривалість брязкіту повинно бути в діапазоні ["
-                     + defaultSettings.getDebounceMin() + "-" + defaultSettings.getDebounceMax()
-                     + "] мс");
-        return;
-    }
-
-    if (ui->lePulsDuration->text().isDetached()) {
-        errorMessage("Помилка конфігурації",
-                     "Тривалість імпульсу ТК не заданий");
-        return;
-    } else if (VALUE_IN_RANGE(ui->lePulsDuration->text().toInt(),
-                              defaultSettings.getPulsDurationMin().toInt(),
-                              defaultSettings.getPulsDurationMax().toInt())
-               == false ) {
-        errorMessage("Помилка конфігурації",
-                     "Тривалість імпульсу ТК повинно бути в діапазоні ["
-                     + defaultSettings.getPulsDurationMin() + "-" + defaultSettings.getPulsDurationMax()
-                     + "] мс");
-        return;
-    }
-
-    /*
-     * Checking the setting for Binary TS.
-     * If at minimum one pair TS is configured as the Binary, the BinaryTsSwitchingTime must be set.
-     */
-    foreach(auto item, tsTypeConfigList) {
-        if(item->currentText() == TS_TEXT_BINARY) {
-            if (ui->leBinaryTsSwitchTime->text().isDetached()) {
-                errorMessage("Помилка конфігурації",
-                             "Час перемикання подвійних ТС не заданий");
-                return;
-            } else if (VALUE_IN_RANGE(ui->leBinaryTsSwitchTime->text().toInt(),
-                                      defaultSettings.getSwitchTimeMin().toInt(),
-                                      defaultSettings.getSwitchTimeMax().toInt())
-                       == false ) {
-                errorMessage("Помилка конфігурації",
-                             "Час перемикання подвійних ТС повинно бути в діапазоні ["
-                             + defaultSettings.getSwitchTimeMin() + "-" + defaultSettings.getSwitchTimeMax()
-                             + "] мс");
-                return;
-            }
-        }
-    }
-
-    if (ui->cbBaudRate->currentIndex() == -1) {
-        errorMessage("Помилка конфігурації",
-                     "Швидкість не задана");
-        return;
-    }
-    if (ui->cbParity->currentIndex() == -1) {
-        errorMessage("Помилка конфігурації",
-                     "Паритет не заданий");
-        return;
-    }
-    if (ui->cbParity->currentIndex() == -1) {
-        errorMessage("Помилка конфігурації",
-                     "Кількість стоп бітів не задано");
-        return;
-    }
-
-    foreach(auto item, tsSetingsList) {
-        if (item->isConfigurationSeted() == false) {
-            errorMessage("Помилка конфігурації",
-                         "Інверсія ТС не задана");
-        }
-    }
-
-    /*
-     * Read user configuration and serialiase it to the SlaveConfiguration
+     * Read user configuration from the UI and serialiase it to the SlaveConfiguration
      * structure
      */
 
@@ -885,7 +822,7 @@ void Mdio::on_pbApplySettings_clicked()
      *  Set the correct value of the binaryTsSwitchingTime. If the user configures any of the tele signalisation input to the Binary mode,
      *  the binaryTsSwitchingTime value will be overwritten by the user settings
      */
-    configuration.signalisation.binaryTsSwitchingTime = defaultSettings.getSwitchTimeDefault().toInt();
+    configuration.signalisation.binaryTsSwitchingTime = SwDefSettings::getSwitchTimeDefault();
     for (uint32_t k = 0; k < TELESIGNAL_BINARY_NUMBERS; k++) {
         configuration.signalisation.isBinary[k] = (tsTypeConfigList[k]->currentText() == TS_TEXT_BINARY);
         if (configuration.signalisation.isBinary[k]) {
@@ -1067,22 +1004,7 @@ void Mdio::tcSetTcSlot(int index, bool enable)
 
 void Mdio::on_pbSetDefaultSettings_clicked()
 {
-    SwDefaultSettings defaultSettings;
-
-    ui->cbBaudRate->setCurrentText(defaultSettings.getBrDefault());
-    ui->cbParity->setCurrentText(defaultSettings.getParityDefault());
-    ui->cbStopBits->setCurrentText(defaultSettings.getStopBitsDefault());
-    ui->leSilentInterval->setText(defaultSettings.getSilentIntervalDefault());
-    ui->leReplyDelay->setText(defaultSettings.getTimeoutReplyDefault());
-    ui->leDebounceInterval->setText(defaultSettings.getDebounceDefault());
-    ui->lePulsDuration->setText(defaultSettings.getPulsDurationDefault());
-    ui->leBinaryTsSwitchTime->setText(defaultSettings.getSwitchTimeDefault());
-    foreach(auto item, tsSetingsList) {
-        item->setInvert(false);
-    }
-    foreach(auto item, tsTypeConfigList) {
-        item->setCurrentIndex(0);
-    }
+    setDefaultSettings();
 }
 
 void Mdio::on_pbConnect_clicked()
@@ -1105,3 +1027,135 @@ void Mdio::on_cbBaudRate_currentIndexChanged(int index)
                                       + silentIntervaMaxList[index]
                                       + ")");
 }
+
+void Mdio::on_pbSaveSettingsFile_clicked()
+{
+    QFile settingsFile("D://settings.json");
+    SwSettings settings;
+
+    CommunicationConfig comConfig(ui->cbBaudRate->currentText().toInt(), CommunicationConfig::PARITY_NONE,
+                                  CommunicationConfig::STOP_BITS_1,
+                                  ui->leSilentInterval->text().toInt(),
+                                  ui->leReplyDelay->text().toInt());
+    TsConfig tsConfig(ui->leBinaryTsSwitchTime->text().toInt(),
+                      ui->leDebounceInterval->text().toInt(),
+                      QVector<bool>{tsSetingsList[0]->isInvert(), tsSetingsList[1]->isInvert(), tsSetingsList[2]->isInvert(), tsSetingsList[3]->isInvert()},
+                      QVector<bool>{tsTypeConfigList[0]->currentText() == TS_TEXT_BINARY, tsTypeConfigList[1]->currentText() == TS_TEXT_BINARY});
+    TcConfig tcConfig(ui->lePulsDuration->text().toInt());
+
+    settings.addCommunicationSettings(comConfig);
+    settings.addTsSettings(tsConfig);
+    settings.addTcSettings(tcConfig);
+
+    QFileDialog getPathDialog;
+    getPathDialog.setModal(true);
+    QDate date = QDate::currentDate();
+    QTime time = QTime::currentTime();
+    QString dateTime = QString::number(date.month()) + "_"
+                       + QString::number(date.day()) + "_"
+                       + QString::number(date.year()) + "_"
+                       + QString::number(time.hour()) + "_"
+                       + QString::number(time.minute()) + "_"
+                       + QString::number(time.second());
+    QString fileName = getPathDialog.getSaveFileName(this,
+                                                     tr("Save  as"),
+                                                     SETTINGS_FILE_NAME + tr("_") + dateTime + SETTINGS_FILE_EXTANTION,
+                                                     tr("Settings(*.json)"));
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    QByteArray settingsBuff{settings.getJsonFile()};
+    QFile fw{fileName};
+
+    fw.open(QIODevice::WriteOnly);
+    fw.write(settingsBuff);
+    fw.close();
+}
+
+void Mdio::on_pbOpenSettingsFile_clicked()
+{
+
+}
+
+void Mdio::on_leSilentInterval_editingFinished()
+{
+    int brIndex = SwDefSettings::getBrList().lastIndexOf(ui->cbBaudRate->currentText().toInt());
+
+    verifyAndModifyNumber((QLineEdit *)this->sender(),
+                          SwDefSettings::getSilentIntervaMinList().at(brIndex),
+                          SwDefSettings::getSilentIntervaMaxList().at(brIndex),
+                          SwDefSettings::getSilentIntervalDefaultList().at(brIndex));
+}
+
+void Mdio::on_leSilentInterval_textEdited(const QString &arg1)
+{
+    int brIndex = SwDefSettings::getBrList().lastIndexOf(ui->cbBaudRate->currentText().toInt());
+
+    verifyNumber((QLineEdit *)this->sender(),
+                 SwDefSettings::getSilentIntervaMinList().at(brIndex),
+                 SwDefSettings::getSilentIntervaMaxList().at(brIndex));
+}
+
+void Mdio::on_leReplyDelay_editingFinished()
+{
+    verifyAndModifyNumber((QLineEdit *)this->sender(),
+                          SwDefSettings::getTimeoutReplyMin(),
+                          SwDefSettings::getTimeoutReplyMax(),
+                          SwDefSettings::getTimeoutReplyDefault());
+}
+
+void Mdio::on_leReplyDelay_textEdited(const QString &arg1)
+{
+    verifyNumber((QLineEdit *)this->sender(),
+                 SwDefSettings::getTimeoutReplyMin(),
+                 SwDefSettings::getTimeoutReplyMax());
+}
+
+void Mdio::on_leDebounceInterval_editingFinished()
+{
+    verifyAndModifyNumber((QLineEdit *)this->sender(),
+                          SwDefSettings::getDebounceMin(),
+                          SwDefSettings::getDebounceMax(),
+                          SwDefSettings::getDebounceDefault());
+}
+
+void Mdio::on_leDebounceInterval_textEdited(const QString &arg1)
+{
+    verifyNumber((QLineEdit *)this->sender(),
+                 SwDefSettings::getDebounceMin(),
+                 SwDefSettings::getDebounceMax());
+}
+
+void Mdio::on_leBinaryTsSwitchTime_editingFinished()
+{
+    verifyAndModifyNumber((QLineEdit *)this->sender(),
+                          SwDefSettings::getSwitchTimeMin(),
+                          SwDefSettings::getSwitchTimeMax(),
+                          SwDefSettings::getSwitchTimeDefault());
+}
+
+
+void Mdio::on_leBinaryTsSwitchTime_textEdited(const QString &arg1)
+{
+    verifyNumber((QLineEdit *)this->sender(),
+                 SwDefSettings::getSwitchTimeMin(),
+                 SwDefSettings::getSwitchTimeMax());
+}
+
+void Mdio::on_lePulsDuration_editingFinished()
+{
+    verifyAndModifyNumber((QLineEdit *)this->sender(),
+                          SwDefSettings::getPulsDurationMin(),
+                          SwDefSettings::getPulsDurationMax(),
+                          SwDefSettings::getPulsDurationDefault());
+}
+
+void Mdio::on_lePulsDuration_textEdited(const QString &arg1)
+{
+    verifyNumber((QLineEdit *)this->sender(),
+                 SwDefSettings::getPulsDurationMin(),
+                 SwDefSettings::getPulsDurationMax());
+}
+

@@ -42,11 +42,11 @@
 #define STOP_BITS_ONE                   0
 #define STOP_BITS_TWO                   1
 
-#define PARITY_POS                      8
-#define PARITY_MASK                     3
-#define PARITY_NONE                     0
-#define PARITY_EVEN                     2
-#define PARITY_ODD                      3
+#define MAP_PARITY_POS                  8
+#define MAP_PARITY_MASK                 3
+#define MAP_PARITY_NONE                 0
+#define MAP_PARITY_EVEN                 2
+#define MAP_PARITY_ODD                  3
 
 #define INVERS_SETTINGS_TI1_POS         0
 #define INVERS_SETTINGS_TI2_POS         1
@@ -185,9 +185,9 @@ private:
      * on the moment of creating  current class
      */
     const QMap<int, SerialCommunication::SerialPortParity> parityMbToSerialLUT{
-          {PARITY_NONE, SerialCommunication::NONE},
-          {PARITY_EVEN, SerialCommunication::EVEN},
-          {PARITY_ODD, SerialCommunication::ODD}
+          {MAP_PARITY_NONE, SerialCommunication::NONE},
+          {MAP_PARITY_EVEN, SerialCommunication::EVEN},
+          {MAP_PARITY_ODD, SerialCommunication::ODD}
         };
 
     const QMap<int, SerialCommunication::SerialPortStopBits> stopBitsMbToSerialLUT{

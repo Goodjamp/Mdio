@@ -16,28 +16,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    SwDefSettings.cpp \
     communication.cpp \
     dialogconnectionsettings.cpp \
     main.cpp \
     mdio.cpp \
     modbusrtumaster.cpp \
     serialcommunication.cpp \
+    swsettings.cpp \
     tccontrol.cpp \
     tssettings.cpp \
-    tsstatus.cpp \
-    SwDefaultSettings.cpp
+    tsstatus.cpp
 
 HEADERS += \
+    SwDefSettings.h \
     communication.h \
     dialogconnectionsettings.h \
     mdio.h \
     modbusrtumaster.h \
     serialcommunication.h \
+    swsettings.h \
     tccontrol.h \
     tssettings.h \
     tsstatus.h \
-    Version.h \
-    SwDefaultSettings.h
+    Version.h
 
 FORMS += \
     dialogconnectionsettings.ui \

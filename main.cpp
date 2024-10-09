@@ -8,9 +8,10 @@
 #include <QFile>
 #include "communication.h"
 #include "serialcommunication.h"
-#include "stdbool.h"
 #include "communication.h"
 #include "dialogconnectionsettings.h"
+#include "QDateTime"
+#include "SwDefSettings.h"
 
 Q_DECLARE_METATYPE(uint8_t);
 Q_DECLARE_METATYPE(uint16_t);
@@ -24,9 +25,15 @@ Q_DECLARE_METATYPE(Communication::MetaInformation);
 
 int main(int argc, char *argv[])
 {
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
-    Mdio w;
+
+    /*
+     * Initilisation default settings
+     * It is important to initiate the default settings before it will be used.
+     */
+    QFile settingsFile(SwDefSettings::settingsFilePath);
+    settingsFile.open(QIODevice::ReadOnly);
+    SwDefSettings::init(settingsFile.readAll());
 
     /*
      * Open and apply style file
@@ -52,6 +59,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<DialogConnectionSettings::UiFilingList>("DialogConnectionSettings::UiFilingList");
     qRegisterMetaType<Communication::MetaInformation>("Communication::MetaInformation");
 
+    Mdio w;
     w.show();
     return a.exec();
 }

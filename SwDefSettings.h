@@ -120,22 +120,22 @@ public:
         return objArrToStringList(rootObj.find(keyModbus)->toObject().find(keyModbusSilentIntervaList)->toArray());
     }
 
-    static QVector<int> getSilentIntervaMinList()
+    static QVector<int> getSilentIntervalMinList()
     {
         return objArrToIntVector(rootObj.find(keyModbus)->toObject().find(keyModbusSilentIntervaMinList)->toArray());
     }
 
-    static QStringList getSilentIntervaMinListString()
+    static QStringList getSilentIntervalMinListString()
     {
         return objArrToStringList(rootObj.find(keyModbus)->toObject().find(keyModbusSilentIntervaMinList)->toArray());
     }
 
-    static QVector<int> getSilentIntervaMaxList()
+    static QVector<int> getSilentIntervalMaxList()
     {
         return objArrToIntVector(rootObj.find(keyModbus)->toObject().find(keyModbusSilentIntervaMaxList)->toArray());
     }
 
-    static QStringList getSilentIntervaMaxListString()
+    static QStringList getSilentIntervalMaxListString()
     {
         return objArrToStringList(rootObj.find(keyModbus)->toObject().find(keyModbusSilentIntervaMaxList)->toArray());
     }

@@ -42,8 +42,8 @@ void Mdio::getSettingsFromJson()
     lastConnectionUserSettings.silentInterval = SwDefSettings::getSilentIntervalDefaultPc();
     lastConnectionUserSettings.port = "";
     silentIntervaDefaultList = SwDefSettings::getSilentIntervalDefaultListString();
-    silentIntervaMinList = SwDefSettings::getSilentIntervaMinListString();
-    silentIntervaMaxList = SwDefSettings::getSilentIntervaMaxListString();
+    silentIntervaMinList = SwDefSettings::getSilentIntervalMinListString();
+    silentIntervaMaxList = SwDefSettings::getSilentIntervalMaxListString();
 }
 
 /*
@@ -1031,9 +1031,6 @@ void Mdio::on_cbBaudRate_currentIndexChanged(int index)
 
 void Mdio::on_pbSaveSettingsFile_clicked()
 {
-    QFile settingsFile("D://settings.json");
-    SwSettings settings;
-
     CommunicationConfig comConfig(ui->cbBaudRate->currentText().toInt(), CommunicationConfig::PARITY_NONE,
                                   CommunicationConfig::STOP_BITS_1,
                                   ui->leSilentInterval->text().toInt(),
@@ -1044,6 +1041,7 @@ void Mdio::on_pbSaveSettingsFile_clicked()
                       QVector<bool>{tsTypeConfigList[0]->currentText() == TS_TEXT_BINARY, tsTypeConfigList[1]->currentText() == TS_TEXT_BINARY});
     TcConfig tcConfig(ui->lePulsDuration->text().toInt());
 
+    SwSettings settings;
     settings.addCommunicationSettings(comConfig);
     settings.addTsSettings(tsConfig);
     settings.addTcSettings(tcConfig);
@@ -1052,15 +1050,15 @@ void Mdio::on_pbSaveSettingsFile_clicked()
     getPathDialog.setModal(true);
     QDate date = QDate::currentDate();
     QTime time = QTime::currentTime();
-    QString dateTime = QString::number(date.month()) + "_"
-                       + QString::number(date.day()) + "_"
-                       + QString::number(date.year()) + "_"
-                       + QString::number(time.hour()) + "_"
-                       + QString::number(time.minute()) + "_"
-                       + QString::number(time.second());
+    QString dateTimeName = QString::number(date.month()) + "_"
+                           + QString::number(date.day()) + "_"
+                           + QString::number(date.year()) + "_"
+                           + QString::number(time.hour()) + "_"
+                           + QString::number(time.minute()) + "_"
+                           + QString::number(time.second());
     QString fileName = getPathDialog.getSaveFileName(this,
                                                      tr("Save  as"),
-                                                     SETTINGS_FILE_NAME + tr("_") + dateTime + SETTINGS_FILE_EXTANTION,
+                                                     SETTINGS_FILE_NAME + tr("_") + dateTimeName + SETTINGS_FILE_EXTANTION,
                                                      tr("Settings(*.json)"));
 
     if (fileName.isEmpty()) {
@@ -1077,7 +1075,26 @@ void Mdio::on_pbSaveSettingsFile_clicked()
 
 void Mdio::on_pbOpenSettingsFile_clicked()
 {
+    QFileDialog getPathDialog;
+    getPathDialog.setModal(true);
+    QString fileName = getPathDialog.getOpenFileName(this,
+                                                     tr("Open settings"),
+                                                     NULL,
+                                                     tr("Settings(*.json)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
 
+    QFile settings(fileName);
+
+    settings.open(QIODeviceBase::ReadOnly);
+    QByteArray settingJson = settings.readAll();
+    settings.close();
+    QString errorStr;
+
+    if (SwSettings::testSettings(settingJson, errorStr) == false) {
+        errorMessage("Помилка файлу конфігурації", errorStr);
+    };
 }
 
 void Mdio::on_leSilentInterval_editingFinished()
@@ -1085,8 +1102,8 @@ void Mdio::on_leSilentInterval_editingFinished()
     int brIndex = SwDefSettings::getBrList().lastIndexOf(ui->cbBaudRate->currentText().toInt());
 
     verifyAndModifyNumber((QLineEdit *)this->sender(),
-                          SwDefSettings::getSilentIntervaMinList().at(brIndex),
-                          SwDefSettings::getSilentIntervaMaxList().at(brIndex),
+                          SwDefSettings::getSilentIntervalMinList().at(brIndex),
+                          SwDefSettings::getSilentIntervalMaxList().at(brIndex),
                           SwDefSettings::getSilentIntervalDefaultList().at(brIndex));
 }
 
@@ -1095,8 +1112,8 @@ void Mdio::on_leSilentInterval_textEdited(const QString &arg1)
     int brIndex = SwDefSettings::getBrList().lastIndexOf(ui->cbBaudRate->currentText().toInt());
 
     verifyNumber((QLineEdit *)this->sender(),
-                 SwDefSettings::getSilentIntervaMinList().at(brIndex),
-                 SwDefSettings::getSilentIntervaMaxList().at(brIndex));
+                 SwDefSettings::getSilentIntervalMinList().at(brIndex),
+                 SwDefSettings::getSilentIntervalMaxList().at(brIndex));
 }
 
 void Mdio::on_leReplyDelay_editingFinished()

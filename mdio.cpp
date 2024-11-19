@@ -149,7 +149,7 @@ void Mdio::addTsConfigBinaryGroupUi(void)
     }
 
     foreach(auto item, tsTypeConfigList) {
-          connect(item, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Mdio::on_cbTsType_currentIndexChanged);
+        connect(item, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Mdio::on_cbTsType_currentIndexChanged);
     }
 
     tsLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -1091,10 +1091,31 @@ void Mdio::on_pbOpenSettingsFile_clicked()
     QByteArray settingJson = settings.readAll();
     settings.close();
     QString errorStr;
+    SwSettings newSettings(settingJson);
 
-    if (SwSettings::testSettings(settingJson, errorStr) == false) {
+    if (!newSettings.getState(errorStr)) {
         errorMessage("Помилка файлу конфігурації", errorStr);
+        return;
     };
+
+    /*
+     * Move new settings to UI
+     */
+    ui->cbBaudRate->setCurrentText(QString::number(newSettings.getBr()));
+    ui->cbParity->setCurrentText(newSettings.getParity());
+    ui->cbStopBits->setCurrentText(QString::number(newSettings.getStopBits()));
+    ui->leBinaryTsSwitchTime->setText(QString::number(newSettings.getSwitchTime()));
+    ui->leDebounceInterval->setText(QString::number(newSettings.getDebounceTime()));
+    ui->leSilentInterval->setText(QString::number(newSettings.getSilentInterval()));
+    ui->lePulsDuration->setText(QString::number(newSettings.getPulsDuration()));
+    ui->leReplyDelay->setText(QString::number(newSettings.getReplyDelay()));
+
+    for (qsizetype i = 0; i < tsTypeConfigList.size(); i++) {
+        tsTypeConfigList.at(i)->setCurrentIndex(newSettings.getDoubleSign().at(i) ? 1 : 0);
+    }
+    for (qsizetype i = 0; i < tsSetingsList.size(); i++) {
+        tsSetingsList.at(i)->setInvert(newSettings.getInversionSign().at(i));
+    }
 }
 
 void Mdio::on_leSilentInterval_editingFinished()

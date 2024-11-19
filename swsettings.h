@@ -196,12 +196,141 @@ public:
         : SwDefSettings()
     {}
 
+    SwSettings(QByteArray file)
+        : SwDefSettings()
+    {
+        if ((isFileSettingsValid = testSettings(file, fileSettingsErroStr)) == true)
+        {
+            rootObj = QJsonDocument::fromJson(file, NULL).object();
+        }
+    }
+
     QByteArray getJsonFile();
     bool addCommunicationSettings(CommunicationConfig config);
     bool addTsSettings(TsConfig config);
     bool addTcSettings(TcConfig config);
 
     static bool testSettings(QByteArray settingsJson, QString &errorStr);
+
+    bool getState(QString &errorStr) {
+        errorStr = fileSettingsErroStr;
+        return isFileSettingsValid;
+    }
+
+    int getBr() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyCommunication)->toObject().find(keyBoadRate)->toInt();
+        }
+        return value;
+    }
+
+    QString getParity() {
+        QString value{""};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyCommunication)->toObject().find(keyParity)->toString();
+        }
+        return value;
+    }
+
+    int getReplyDelay() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyCommunication)->toObject().find(keyReplyDelay)->toInt();
+        }
+        return value;
+    }
+
+    int getSilentInterval() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyCommunication)->toObject().find(keySilentInterval)->toInt();
+        }
+        return value;
+    }
+
+    int getStopBits() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyCommunication)->toObject().find(keyStopBits)->toInt();
+        }
+        return value;
+    }
+
+    QString getDate() {
+        QString value{""};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyDate)->toString();
+        }
+        return "";
+    }
+
+    QString getSwVersion() {
+        QString value{""};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keySwVersion)->toString();
+        }
+        return value;
+    }
+
+    int getPulsDuration() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTc)->toObject().find(keyPulsDuration)->toInt();
+        }
+        return value;
+    }
+
+    int getDebounceTime() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTs)->toObject().find(keyDebounceTime)->toInt();
+        }
+        return value;
+    }
+
+    QVector<bool> getDoubleSign() {
+        QVector<bool> value;
+
+        if (isFileSettingsValid) {
+            QJsonArray doubleSignArray = rootObj.find(keyTs)->toObject().find(keyDouble)->toArray();
+            foreach (auto item, doubleSignArray) {
+                value.push_back(item.toBool());
+            }
+        }
+        return value;
+    }
+
+    QVector<bool> getInversionSign() {
+        QVector<bool> value;
+
+        if (isFileSettingsValid) {
+            QJsonArray inversionSignArray = rootObj.find(keyTs)->toObject().find(keyInversion)->toArray();
+            foreach (auto item, inversionSignArray) {
+                value.push_back(item.toBool());
+            }
+        }
+        return value;
+    }
+
+    int getSwitchTime() {
+        int value{0};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTs)->toObject().find(keySwitchTime)->toInt();
+        }
+        return value;
+    }
+
 
 private:
 
@@ -230,6 +359,8 @@ private:
     QJsonObject communicationObj;
     QJsonObject tsObj;
     QJsonObject tcObj;
+    QString fileSettingsErroStr;
+    bool isFileSettingsValid;
 
     bool testMetaInformation();
     bool testCommunication();

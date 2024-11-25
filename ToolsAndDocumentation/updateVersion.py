@@ -9,7 +9,7 @@ import subprocess
 
 try:
     if len(sys.argv) == 2:
-        # processing git tags to update biuild number
+        # processing git tags to update build number
         tagFile = open(sys.argv[1], "r")
         tagContent = tagFile.read()
         tagFile.close()
@@ -42,7 +42,13 @@ try:
         # - VERSION_MINOR from the version.h
         # - VERSION_BUILD from the last tag
         newVersion = versionMajorText[0] + "." + versionMinorText[0] + "." + str(buildNumberInt)
-        print("version: ", newVersion)
+        print("Sw version: ", newVersion)
         subprocess.run(["git","tag", newVersion])
+
+        # save version to the file. It used by the external process to create name of *.exe
+        file = open("swVersion.txt", "wt")
+        file.write(newVersion)
+        file.close()
+
 except:
     print("Can't update version")

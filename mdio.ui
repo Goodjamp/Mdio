@@ -598,6 +598,12 @@
                 </item>
                 <item row="1" column="2">
                  <widget class="QLabel" name="lTsDoubleSwitchTimeRange">
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <bold>true</bold>
+                   </font>
+                  </property>
                   <property name="text">
                    <string>(100-10000)</string>
                   </property>
@@ -656,6 +662,12 @@
                     <height>40</height>
                    </size>
                   </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <bold>true</bold>
+                   </font>
+                  </property>
                   <property name="text">
                    <string>Час перемикання
 подвійних ТС, мс</string>
@@ -675,6 +687,12 @@
                     <width>60</width>
                     <height>25</height>
                    </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>9</pointsize>
+                    <bold>true</bold>
+                   </font>
                   </property>
                   <property name="text">
                    <string/>
@@ -1030,23 +1048,33 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pbSetDefaultSettings">
-              <property name="minimumSize">
-               <size>
-                <width>160</width>
-                <height>30</height>
-               </size>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <property name="leftMargin">
+               <number>0</number>
               </property>
-              <property name="maximumSize">
-               <size>
-                <width>160</width>
-                <height>30</height>
-               </size>
+              <property name="topMargin">
+               <number>10</number>
               </property>
-              <property name="text">
-               <string>За умовчуванням</string>
-              </property>
-             </widget>
+              <item>
+               <widget class="QPushButton" name="pbSetDefaultSettings">
+                <property name="minimumSize">
+                 <size>
+                  <width>160</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>160</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>За умовчуванням</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
              <spacer name="horizontalSpacer_2">

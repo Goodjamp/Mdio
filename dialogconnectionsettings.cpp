@@ -7,6 +7,7 @@
 #include <QByteArray>
 
 #include "SwDefSettings.h"
+#include "mdio.h"
 
 #define VALUE_IN_RANGE(value, min, max)    (((value) >= (min)) && ((value) <= (max)))
 
@@ -41,8 +42,23 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
     ui->leSilentInterval->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this));
     ui->leReplyTimeout->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,4}", this));
 
+    connect(ui->leAddress, &QLineEdit::editingFinished, this, &DialogConnectionSettings::leAddressEditFinish);
+    connect(ui->leAddress, &QLineEdit::textEdited, this, &DialogConnectionSettings::leAddressEdited);
+
     using ::operator|;
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+}
+
+void DialogConnectionSettings::leAddressEditFinish()
+{
+    Mdio::verifyAndModifyNumber(ui->leAddress, 1, 255, 1);
+}
+
+void DialogConnectionSettings::leAddressEdited(const QString &text)
+{
+    (void)text;
+
+    Mdio::verifyNumber(ui->leAddress, 1, 255);
 }
 
 DialogConnectionSettings::~DialogConnectionSettings()

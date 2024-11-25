@@ -134,6 +134,7 @@ void Mdio::addTsConfigBinaryGroupUi(void)
          */
         tsTypeConfigList.append(new QComboBox());
         tsTypeConfigList.last()->addItems({TS_TEXT_SIMPLE, TS_TEXT_BINARY});
+        tsTypeConfigList.last()->setStyleSheet("font: bold 12px;");
         tsTypeConfigList.last()->setFixedSize(size);
         tsTypeConfigList.last()->setCurrentIndex(-1);
         serviceLayoute = new QHBoxLayout();
@@ -520,8 +521,6 @@ void Mdio::resetSlaveInformation(void)
 
 void Mdio::saveConnectionSettings(DialogConnectionSettings::UserSettingsList connectionSettings)
 {
-    QStringList comList = Communication::getPortsList();
-
     connectPort = connectionSettings.port;
     connectBr = connectionSettings.br.toInt();
     connectParity = parityUiToSerilaLUT.value(connectionSettings.parity);
@@ -691,7 +690,7 @@ bool Mdio::connectWithSettings()
      */
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                         "Порт недоступний", true) == false) {
-        disconnectSlave();
+        emit disconnectSlave();
         return false;
     }
 
@@ -701,7 +700,7 @@ bool Mdio::connectWithSettings()
     emit readMetaInformation(CB_WRAP_2(Mdio, readMetaInformationResult), connectSlaveAddress);
     if (processingCommunicatitonResult("Неможливо приєднатися",
                                        "Помилка зчитування метаінформації", false) == false) {
-        disconnectSlave();
+        emit disconnectSlave();
         return false;
     }
 
@@ -940,7 +939,7 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         ui->pbConnectionStatus->setChecked(true);
 
         /*
-         * If this function call firs time after connection, we need update the state of the
+         * If this function call first time after connection, we need update the state of the
          * button on the pannel of the TC control
          */
         if (updateTcButtonState == true) {
@@ -1130,6 +1129,7 @@ void Mdio::on_leSilentInterval_editingFinished()
 
 void Mdio::on_leSilentInterval_textEdited(const QString &arg1)
 {
+    (void)arg1;
     int brIndex = SwDefSettings::getBrList().lastIndexOf(ui->cbBaudRate->currentText().toInt());
 
     verifyNumber((QLineEdit *)this->sender(),
@@ -1147,6 +1147,7 @@ void Mdio::on_leReplyDelay_editingFinished()
 
 void Mdio::on_leReplyDelay_textEdited(const QString &arg1)
 {
+    (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getTimeoutReplyMin(),
                  SwDefSettings::getTimeoutReplyMax());
@@ -1162,6 +1163,7 @@ void Mdio::on_leDebounceInterval_editingFinished()
 
 void Mdio::on_leDebounceInterval_textEdited(const QString &arg1)
 {
+    (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getDebounceMin(),
                  SwDefSettings::getDebounceMax());
@@ -1178,6 +1180,7 @@ void Mdio::on_leBinaryTsSwitchTime_editingFinished()
 
 void Mdio::on_leBinaryTsSwitchTime_textEdited(const QString &arg1)
 {
+    (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getSwitchTimeMin(),
                  SwDefSettings::getSwitchTimeMax());
@@ -1193,6 +1196,7 @@ void Mdio::on_lePulsDuration_editingFinished()
 
 void Mdio::on_lePulsDuration_textEdited(const QString &arg1)
 {
+    (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getPulsDurationMin(),
                  SwDefSettings::getPulsDurationMax());

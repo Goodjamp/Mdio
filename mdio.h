@@ -38,6 +38,8 @@ class Mdio : public QMainWindow
 public:
     Mdio(QWidget *parent = nullptr);
     ~Mdio();
+    static void verifyAndModifyNumber(QLineEdit *item, int min, int max, int def);
+    static void verifyNumber(QLineEdit *item, int min, int max);
 
 signals:
     void connectSlave(std::function<void(bool result)> cb,
@@ -90,8 +92,6 @@ private:
     void readStateResult(bool result, Communication::SlaveState state);
     void setTeleControlResult(bool result);
     void setDefaultSettings();
-    void verifyAndModifyNumber(QLineEdit *item, int min, int max, int def);
-    void verifyNumber(QLineEdit *item, int min, int max);
 
 private slots:
     /*

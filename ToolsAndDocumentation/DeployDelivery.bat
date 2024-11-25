@@ -12,6 +12,12 @@ cd ToolsAndDocumentation
 
 python updateVersion.py TagList.txt
 
+set /p newVersion=<swVersion.txt
+
+set folderName=MdioDelivery_%newVersion%
+
+set exeName=Mdio_%newVersion%
+
 cd ..\..\
 
 rmdir /S /Q Build
@@ -28,12 +34,12 @@ cd ..
 
 rmdir /S /Q MdioDelivery
 
-xcopy Mdio\ToolsAndDocumentation\MdioDelivery MdioDelivery /S /E /Y /I
+xcopy Mdio\ToolsAndDocumentation\MdioDelivery %folderName% /S /E /Y /I
 
-copy Build\release\Mdio.exe MdioDelivery\Mdio.exe
+copy Build\release\Mdio.exe %folderName%\%exeName%.exe
 
 rmdir /S /Q Build
 
 del /f  MdioDelivery*.zip
 
-Mdio\ToolsAndDocumentation\7-Zip\7zG.exe a -tzip MdioDelivery.zip MdioDelivery
+Mdio\ToolsAndDocumentation\7-Zip\7zG.exe a -tzip %folderName%.zip %folderName%

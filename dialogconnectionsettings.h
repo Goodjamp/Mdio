@@ -44,6 +44,9 @@ private slots:
 
     void on_byDefault_clicked();
 
+    void leAddressEditFinish();
+    void leAddressEdited(const QString &text);
+
 signals:
     void applySettings(UserSettingsList);
 

@@ -43,16 +43,20 @@ bool SwSettings::addTsSettings(TsConfig config)
     tsObj.insert(keyDebounceTime, (QJsonValue)config.getDebounceTime());
     tsObj.insert(keySwitchTime, (QJsonValue)config.getSwitchTime());
     QJsonArray temp;
+
     for(auto item: config.getInvertSign()) {
-        temp.push_back(item);
+        temp.push_back(inversionToStr(item));
     }
     tsObj.insert(keyInversion, temp);
 
+    /*
+     * Clear array
+     */
     while(temp.size()) {
         temp.removeLast();
     }
     for(auto item: config.getDoubleSign()) {
-        temp.push_back(item);
+        temp.push_back(tsTypeToStr( item));
     }
     tsObj.insert(keyDouble, temp);
 
@@ -125,7 +129,7 @@ bool SwSettings::testRootKeys(QJsonObject jsonObj, QString &errorStr)
 
     bool result = true;
     if (rootKeys.size() == rootKeyList.size()) {
-        foreach(auto item, rootKeyList) {
+        for(auto item: rootKeyList) {
             if (rootKeyList.contains(item) == false) {
                 result = false;
                 break;
@@ -350,8 +354,14 @@ bool SwSettings::testTs(QJsonObject jsonObj, QString &errorStr)
                         [&errorStr](QJsonArray value)->bool{
                             bool result = true;
                             if (value.size() == 2) {
-                                foreach (auto item, value) {
-                                    if (item.isBool() != true) {
+                                for (auto item: value) {
+                                    if (item.isString() == true) {
+                                        if (tsTypeStrList.contains(item.toString()) == false) {
+                                            errorStr = errorStrList.value(KEY_DOUBLE_VALUE_ITEM_ERROR);
+                                            result = false;
+                                            break;
+                                        }
+                                    } else {
                                         errorStr = errorStrList.value(KEY_DOUBLE_FORMAT_ITEM_ERROR);
                                         result = false;
                                         break;
@@ -370,8 +380,14 @@ bool SwSettings::testTs(QJsonObject jsonObj, QString &errorStr)
                           [&errorStr](QJsonArray value)->bool{
                           bool result = true;
                           if (value.size() == 4) {
-                              foreach (auto item, value) {
-                                  if (item.isBool() != true) {
+                              for (auto item: value) {
+                                  if (item.isString() == true) {
+                                      if (tsInversionStrList.contains(item.toString()) == false) {
+                                          errorStr = errorStrList.value(KEY_INVERSION_VALUE_ITEM_ERROR);
+                                          result = false;
+                                          break;
+                                      }
+                                  } else {
                                       errorStr = errorStrList.value(KEY_INVERSION_FORMAT_ITEM_ERROR);
                                       result = false;
                                       break;

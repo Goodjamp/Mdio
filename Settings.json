@@ -19,24 +19,24 @@
     ],
     "Port":
     {
-        "BrList": ["2400", "4800", "9600", "19200", "38400", "57600"],
+        "BrList": [2400, 4800, 9600, 19200, 38400, 57600],
         "ParityList": ["None", "Even", "Odd"],
-        "StopBitsList": ["1", "2"],
-        "BrDefault": "19200",
+        "StopBitsList": [1, 2],
+        "BrDefault": 19200,
         "ParityDefault": "None",
-        "StopBitsDefault": "1"
+        "StopBitsDefault": 1
     },
     "Modbus":
     {
-        "SilentIntervaList": ["50", "40", "30", "10", "5", "3"],
-        "SilentIntervaMinList": ["15", "8", "6", "4", "3", "2"],
-        "SilentIntervaMaxList": ["200", "200", "100", "100", "100", "100"],
-        "SilentIntervalDefault": "10",
-        "SilentIntervalMin": "0",
-        "SilentIntervalMax": "100",
-        "TimeoutReplyDefault": "0",
-        "TimeoutReplyMin": "0",
-        "TimeoutReplyMax": "100",
+        "SilentIntervaDefaultList": [50, 40, 30, 10, 5, 3],
+        "SilentIntervaMinList": [15, 8, 6, 4, 3, 2],
+        "SilentIntervaMaxList": [200, 200, 100, 100, 100, 100],
+        "SilentIntervalDefault": 10,
+        "SilentIntervalMin": 0,
+        "SilentIntervalMax": 100,
+        "TimeoutReplyDefault": 0,
+        "TimeoutReplyMin": 0,
+        "TimeoutReplyMax": 100,
         "SilentIntervalDefaultPc": "10",
         "SilentIntervalMinPc": "0",
         "SilentIntervalMaxPc": "100",
@@ -47,20 +47,22 @@
     },
     "TS":
     {
-        "DebounceDefault": "20",
-        "DebounceMin": "0",
-        "DebounceMax": "100"
+        "DebounceDefault": 20,
+        "DebounceMin": 0,
+        "DebounceMax": 100,
+        "TsSingleNumber": 4,
+        "TsDoubleNumber": 2
     },
     "BinaryTs":
     {
-        "SwitchTimeDefault": "500",
-        "SwitchTimeMin": "100",
-        "SwitchTimeMax": "10000"
+        "SwitchTimeDefault": 500,
+        "SwitchTimeMin": 100,
+        "SwitchTimeMax": 10000
     },
     "TC":
     {
-        "PulsDurationDefault": "1000",
-        "PulsDurationMin": "100",
-        "PulsDurationMax": "4000"
+        "PulsDurationDefault": 1000,
+        "PulsDurationMin": 100,
+        "PulsDurationMax": 4000
     }
 }

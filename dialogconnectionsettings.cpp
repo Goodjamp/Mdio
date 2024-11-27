@@ -6,17 +6,16 @@
 #include <QDebug>
 #include <QByteArray>
 
-#include "SwDefaultSettings.h"
+#include "SwDefSettings.h"
+#include "mdio.h"
 
 #define VALUE_IN_RANGE(value, min, max)    (((value) >= (min)) && ((value) <= (max)))
 
 void DialogConnectionSettings::getSettingsFromJson()
 {
-    SwDefaultSettings defaultSettings;
-
-    ui->cbBaudRate->addItems(defaultSettings.getBrList());
-    ui->cbParity->addItems(defaultSettings.getParityList());
-    ui->cbStopBits->addItems(defaultSettings.getStopBitList());
+    ui->cbBaudRate->addItems(SwDefSettings::getBrListString());
+    ui->cbParity->addItems(SwDefSettings::getParityListString());
+    ui->cbStopBits->addItems(SwDefSettings::getStopBitListString());
 }
 
 DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
@@ -43,8 +42,23 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
     ui->leSilentInterval->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,3}", this));
     ui->leReplyTimeout->setValidator(new QRegularExpressionValidator((QRegularExpression)"\\d{1,4}", this));
 
+    connect(ui->leAddress, &QLineEdit::editingFinished, this, &DialogConnectionSettings::leAddressEditFinish);
+    connect(ui->leAddress, &QLineEdit::textEdited, this, &DialogConnectionSettings::leAddressEdited);
+
     using ::operator|;
     setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+}
+
+void DialogConnectionSettings::leAddressEditFinish()
+{
+    Mdio::verifyAndModifyNumber(ui->leAddress, 1, 255, 1);
+}
+
+void DialogConnectionSettings::leAddressEdited(const QString &text)
+{
+    (void)text;
+
+    Mdio::verifyNumber(ui->leAddress, 1, 255);
 }
 
 DialogConnectionSettings::~DialogConnectionSettings()
@@ -70,7 +84,6 @@ void DialogConnectionSettings::errorMessage(QString headr, QString detailed)
 
 void DialogConnectionSettings::on_pbApply_clicked()
 {
-    SwDefaultSettings defaultSettings;
     if (ui->leAddress->text().toUInt() > 255) {
         QMessageBox *errorAddressMessage = new QMessageBox(QMessageBox::Warning,
                                                            "Помилка адреси пристрою",
@@ -83,27 +96,27 @@ void DialogConnectionSettings::on_pbApply_clicked()
         UserSettingsList currentSettings;
 
         if (VALUE_IN_RANGE(ui->leReplyTimeout->text().toInt(),
-                           defaultSettings.getTimeoutReplyMinPc().toInt(),
-                           defaultSettings.getTimeoutReplyMaxPc().toInt())
+                           SwDefSettings::getTimeoutReplyMinPc().toInt(),
+                           SwDefSettings::getTimeoutReplyMaxPc().toInt())
                            == false) {
             errorMessage("Помилка конфігурації",
                          "Час таймаут повинен бути в діапазоні ["
-                         + defaultSettings.getTimeoutReplyMinPc()
+                             + SwDefSettings::getTimeoutReplyMinPc()
                          + "-"
-                         + defaultSettings.getTimeoutReplyMaxPc()
+                             + SwDefSettings::getTimeoutReplyMaxPc()
                          + "] мс");
             return;
         }
 
         if (VALUE_IN_RANGE(ui->leSilentInterval->text().toInt(),
-                           defaultSettings.getSilentIntervalMinPc().toInt(),
-                           defaultSettings.getSilentIntervalMaxPc().toInt())
+                           SwDefSettings::getSilentIntervalMinPc().toInt(),
+                           SwDefSettings::getSilentIntervalMaxPc().toInt())
                            == false) {
             errorMessage("Помилка конфігурації",
                          "Час тиші повинено бути в діапазоні ["
-                         +defaultSettings.getSilentIntervalMinPc()
+                             + SwDefSettings::getSilentIntervalMinPc()
                          + "-"
-                         + defaultSettings.getSilentIntervalMaxPc()
+                             + SwDefSettings::getSilentIntervalMaxPc()
                          + "] мс");
             return;
         }
@@ -129,12 +142,10 @@ void DialogConnectionSettings::on_pbClose_clicked()
 
 void DialogConnectionSettings::on_byDefault_clicked()
 {
-    SwDefaultSettings defaultSettings;
-
-    ui->cbBaudRate->setCurrentText(defaultSettings.getBrDefault());
-    ui->cbParity->setCurrentText(defaultSettings.getParityDefault());
-    ui->cbStopBits->setCurrentText(defaultSettings.getStopBitsDefault());
-    ui->leAddress->setText(defaultSettings.getAddressDefault());
-    ui->leSilentInterval->setText(defaultSettings.getSilentIntervalDefaultPc());
-    ui->leReplyTimeout->setText(defaultSettings.getTimeoutReplyDefaultPc());
+    ui->cbBaudRate->setCurrentText(SwDefSettings::getBrDefaultString());
+    ui->cbParity->setCurrentText(SwDefSettings::getParityDefault());
+    ui->cbStopBits->setCurrentText(SwDefSettings::getStopBitsDefaultStr());
+    ui->leAddress->setText(SwDefSettings::getAddressDefault());
+    ui->leSilentInterval->setText(SwDefSettings::getSilentIntervalDefaultPc());
+    ui->leReplyTimeout->setText(SwDefSettings::getTimeoutReplyDefaultPc());
 }

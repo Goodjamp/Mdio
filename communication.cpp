@@ -62,7 +62,7 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
          */
         configReg[ADDR_REG_COMMUNICATION_BAUDRATE - baseConfReg] = configuration.communication.baudRate;
         configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] = 0;
-        configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] |= parity << PARITY_POS;
+        configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] |= parity << MAP_PARITY_POS;
         configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] |= stopBits << STOP_BITS_POS;
         configReg[ADDR_REG_COMMUNICATION_SILENTS_INTERVAL - baseConfReg] = configuration.communication.silentInterval;
         configReg[ADDR_REG_COMMUNICATION_REPLY_DELAY - baseConfReg] = configuration.communication.replyDelay;
@@ -133,7 +133,7 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
          * Deserialiase configuration
          */
         stopBits =  static_cast<int>(STOP_BITS_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> STOP_BITS_POS));
-        parity = static_cast<int>(PARITY_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> PARITY_POS));
+        parity = static_cast<int>(MAP_PARITY_MASK & (configReg[ADDR_REG_COMMUNICATION_SETTINGS - baseConfReg] >> MAP_PARITY_POS));
         if (parityMbToSerialLUT.contains(parity) == true
             && stopBitsMbToSerialLUT.contains(stopBits) == true) {
             /*

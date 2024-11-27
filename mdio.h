@@ -38,6 +38,8 @@ class Mdio : public QMainWindow
 public:
     Mdio(QWidget *parent = nullptr);
     ~Mdio();
+    static void verifyAndModifyNumber(QLineEdit *item, int min, int max, int def);
+    static void verifyNumber(QLineEdit *item, int min, int max);
 
 signals:
     void connectSlave(std::function<void(bool result)> cb,
@@ -65,7 +67,7 @@ private:
     bool connectWithSettings();
     void enableSettingsControl();
     void disableSettingsControl();
-    void skipAllSettings();
+    //void skipAllSettings();
     void getSettingsFromJson();
     void initCustomUi();
     void updateUiConnectionStatusStr(void);
@@ -89,6 +91,7 @@ private:
     void writeConfigurationResult(bool result);
     void readStateResult(bool result, Communication::SlaveState state);
     void setTeleControlResult(bool result);
+    void setDefaultSettings();
 
 private slots:
     /*
@@ -116,20 +119,46 @@ private slots:
 
     void on_cbTsType_currentIndexChanged(int index);
 
+    void updateUiStateSlot(bool result, Communication::SlaveState state);
+
+    void on_pbSetDefaultSettings_clicked();
+
+    void on_pbConnect_clicked();
+
+    void on_cbBaudRate_currentIndexChanged(int index);
+
 /*
  * The pair of the signal/slot updateUiStateSignal/updateUiStateSlot is used to
  * pass the results of reading the state of slave from the CB
  * function, called from the external thread to the Mdio thread.
  */
+    void on_pbOpenSettingsFile_clicked();
+
+    void on_pbSaveSettingsFile_clicked();
+
+    void on_leSilentInterval_editingFinished();
+
+    void on_leReplyDelay_editingFinished();
+
+    void on_leSilentInterval_textEdited(const QString &arg1);
+
+    void on_leReplyDelay_textEdited(const QString &arg1);
+
+    void on_leDebounceInterval_editingFinished();
+
+    void on_leDebounceInterval_textEdited(const QString &arg1);
+
+    void on_leBinaryTsSwitchTime_editingFinished();
+
+    void on_leBinaryTsSwitchTime_textEdited(const QString &arg1);
+
+    void on_lePulsDuration_editingFinished();
+
+    void on_lePulsDuration_textEdited(const QString &arg1);
+
 private:
     signals:
     void updateUiStateSignal(bool result, Communication::SlaveState state);
-
-private slots:
-    void updateUiStateSlot(bool result, Communication::SlaveState state);
-    void on_pbSetDefaultSettings_clicked();
-    void on_pbConnect_clicked();
-    void on_cbBaudRate_currentIndexChanged(int index);
 
 private:
     Ui::Mdio *ui;

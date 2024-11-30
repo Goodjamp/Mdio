@@ -255,14 +255,14 @@ public:
         return QString::number(getDebounceMax());
     }
 
-    static int getSwitchTimeDefault()
+    static int getBinaryTsSwitchTimeDefault()
     {
         return rootObj.find(keyBinaryTs)->toObject().find(keyBinaryTsSwitchTimeDefault)->toInt();
     }
 
-    static QString getSwitchTimeDefaultString()
+    static QString getBinaryTsSwitchTimeDefaultString()
     {
-        return QString::number(getSwitchTimeDefault());
+        return QString::number(getBinaryTsSwitchTimeDefault());
     }
 
     static int getSwitchTimeMin()

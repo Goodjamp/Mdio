@@ -15,6 +15,8 @@
 #include <QWidget>
 #include <QJsonObject>
 #include <QComboBox>
+#include <QToolTip>
+
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"
@@ -68,8 +70,9 @@ private:
     void enableSettingsControl();
     void disableSettingsControl();
     //void skipAllSettings();
-    void getSettingsFromJson();
+    void getDefaultPcConnectionSettings();
     void initCustomUi();
+    void addToolTip();
     void updateUiConnectionStatusStr(void);
     void updateUiDeviceMetaInfStr(void);
     void updateUiCommunicationStatisticStr(void);
@@ -180,6 +183,7 @@ private:
     QVector<QComboBox *> tsTypeConfigList;
     QVector<QFrame *> teleSignalStatusBinaryFrameList;
     QVector<QVBoxLayout *> teleSignalStatusBinaryLayoutList;
+    QToolTip *debounceToolTip;
     int stateRequestCnt;
     int stateReplyCnt;
 
@@ -212,9 +216,6 @@ private:
     QStringList brStrList;
     QStringList parityStr;
     QStringList stopBitsStrList;
-    QStringList silentIntervaDefaultList;
-    QStringList silentIntervaMinList;
-    QStringList silentIntervaMaxList;
 
     /*
      * Services variable. Used to move readed settings from CallBack method to the showUimethod

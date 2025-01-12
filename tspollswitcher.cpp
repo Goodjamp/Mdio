@@ -46,7 +46,6 @@ void TsPollSwitcher::mousePressEvent(QMouseEvent *event)
             ui->pbPollingSwitcher->setChecked(true);
         } else if (child == (QWidget *)ui->lTsPollingRegister) {
             ui->pbPollingSwitcher->setChecked(false);
-            qDebug()<<"Register";
         }
     }
 }

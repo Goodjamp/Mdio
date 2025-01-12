@@ -203,16 +203,33 @@ void Mdio::addToolTip()
                                          + SwDefSettings::getSwitchTimeMinString()
                                          + "-"
                                          + SwDefSettings::getSwitchTimeMaxString() + " мс");
+    ui->lBinaryTsSwitchTime->setToolTip(ui->leBinaryTsSwitchTime->toolTip());
+    ui->lBinaryTsSwitchTimeRange->setToolTip(ui->leBinaryTsSwitchTime->toolTip());
+
     ui->leDebounceInterval->setToolTip("За умовчуванням " + SwDefSettings::getDebounceDefaultString() + " мс\n"
                                        + "Допустимй діапазон: "
                                        + SwDefSettings::getDebounceMinString()
                                        + "-"
                                        + SwDefSettings::getDebounceMaxString() + " мс");
+    ui->lDebounceInterval->setToolTip(ui->leDebounceInterval->toolTip());
+    ui->lDebounceIntervalRange->setToolTip(ui->leDebounceInterval->toolTip());
+
     ui->lePulsDuration->setToolTip("За умовчуванням " + SwDefSettings::getPulsDurationDefaultString() + " мс");
+    ui->lPulsDuration->setToolTip(ui->lePulsDuration->toolTip());
+    ui->lPulsDurationRange->setToolTip(ui->lePulsDuration->toolTip());
+
     ui->leReplyDelay->setToolTip("За умовчуванням " + SwDefSettings::getTimeoutReplyDefaultString());
+    ui->lReplyDelay->setToolTip(ui->leReplyDelay->toolTip());
+    ui->lReplyDelayRange->setToolTip(ui->leReplyDelay->toolTip());
+
     ui->cbBaudRate->setToolTip("За умовчуванням " + SwDefSettings::getBrDefaultString() + " біт/с");
+    ui->lBaudRate->setToolTip(ui->cbBaudRate->toolTip());
+
     ui->cbParity->setToolTip("За умовчуванням " + SwDefSettings::getParityDefault());
+    ui->lParity->setToolTip(ui->cbParity->toolTip());
+
     ui->cbStopBits->setToolTip("За умовчуванням " + SwDefSettings::getStopBitsDefaultStr());
+    ui->lStopBits->setToolTip(ui->cbStopBits->toolTip());
 }
 
 void Mdio::initCustomUi()
@@ -244,7 +261,7 @@ void Mdio::initCustomUi()
     /*
      * Add TeleControl status/control items
      */
-    ui->lTcPulsDurationRange->setText("("
+    ui->lPulsDurationRange->setText("("
                                       + SwDefSettings::getPulsDurationMinString()
                                       + "-"
                                       + SwDefSettings::getPulsDurationMaxString()
@@ -266,12 +283,12 @@ void Mdio::initCustomUi()
     /*
      * Add TeleSignalisation configuration items
      */
-    ui->lTsDebounceTimeRange->setText("("
+    ui->lDebounceIntervalRange->setText("("
                                       + SwDefSettings::getDebounceMinString()
                                       + "-"
                                       + SwDefSettings::getDebounceMaxString()
                                       + ")");
-    ui->lTsDoubleSwitchTimeRange->setText("("
+    ui->lBinaryTsSwitchTimeRange->setText("("
                                           + SwDefSettings::getSwitchTimeMinString()
                                           + "-"
                                           + SwDefSettings::getSwitchTimeMaxString()
@@ -1002,7 +1019,11 @@ void Mdio::on_cbBaudRate_currentIndexChanged(int index)
         || index < 0) {
         return;
     }
+
     ui->leSilentInterval->setToolTip("За умовчуванням " + SwDefSettings::getSilentIntervalDefaultListString().at(index) + " мс");
+    ui->lSilentInterval->setToolTip(ui->leSilentInterval->toolTip());
+    ui->lSilentIntervalRange->setToolTip(ui->leSilentInterval->toolTip());
+
     ui->leSilentInterval->setText(SwDefSettings::getSilentIntervalDefaultListString().at(index));
     ui->lSilentIntervalRange->setText(" ("
                                       + SwDefSettings::getSilentIntervalMinListString().at(index)

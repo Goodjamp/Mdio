@@ -127,6 +127,9 @@ void Mdio::addTsConfigBinaryGroupUi(void)
 
 void Mdio::addTsStatusBinaryGroupUi(void)
 {
+    tsPollingSwitcher = new TsPollSwitcher();
+    ui->vlTeleSignalStatus->addWidget(tsPollingSwitcher);
+
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
         teleSignalStatusBinaryFrameList.push_back(new QFrame());
 
@@ -195,8 +198,16 @@ void Mdio::on_cbTsType_currentIndexChanged(int index)
 
 void Mdio::addToolTip()
 {
-    ui->leBinaryTsSwitchTime->setToolTip("За умовчуванням " + SwDefSettings::getBinaryTsSwitchTimeDefaultString() + " мс");
-    ui->leDebounceInterval->setToolTip("За умовчуванням " + SwDefSettings::getDebounceDefaultString() + " мс");
+    ui->leBinaryTsSwitchTime->setToolTip("За умовчуванням " + SwDefSettings::getBinaryTsSwitchTimeDefaultString() + " мс\n"
+                                         + "Допустимй діапазон: "
+                                         + SwDefSettings::getSwitchTimeMinString()
+                                         + "-"
+                                         + SwDefSettings::getSwitchTimeMaxString() + " мс");
+    ui->leDebounceInterval->setToolTip("За умовчуванням " + SwDefSettings::getDebounceDefaultString() + " мс\n"
+                                       + "Допустимй діапазон: "
+                                       + SwDefSettings::getDebounceMinString()
+                                       + "-"
+                                       + SwDefSettings::getDebounceMaxString() + " мс");
     ui->lePulsDuration->setToolTip("За умовчуванням " + SwDefSettings::getPulsDurationDefaultString() + " мс");
     ui->leReplyDelay->setToolTip("За умовчуванням " + SwDefSettings::getTimeoutReplyDefaultString());
     ui->cbBaudRate->setToolTip("За умовчуванням " + SwDefSettings::getBrDefaultString() + " біт/с");
@@ -878,9 +889,13 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         /*
          * Update Tele signalisation and status indication
          */
+        TsPollSwitcher::PollingType pollingType = tsPollingSwitcher->getPollingType();
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             if (state.error220 == false) {
-                tsStatus[k]->setStatus(state.signalisation[k] ? TsStatus::TS_OK_ON : TsStatus::TS_OK_OFF);
+                tsStatus[k]->setStatus((pollingType == TsPollSwitcher::POLLING_TYPE_REGISTER
+                                        ? state.signalisation[k]
+                                        : state.signalisationBinary[k])
+                                        ? TsStatus::TS_OK_ON : TsStatus::TS_OK_OFF);
             } else {
                 tsStatus[k]->setStatus(TsStatus::TS_ERROR);
             }

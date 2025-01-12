@@ -129,14 +129,29 @@ public:
     /*
      * Read
      */
+    /**
+     * @brief Function 1, read binary
+     */
     MbStatus readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress,
-                            uint16_t coilsNumber, QVector<bool> &coilState); // F_1
+                            uint16_t coilsNumber, QVector<bool> &coilState);
+
+    /**
+     * @brief Function 2, read binary
+     */
     MbStatus readDiscreteInputs(uint8_t slaveAddress, uint16_t coilAddress,
-                                uint16_t coilsNumber, QVector<bool> &coilState); // F_2
+                                uint16_t coilsNumber, QVector<bool> &coilState);
+
+    /**
+     * @brief Function 3, read registers
+     */
     MbStatus readHoldingRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
-                                  uint16_t registersNumber, QVector<uint16_t> &regValue); // F_3
+                                  uint16_t registersNumber, QVector<uint16_t> &regValue);
+
+    /**
+     * @brief Function 4, read registers
+     */
     MbStatus readInputRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
-                                uint16_t registersNumber, QVector<uint16_t> &regValue); // F_4
+                                uint16_t registersNumber, QVector<uint16_t> &regValue);
     /*
      * Write
      */

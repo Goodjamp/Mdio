@@ -169,6 +169,21 @@ QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);
 }
 
+QLabel[TsPollingType = Bin]
+{
+    border-image: url(:/Resources/TS_satus_bin_text.png) 0 0 0 0 stretch stretch;
+}
+
+QLabel[TsPollingType = Register]
+{
+    border-image: url(:/Resources/TS_satus_register_text.png) 0 0 0 0 stretch stretch;
+}
+
+QLabel[TsPollingType = Disable]
+{
+    background: transparent;
+}
+
 QLabel#lTcState
 {
     border-style: outset;
@@ -193,6 +208,17 @@ QPushButton#pbOff:checked
 QPushButton#pbOn:checked
 {
     background-color:rgb(255, 100, 100);
+}
+
+QPushButton#pbPollingSwitcher
+{
+    background: transparent;
+    image: url(:/Resources/TS_satus_register.png);
+}
+
+QPushButton#pbPollingSwitcher:checked
+{
+    image: url(:/Resources/TS_satus_bin.png);
 }
 
 QPushButton#pbTsState
@@ -255,7 +281,6 @@ QGroupBox {
     border-width: 2px;
     margin-top: 10px 0px 0px 0px; /* The margin top) beetwen QGroupBox frame and global QGroupBox control are*/
     border-color: rgb(0, 0, 0);
-
 }
 
 QGroupBox::title {

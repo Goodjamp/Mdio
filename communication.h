@@ -85,6 +85,12 @@ private:
         ADDR_REG_TELE_CONTROL_3 = 522,
 
         /*
+         * TS_BINARY_STAT containe the state of all Tele Signalisation on the one register.
+         * Use function 3 or 4 to read this register.
+         */
+        ADDR_REG_TS_BINARY_STATE = 535,
+
+        /*
          * settings registers
          */
         ADDR_REG_VERSION_FW = 0x03E8,
@@ -166,6 +172,7 @@ public:
         bool errorEeprom;
         bool errorEepromClear;
         bool signalisation[TELESIGNAL_NUMBERS];
+        bool signalisationBinary[TELESIGNAL_NUMBERS];
         TelecontrolState control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;
 

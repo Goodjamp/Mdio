@@ -15,11 +15,14 @@
 #include <QWidget>
 #include <QJsonObject>
 #include <QComboBox>
+#include <QToolTip>
+
 #include "communication.h"
 #include "tccontrol.h"
 #include "tssettings.h"
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
+#include "tspollswitcher.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -68,8 +71,9 @@ private:
     void enableSettingsControl();
     void disableSettingsControl();
     //void skipAllSettings();
-    void getSettingsFromJson();
+    void getDefaultPcConnectionSettings();
     void initCustomUi();
+    void addToolTip();
     void updateUiConnectionStatusStr(void);
     void updateUiDeviceMetaInfStr(void);
     void updateUiCommunicationStatisticStr(void);
@@ -164,6 +168,7 @@ private:
     Ui::Mdio *ui;
     Communication *communicaiton;
     QVector<TcControl *> tcMonitorList;
+    TsPollSwitcher *tsPollingSwitcher;
     QVector<TsSettings *> tsSetingsList;
     QVector<TsStatus *> tsStatus;
     QRandomGenerator rand;
@@ -180,6 +185,7 @@ private:
     QVector<QComboBox *> tsTypeConfigList;
     QVector<QFrame *> teleSignalStatusBinaryFrameList;
     QVector<QVBoxLayout *> teleSignalStatusBinaryLayoutList;
+    QToolTip *debounceToolTip;
     int stateRequestCnt;
     int stateReplyCnt;
 
@@ -212,9 +218,6 @@ private:
     QStringList brStrList;
     QStringList parityStr;
     QStringList stopBitsStrList;
-    QStringList silentIntervaDefaultList;
-    QStringList silentIntervaMinList;
-    QStringList silentIntervaMaxList;
 
     /*
      * Services variable. Used to move readed settings from CallBack method to the showUimethod

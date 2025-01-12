@@ -297,7 +297,7 @@
                  </widget>
                 </item>
                 <item row="4" column="0">
-                 <widget class="QLabel" name="lBaudRate_2">
+                 <widget class="QLabel" name="lReplyDelay">
                   <property name="minimumSize">
                    <size>
                     <width>90</width>
@@ -359,7 +359,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="label_11">
+                   <widget class="QLabel" name="lReplyDelayRange">
                     <property name="minimumSize">
                      <size>
                       <width>75</width>
@@ -597,7 +597,7 @@
                  </widget>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QLabel" name="lTsDoubleSwitchTimeRange">
+                 <widget class="QLabel" name="lBinaryTsSwitchTimeRange">
                   <property name="font">
                    <font>
                     <pointsize>9</pointsize>
@@ -610,7 +610,7 @@
                  </widget>
                 </item>
                 <item row="0" column="0">
-                 <widget class="QLabel" name="lBounceTimeoute">
+                 <widget class="QLabel" name="lDebounceInterval">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -636,7 +636,7 @@
                  </widget>
                 </item>
                 <item row="0" column="2">
-                 <widget class="QLabel" name="lTsDebounceTimeRange">
+                 <widget class="QLabel" name="lDebounceIntervalRange">
                   <property name="font">
                    <font>
                     <pointsize>9</pointsize>
@@ -649,7 +649,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QLabel" name="lDoubleTsSwitchTime">
+                 <widget class="QLabel" name="lBinaryTsSwitchTime">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -785,7 +785,7 @@
               <item>
                <layout class="QGridLayout" name="glConnectionInternal_3">
                 <item row="0" column="0">
-                 <widget class="QLabel" name="lBounceTimeoute_2">
+                 <widget class="QLabel" name="lPulsDuration">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -839,7 +839,7 @@
                  </widget>
                 </item>
                 <item row="0" column="2">
-                 <widget class="QLabel" name="lTcPulsDurationRange">
+                 <widget class="QLabel" name="lPulsDurationRange">
                   <property name="font">
                    <font>
                     <pointsize>9</pointsize>

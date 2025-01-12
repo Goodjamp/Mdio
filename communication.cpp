@@ -221,7 +221,6 @@ void Communication::reloadSlot(std::function<void(bool result)> cb,
 void Communication::readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                                   int slaveAddress)
 {
-    QVector<bool> teleSignal;
     QVector<bool> status;
     QVector<uint16_t> teleControl;
     ModbusRtuMaster::MbStatus result;
@@ -265,16 +264,32 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         /*
          * Read tele signal status
          */
+        QVector<bool> teleSignalStatusBin;
         baseCoilAddress = ADDR_COIL_TC_1;
         readCoilsNumber = ADDR_COIL_TC_4 - baseCoilAddress + 1;
-        result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, teleSignal);
+        result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, teleSignalStatusBin);
         if (result != ModbusRtuMaster::MB_OK) {
             CALL_CB(cb, false, state);
             qDebug()<<"Error readStateSlot read read signals: "<<modbus->getStatusString(result);
             return;
         }
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
-            state.signalisation[k] = teleSignal[k];
+            state.signalisation[k] = teleSignalStatusBin[k];
+        }
+
+        /*
+         * Read tele signal status from binary register
+         */
+        QVector<uint16_t> teleSignalStatusRegister;
+        result = modbus->readHoldingRegisters(slaveAddress, ADDR_REG_TS_BINARY_STATE, 1, teleSignalStatusRegister);
+        if (result != ModbusRtuMaster::MB_OK) {
+            CALL_CB(cb, false, state);
+            qDebug()<<"Error readStateSlot read read signals: "<<modbus->getStatusString(result);
+            return;
+        }
+
+        for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
+            state.signalisationBinary[k] = teleSignalStatusRegister[0] & (1 << k);
         }
     } else {
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {

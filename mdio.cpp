@@ -214,11 +214,19 @@ void Mdio::addToolTip()
     ui->lDebounceInterval->setToolTip(ui->leDebounceInterval->toolTip());
     ui->lDebounceIntervalRange->setToolTip(ui->leDebounceInterval->toolTip());
 
-    ui->lePulsDuration->setToolTip("За умовчуванням " + SwDefSettings::getPulsDurationDefaultString() + " мс");
+    ui->lePulsDuration->setToolTip("За умовчуванням " + SwDefSettings::getPulsDurationDefaultString() + " мс\n"
+                                   + "Допустимй діапазон: "
+                                   + SwDefSettings::getPulsDurationMinString()
+                                   + "-"
+                                   + SwDefSettings::getPulsDurationMaxString() + " мс");
     ui->lPulsDuration->setToolTip(ui->lePulsDuration->toolTip());
     ui->lPulsDurationRange->setToolTip(ui->lePulsDuration->toolTip());
 
-    ui->leReplyDelay->setToolTip("За умовчуванням " + SwDefSettings::getTimeoutReplyDefaultString());
+    ui->leReplyDelay->setToolTip("За умовчуванням " + SwDefSettings::getTimeoutReplyDefaultString() + " мс\n"
+                                 + "Допустимй діапазон: "
+                                 + SwDefSettings::getTimeoutReplyMinString()
+                                 + "-"
+                                 + SwDefSettings::getTimeoutReplyMaxString() + " мс");
     ui->lReplyDelay->setToolTip(ui->leReplyDelay->toolTip());
     ui->lReplyDelayRange->setToolTip(ui->leReplyDelay->toolTip());
 
@@ -1020,7 +1028,11 @@ void Mdio::on_cbBaudRate_currentIndexChanged(int index)
         return;
     }
 
-    ui->leSilentInterval->setToolTip("За умовчуванням " + SwDefSettings::getSilentIntervalDefaultListString().at(index) + " мс");
+    ui->leSilentInterval->setToolTip("За умовчуванням " + SwDefSettings::getSilentIntervalDefaultListString().at(index) + " мс\n"
+                                     + "Допустимй діапазон: "
+                                     + SwDefSettings::getSilentIntervalMinListString().at(index)
+                                     + "-"
+                                     + SwDefSettings::getSilentIntervalMaxListString().at(index) + " мс");
     ui->lSilentInterval->setToolTip(ui->leSilentInterval->toolTip());
     ui->lSilentIntervalRange->setToolTip(ui->leSilentInterval->toolTip());
 

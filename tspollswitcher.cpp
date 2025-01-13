@@ -6,7 +6,7 @@
 #include <QGraphicsItem>
 
 #define DEFINE_SWITCHER_SIZE    40
-#define DEFINE_TEXT_WIDTH       150
+#define DEFINE_TEXT_WIDTH       180
 #define DEFINE_TEXT_HEIGHT      30
 
 TsPollSwitcher::TsPollSwitcher(QWidget *parent)
@@ -16,14 +16,19 @@ TsPollSwitcher::TsPollSwitcher(QWidget *parent)
     ui->setupUi(this);
     ui->pbPollingSwitcher->setCheckable(true);
     on_pbPollingSwitcher_toggled(false);
+
     ui->pbPollingSwitcher->setMinimumSize(DEFINE_SWITCHER_SIZE, DEFINE_SWITCHER_SIZE);
     ui->pbPollingSwitcher->setMaximumSize(ui->pbPollingSwitcher->minimumSize());
 
     ui->lTsPollingBinary->setMinimumSize(DEFINE_TEXT_WIDTH, DEFINE_TEXT_HEIGHT);
     ui->lTsPollingBinary->setMaximumSize(ui->lTsPollingBinary->minimumSize());
+    ui->lTsPollingBinary->setToolTip("Зріз ТС без буфера по функції 3 ModBus,\n"
+                                     "початкова адреса даних 535, кількість регістрів - 1");
 
     ui->lTsPollingRegister->setMinimumSize(DEFINE_TEXT_WIDTH, DEFINE_TEXT_HEIGHT);
     ui->lTsPollingRegister->setMaximumSize(ui->lTsPollingRegister->minimumSize());
+    ui->lTsPollingRegister->setToolTip("Буферізований зріз ТС по функції 2 ModBus,\n"
+                                       "початкова адреса даних 506, кількість ТС - 4");
 }
 
 TsPollSwitcher::~TsPollSwitcher()

@@ -32,6 +32,12 @@ class ModbusRtuMaster : public SerialCommunication
 {
     Q_OBJECT
 public:
+
+    typedef enum {
+        COIL_ON = 0xFF00,
+        COIL_OFF = 0x0000,
+    } CoilState;
+
     typedef enum {
         MB_RX_EXEPTION = 1,
         MB_OK = 0,
@@ -105,11 +111,6 @@ private:
                                          uint16_t address, QVector<uint16_t> value, uint32_t timeout);
 
 public:
-
-    typedef enum {
-        COIL_ON = 0xFF00,
-        COIL_OFF = 0x0000,
-    } CoilState;
 
     explicit ModbusRtuMaster(QObject *parent = nullptr);
 

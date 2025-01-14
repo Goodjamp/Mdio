@@ -354,16 +354,22 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
-                                       int slaveAddress, int index, bool enable)
+                                       int slaveAddress, int index, bool enable, bool fun5)
 {
-ModbusRtuMaster::MbStatus result;
+    ModbusRtuMaster::MbStatus result;
 
     if (index > TELECONTRO_STATIC_NUMBERS) {
         qDebug()<<"Error setTeleControlSlot index value error: "<<index;
         CALL_CB(cb, false);
         return;
     }
-    result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable);
+    result = fun5
+             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable)
+             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index,
+                                            enable == true
+                                            ? static_cast<uint16_t>(ModbusRtuMaster::COIL_ON)
+                                            : static_cast<uint16_t>(ModbusRtuMaster::COIL_OFF));
+
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"Error setTeleControlSlot reply: "<<modbus->getStatusString(result);
     }
@@ -371,11 +377,16 @@ ModbusRtuMaster::MbStatus result;
 }
 
 void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
-                                           int slaveAddress, bool enable)
+                                           int slaveAddress, bool enable, bool fun5)
 {
-ModbusRtuMaster::MbStatus result;
+    ModbusRtuMaster::MbStatus result;
 
-    result = modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_1, enable);
+    result = fun5
+             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_1, enable)
+             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_1,
+                                            enable == true
+                                            ? static_cast<uint16_t>(ModbusRtuMaster::COIL_ON)
+                                            : static_cast<uint16_t>(ModbusRtuMaster::COIL_OFF));
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"Error setTeleControlPulsSlot reply: "<<modbus->getStatusString(result);
     }

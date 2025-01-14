@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TsPollSwitcher</class>
- <widget class="QWidget" name="TsPollSwitcher">
+ <class>Toogle</class>
+ <widget class="QWidget" name="Toogle">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -55,7 +55,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="lTsPollingBinary">
+    <widget class="QLabel" name="lToogleOn">
      <property name="font">
       <font>
        <pointsize>11</pointsize>
@@ -63,7 +63,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Бінарний зріз</string>
+      <string/>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -71,7 +71,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="pbPollingSwitcher">
+    <widget class="QPushButton" name="pbToogle">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -90,7 +90,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="lTsPollingRegister">
+    <widget class="QLabel" name="lToogleOff">
      <property name="font">
       <font>
        <pointsize>11</pointsize>
@@ -98,7 +98,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Регістровий зріз</string>
+      <string/>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

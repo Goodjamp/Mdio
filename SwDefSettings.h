@@ -37,9 +37,9 @@ public:
     {
         QVector<MonitorDesr> argOut;
         MonitorDesr tempDesr;
-        QJsonArray arr = rootObj.find(monTc)->toArray();
+        QJsonArray arr = rootObj.find(monTc)->toObject().find(monTcList)->toArray();
 
-        for (auto item: rootObj.find(monTc)->toArray()) {
+        for (auto item: arr) {
             tempDesr.name = item.toObject().find(monTcName)->toString();
             tempDesr.rel1State.clear();
             for (auto item: item.toObject().find(monTcRelayStr1)->toArray()) {
@@ -325,13 +325,41 @@ public:
         return QString::number(getPulsDurationMax());
     }
 
+    static QString getMonitroTsNamePollBinary()
+    {
+        return rootObj.find(keyMonTs)->toObject().find(keyMonTsNamePollBinary)->toString();
+    }
+
+    static QString getMonitroTsNamePollRegister()
+    {
+        return rootObj.find(keyMonTs)->toObject().find(keyMonTsNamePollRegister)->toString();
+    }
+
+    static QString getMonitroTcNameFun5()
+    {
+        return rootObj.find(monTc)->toObject().find(monTcNameFun5)->toString();
+    }
+
+    static QString getMonitroTcNameFun6()
+    {
+        return rootObj.find(monTc)->toObject().find(monTcNameFun6)->toString();
+    }
+
     inline static const QString settingsFilePath = ":/Settings.json";
+
 private:
 
     inline static const QString monTc = "monitorTC";
+    inline static const QString monTcNameFun5 = "NameFun5";
+    inline static const QString monTcNameFun6 = "NameFun6";
+    inline static const QString monTcList = "List";
     inline static const QString monTcName = "Name";
     inline static const QString monTcRelayStr1 = "RelayStr1";
     inline static const QString monTcRelayStr2 = "RelayStr2";
+
+    inline static const QString keyMonTs = "monitorTS";
+    inline static const QString keyMonTsNamePollBinary = "NamePollBinary";
+    inline static const QString keyMonTsNamePollRegister = "NamePollRegister";
 
     inline static const QString keyPort = "Port";
     inline static const QString keyPortBrLis = "BrList";

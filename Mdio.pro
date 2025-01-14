@@ -25,7 +25,7 @@ SOURCES += \
     serialcommunication.cpp \
     swsettings.cpp \
     tccontrol.cpp \
-    tspollswitcher.cpp \
+    toogle.cpp \
     tssettings.cpp \
     tsstatus.cpp
 
@@ -38,7 +38,7 @@ HEADERS += \
     serialcommunication.h \
     swsettings.h \
     tccontrol.h \
-    tspollswitcher.h \
+    toogle.h \
     tssettings.h \
     tsstatus.h \
     Version.h
@@ -47,7 +47,7 @@ FORMS += \
     dialogconnectionsettings.ui \
     mdio.ui \
     tccontrol.ui \
-    tspollswitcher.ui \
+    toogle.ui \
     tssettings.ui \
     tsstatus.ui
 

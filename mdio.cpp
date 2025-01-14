@@ -127,7 +127,7 @@ void Mdio::addTsConfigBinaryGroupUi(void)
 
 void Mdio::addTsStatusBinaryGroupUi(void)
 {
-    tsPollingSwitcher = new TsPollSwitcher();
+    tsPollingSwitcher = new Toogle(SwDefSettings::getMonitroTsNamePollBinary(), SwDefSettings::getMonitroTsNamePollRegister());
     ui->vlTeleSignalStatus->addWidget(tsPollingSwitcher);
 
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
@@ -238,6 +238,14 @@ void Mdio::addToolTip()
 
     ui->cbStopBits->setToolTip("За умовчуванням " + SwDefSettings::getStopBitsDefaultStr());
     ui->lStopBits->setToolTip(ui->cbStopBits->toolTip());
+
+    tsPollingSwitcher->addToolTip("Зріз ТС без буфера по функції 3 ModBus,\n"
+                                  "початкова адреса даних 535, кількість регістрів - 1",
+                                  "Буферізований зріз ТС по функції 2 ModBus,\n"
+                                  "початкова адреса даних 506, кількість ТС - 4");
+
+    tkControlSwitcher->addToolTip("Функція ModBus для ТК 6",
+                                  "Функція ModBus для ТК 5");
 }
 
 void Mdio::initCustomUi()
@@ -245,8 +253,7 @@ void Mdio::initCustomUi()
     /*
      *  Title bar: icon name
      */
-    setWindowTitle(SW_NAME + " V"
-                   + SW_VERSION_STR);
+    setWindowTitle(SW_NAME + " V" + SW_VERSION_STR);
     setWindowIcon((QIcon)":/Resources/CompanyIcon.png");
 
     relayControlListTc1 = new QButtonGroup();
@@ -254,8 +261,6 @@ void Mdio::initCustomUi()
     QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,3}", this);
     QRegularExpressionValidator *numericValidator4D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,4}", this);
     QRegularExpressionValidator *numericValidator5D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,5}", this);
-
-    addToolTip();
 
     /*
      * Add validation to the numeric UI items
@@ -274,6 +279,8 @@ void Mdio::initCustomUi()
                                       + "-"
                                       + SwDefSettings::getPulsDurationMaxString()
                                       + ")");
+    tkControlSwitcher = new Toogle(SwDefSettings::getMonitroTcNameFun6(), SwDefSettings::getMonitroTcNameFun5());
+    ui->vlTcControlMonitorInternal->addWidget(tkControlSwitcher);
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("", k, this));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList.last());
@@ -333,6 +340,8 @@ void Mdio::initCustomUi()
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
         settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
     }
+
+    addToolTip();
 
     setDefaultSettings();
     ui->tabWidget->setCurrentIndex(0);
@@ -914,10 +923,10 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         /*
          * Update Tele signalisation and status indication
          */
-        TsPollSwitcher::PollingType pollingType = tsPollingSwitcher->getPollingType();
+        Toogle::ToogleState pollingType = tsPollingSwitcher->getState();
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             if (state.error220 == false) {
-                tsStatus[k]->setStatus((pollingType == TsPollSwitcher::POLLING_TYPE_REGISTER
+                tsStatus[k]->setStatus((pollingType == Toogle::TOOGLE_STATE_OFF
                                         ? state.signalisation[k]
                                         : state.signalisationBinary[k])
                                         ? TsStatus::TS_OK_ON : TsStatus::TS_OK_OFF);
@@ -997,10 +1006,12 @@ void Mdio::tcSetTcSlot(int index, bool enable)
     if (index == 0) {
         tcMonitorList[1]->unchekAllButton();
         tcMonitorList[2]->unchekAllButton();
-        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, enable);
+        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
+                                      enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     } else {
         tcMonitorList[0]->unchekAllButton();
-        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress, index - 1, enable);\
+        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
+                                  index - 1, enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     }
 
     if (processingCommunicatitonResult("Телекерування",

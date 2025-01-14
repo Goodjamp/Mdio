@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
+    <width>408</width>
     <height>145</height>
    </rect>
   </property>
@@ -54,7 +54,6 @@
              <font>
               <family>MS Shell Dlg 2</family>
               <pointsize>12</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -84,7 +83,6 @@
              <font>
               <family>MS Shell Dlg 2</family>
               <pointsize>9</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -134,7 +132,6 @@
              <font>
               <family>MS Shell Dlg 2</family>
               <pointsize>12</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -172,7 +169,6 @@
              <font>
               <family>MS Shell Dlg 2</family>
               <pointsize>12</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -202,7 +198,6 @@
              <font>
               <family>MS Shell Dlg 2</family>
               <pointsize>9</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -280,7 +275,6 @@
            <font>
             <family>MS Shell Dlg 2</family>
             <pointsize>12</pointsize>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -314,13 +308,13 @@
     <widget class="QLabel" name="lTcName">
      <property name="minimumSize">
       <size>
-       <width>160</width>
+       <width>100</width>
        <height>50</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>140</width>
+       <width>100</width>
        <height>50</height>
       </size>
      </property>
@@ -328,27 +322,16 @@
       <font>
        <family>MS Shell Dlg 2</family>
        <pointsize>12</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="text">
       <string>ТС1 ІМПУЛЬСНЕ</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>2</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

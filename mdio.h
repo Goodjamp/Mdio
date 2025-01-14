@@ -22,7 +22,7 @@
 #include "tssettings.h"
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
-#include "tspollswitcher.h"
+#include "toogle.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -60,9 +60,9 @@ signals:
     void readState(std::function<void(bool result, Communication::SlaveState state)> cb,
                    int slaveAddress);
     void setTeleControlPuls(std::function<void(bool result)> cb,
-                            int slaveAddress, bool enable);
+                            int slaveAddress, bool enable, bool fun5);
     void setTeleControl(std::function<void(bool result)> cb,
-                        int slaveAddress, int index, bool enable);
+                        int slaveAddress, int index, bool enable, bool fun5);
     void readMetaInformation(std::function<void(bool result, Communication::MetaInformation metaInformation)> cb,
                              int slaveAddress);
 
@@ -168,7 +168,8 @@ private:
     Ui::Mdio *ui;
     Communication *communicaiton;
     QVector<TcControl *> tcMonitorList;
-    TsPollSwitcher *tsPollingSwitcher;
+    Toogle *tsPollingSwitcher;
+    Toogle *tkControlSwitcher;
     QVector<TsSettings *> tsSetingsList;
     QVector<TsStatus *> tsStatus;
     QRandomGenerator rand;

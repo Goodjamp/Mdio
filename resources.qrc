@@ -7,10 +7,10 @@
         <file>Resources/Rela_RC1_Off.png</file>
         <file>Resources/Relay_Off.png</file>
         <file>Resources/Relay_On.png</file>
-        <file>Resources/TS_satus_bin.png</file>
-        <file>Resources/TS_satus_register.png</file>
-		<file>Resources/TS_satus_bin_text.png</file>
-		<file>Resources/TS_satus_register_text.png</file>
+        <file>Resources/Toogle_on.png</file>
+        <file>Resources/Toogle_off.png</file>
+        <file>Resources/Toogle_background_on.png</file>
+        <file>Resources/Toogle_background_off.png</file>
         <file>Settings.json</file>
     </qresource>
 </RCC>

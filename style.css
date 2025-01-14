@@ -169,17 +169,17 @@ QPushButton#pbVoltageOnTcStatus:checked{
     background-color:rgb(250, 50, 50);
 }
 
-QLabel[TsPollingType = Bin]
+QLabel[ToogleState = On]
 {
-    border-image: url(:/Resources/TS_satus_bin_text.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/Resources/Toogle_background_on.png) 0 0 0 0 stretch stretch;
 }
 
-QLabel[TsPollingType = Register]
+QLabel[ToogleState = Off]
 {
-    border-image: url(:/Resources/TS_satus_register_text.png) 0 0 0 0 stretch stretch;
+    border-image: url(:/Resources/Toogle_background_off.png) 0 0 0 0 stretch stretch;
 }
 
-QLabel[TsPollingType = Disable]
+QLabel[ToogleState = Disable]
 {
     background: transparent;
 }
@@ -210,15 +210,15 @@ QPushButton#pbOn:checked
     background-color:rgb(255, 100, 100);
 }
 
-QPushButton#pbPollingSwitcher
+QPushButton#pbToogle
 {
     background: transparent;
-    image: url(:/Resources/TS_satus_register.png);
+    image: url(:/Resources/Toogle_off.png);
 }
 
-QPushButton#pbPollingSwitcher:checked
+QPushButton#pbToogle:checked
 {
-    image: url(:/Resources/TS_satus_bin.png);
+    image: url(:/Resources/Toogle_on.png);
 }
 
 QPushButton#pbTsState

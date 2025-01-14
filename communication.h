@@ -230,9 +230,9 @@ public slots:
     void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                        int slaveAddress);
     void setTeleControlSlot(std::function<void(bool result)> cb,
-                            int slaveAddress, int index, bool enable);
+                            int slaveAddress, int index, bool enable, bool fun5);
     void setTeleControlPulsSlot(std::function<void(bool result)> cb,
-                                int slaveAddress, bool enable);
+                                int slaveAddress, bool enable, bool fun5);
 };
 
 #endif // B_H

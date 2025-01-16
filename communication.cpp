@@ -47,7 +47,7 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
          * Serialiase configuration to registers list
          */
         baseConfReg = ADDR_REG_DATE_CONFIGURATION;
-        registersNumbers = ADDR_REG_TC_PULS_DURATION - baseConfReg + 1;
+        registersNumbers = ADDR_REG_TC_OFF_VALUE - baseConfReg + 1;
         configReg.resize(registersNumbers);
 
         /*
@@ -89,6 +89,8 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
          * Serialiase tele control settings
          */
         configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg] = configuration.control.pulsDuration;
+        configReg[ADDR_REG_TC_ON_VALUE - baseConfReg] = configuration.control.onVal;
+        configReg[ADDR_REG_TC_OFF_VALUE - baseConfReg] = configuration.control.offVal;
 
         result = modbus->presetMultipleRegister(slaveAddress, baseConfReg, configReg);
         if (result == ModbusRtuMaster::MB_OK) {
@@ -161,6 +163,8 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
              * Deserialiase tele control settings
              */
             configuration.control.pulsDuration = configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg];
+            configuration.control.onVal = configReg[ADDR_REG_TC_ON_VALUE - baseConfReg];
+            configuration.control.offVal = configReg[ADDR_REG_TC_OFF_VALUE - baseConfReg];
             resulReadConfiguration = true;
         } else {
             qDebug()<<"Error readConfigurationSlot parity or stop bits error:";
@@ -311,17 +315,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Test and apply the context of the puls telecontrol registers
      */
-    if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == ModbusRtuMaster::COIL_ON) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_STATE_ON;
-    } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == ModbusRtuMaster::COIL_OFF) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_STATE_OFF;
-    } else if (teleControl[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] == TELECONTROL_UNDEFINED) {
-        state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = Communication::TELECONTROL_STATE_UNDEFINED;
-    } else {
-        qDebug()<<"Error readStateSlot puls telecontrol value";
-        CALL_CB(cb, false, state);
-        return;
-    }
+    state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress] = state.control[ADDR_REG_TELE_CONTROL_1 - baseTcAddress];
 
     /*
      * Read the puls tele control state.
@@ -338,23 +332,13 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
      * Test and apply the context of the static telecontrol registers
      */
     for (uint32_t k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
-        if (teleControl[k] == ModbusRtuMaster::COIL_ON) {
-            state.control[k + 1] = Communication::TELECONTROL_STATE_ON;
-        } else if (teleControl[k] == ModbusRtuMaster::COIL_OFF) {
-            state.control[k + 1] = Communication::TELECONTROL_STATE_OFF;
-        } else if (teleControl[k] == TELECONTROL_UNDEFINED) {
-            state.control[k + 1] = Communication::TELECONTROL_STATE_UNDEFINED;
-        } else {
-            qDebug()<<"Error readStateSlot static telecontrol value";
-            CALL_CB(cb, false, state);
-            return;
-        }
+        state.control[k + 1] = teleControl[k];
     }
     CALL_CB(cb, true, state);
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
-                                       int slaveAddress, int index, bool enable, bool fun5)
+                                       int slaveAddress, int index, unsigned int val, bool fun5)
 {
     ModbusRtuMaster::MbStatus result;
 
@@ -364,12 +348,8 @@ void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
         return;
     }
     result = fun5
-             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, enable)
-             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index,
-                                            enable == true
-                                            ? static_cast<uint16_t>(ModbusRtuMaster::COIL_ON)
-                                            : static_cast<uint16_t>(ModbusRtuMaster::COIL_OFF));
-
+             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, (uint16_t)(0xFFFF & val))
+             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_2 + index, (uint16_t)(0xFFFF & val));
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"Error setTeleControlSlot reply: "<<modbus->getStatusString(result);
     }
@@ -377,16 +357,13 @@ void Communication::setTeleControlSlot(std::function<void(bool result)> cb,
 }
 
 void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
-                                           int slaveAddress, bool enable, bool fun5)
+                                           int slaveAddress, unsigned int val, bool fun5)
 {
     ModbusRtuMaster::MbStatus result;
 
     result = fun5
-             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_1, enable)
-             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_1,
-                                            enable == true
-                                            ? static_cast<uint16_t>(ModbusRtuMaster::COIL_ON)
-                                            : static_cast<uint16_t>(ModbusRtuMaster::COIL_OFF));
+             ? modbus->forceSingleCoil(slaveAddress, ADDR_REG_TELE_CONTROL_1,  (uint16_t)(0xFFFF & val))
+             : modbus->presetSingleRegister(slaveAddress, ADDR_REG_TELE_CONTROL_1, (uint16_t)(0xFFFF & val));
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"Error setTeleControlPulsSlot reply: "<<modbus->getStatusString(result);
     }

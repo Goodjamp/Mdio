@@ -72,6 +72,8 @@
     {
         "PulsDurationDefault": 1000,
         "PulsDurationMin": 100,
-        "PulsDurationMax": 4000
+        "PulsDurationMax": 4000,
+        "OnVal": "FF00",
+        "OffVal": "0000"
     }
 }

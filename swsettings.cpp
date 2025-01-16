@@ -69,6 +69,8 @@ bool SwSettings::addTcSettings(TcConfig config)
         return false;
     }
     tcObj.insert(keyPulsDuration, (QJsonValue)config.getPulsDuration());
+    tcObj.insert(keyValueOn, (QJsonValue)config.getValOn());
+    tcObj.insert(keyValueOff, (QJsonValue)config.getValOff());
 
     return true;
 }
@@ -248,6 +250,35 @@ bool SwSettings::testTc(QJsonObject jsonObj, QString &errorStr)
                               errorStr = errorStrList.value(KEY_PULS_DURATION_VALUE_ERROR);
                           return result;
                       });
+
+        if (result == true) {
+            result = test(tcObj, keyValueOn, KEY_ON_VALUE_MISSING_ERROR, errorStr,
+                          [&errorStr](QString value)->bool{
+                              QRegularExpressionValidator valValidator(QRegularExpression("[a-f,A-F,\\d]{1,4}"));
+                              int pos;
+                              if(valValidator.validate(value, pos) == QValidator::Acceptable){
+                                  return true;
+                              }
+                              errorStr = errorStrList.value(KEY_ON_VALUE_VALUE_ERROR);
+                              return false;
+                          });
+        }
+        if (result == true) {
+            result = test(tcObj, keyValueOff, KEY_OFF_VALUE_MISSING_ERROR, errorStr,
+                          [&errorStr](QString value)->bool{
+                              QRegularExpressionValidator valValidator(QRegularExpression("[a-f,A-F,\\d]{1,4}"));
+                              int pos;
+                              if(valValidator.validate(value, pos) == QValidator::Acceptable){
+                                  return true;
+                              }
+                              errorStr = errorStrList.value(KEY_OFF_VALUE_VALUE_ERROR);
+                              return false;
+                          });
+        }
+        if (tcObj.find(keyValueOn)->toString().toUInt(NULL, 16) == tcObj.find(keyValueOff)->toString().toUInt(NULL, 16)) {
+             errorStr = errorStrList.value(KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR);
+            result = false;
+        }
     } else {
         errorStr = errorStrList.value(KEY_TC_FORMAT_ERROR);
     }

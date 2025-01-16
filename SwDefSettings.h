@@ -345,6 +345,16 @@ public:
         return rootObj.find(monTc)->toObject().find(monTcNameFun6)->toString();
     }
 
+    static QString getTcOnValDefaultString()
+    {
+        return rootObj.find(keyTc)->toObject().find(keyTcOnValDefault)->toString();
+    }
+
+    static QString getTcOffValDefaultString()
+    {
+        return rootObj.find(keyTc)->toObject().find(keyTcOffValDefault)->toString();
+    }
+
     inline static const QString settingsFilePath = ":/Settings.json";
 
 private:
@@ -401,6 +411,8 @@ private:
     inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
     inline static const QString keyTcPulsDurationMin = "PulsDurationMin";
     inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
+    inline static const QString keyTcOnValDefault = "OnVal";
+    inline static const QString keyTcOffValDefault = "OffVal";
 
     inline static const QString keyTsSingleNumber = "TsSingleNumber";
     inline static const QString keyTsDoubleNumber = "TsDoubleNumber";

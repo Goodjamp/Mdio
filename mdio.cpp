@@ -506,6 +506,8 @@ bool Mdio::updateUiConfiguration(void)
                                              : TS_TEXT_SIMPLE);
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
+    ui->leOnVal->setText(QString::number(connectDeviceConf.control.onVal));
+    ui->leOnVal->setText(QString::number(connectDeviceConf.control.offVal));
 
     lastConfigurationYear = connectDeviceConf.configurationYear;
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
@@ -863,10 +865,8 @@ void Mdio::on_pbApplySettings_clicked()
     configuration.configurationDay = QDate::currentDate().day();
 
     emit writeConfiguration(CB_WRAP_1(Mdio, writeConfigurationResult), connectSlaveAddress, configuration);
-    if (processingCommunicatitonResult("Оновлення конфігурації",
-                                       "Помилка оновлення конфігурації", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Оновлення конфігурації",
+                                   "Помилка оновлення конфігурації", false);
 }
 
 void Mdio::on_pbDisconnect_clicked()
@@ -886,10 +886,8 @@ void Mdio::on_pbReload_clicked()
      */
     communicationSyncSem.tryAcquire(1);
     emit reload(CB_WRAP_1(Mdio,reloadResult), connectSlaveAddress);
-    if (processingCommunicatitonResult("Перезавантаження пристрою",
-                                       "Помилка перезавантаження", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Перезавантаження пристрою",
+                                   "Помилка перезавантаження", false);
 }
 
 void Mdio::readSettings()
@@ -1009,19 +1007,18 @@ void Mdio::tcSetTcSlot(int index, bool enable)
         tcMonitorList[1]->unchekAllButton();
         tcMonitorList[2]->unchekAllButton();
         emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                      enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
+                                      enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
+                                      tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     } else {
         tcMonitorList[0]->unchekAllButton();
         emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                  index - 1, enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF
-                                                     ? ui->leOnVal->text().toUInt(NULL, 16)
-                                                     : ui->leOffVal->text().toUInt(NULL, 16));
+                                  index - 1,
+                                  enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
+                                  tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     }
 
-    if (processingCommunicatitonResult("Телекерування",
-                                       "Помилка передачі команди\nдля статичного телекерування", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Телекерування",
+                                   "Помилка передачі команди\nдля статичного телекерування", false);
 }
 
 void Mdio::on_pbSetDefaultSettings_clicked()

@@ -121,7 +121,7 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
      * Read reagisters range from the ADDRESS_COMMUNICATION_BAUDRATE to the ADDRESS_TC_PULS_DURATION
      */
     baseConfReg = ADDR_REG_DATE_CONFIGURATION;
-    registersNumbers = ADDR_REG_TC_PULS_DURATION - baseConfReg + 1;
+    registersNumbers = ADDR_REG_TC_OFF_VALUE - baseConfReg + 1;
     result = modbus->readHoldingRegisters(slaveAddress, baseConfReg, registersNumbers, configReg);
     if (result == ModbusRtuMaster::MB_OK) {
         /*

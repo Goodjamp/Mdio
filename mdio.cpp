@@ -507,7 +507,7 @@ bool Mdio::updateUiConfiguration(void)
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
     ui->leOnVal->setText(QString::number(connectDeviceConf.control.onVal));
-    ui->leOnVal->setText(QString::number(connectDeviceConf.control.offVal));
+    ui->leOffVal->setText(QString::number(connectDeviceConf.control.offVal));
 
     lastConfigurationYear = connectDeviceConf.configurationYear;
     lastConfigurationMonth = connectDeviceConf.configurationMonth;

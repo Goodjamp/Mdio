@@ -157,7 +157,7 @@ public:
      * Write
      */
     MbStatus forceSingleCoil(uint8_t slaveAddress, uint16_t coilAddress,
-                             bool coilState);  // F_5  0xFF00 - ON, 0x0000- OFF
+                             uint16_t regValue);  // F_5  0xFF00 - ON, 0x0000- OFF
     MbStatus presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,
                                   uint16_t regValue); // F_6
     /*

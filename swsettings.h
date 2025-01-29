@@ -162,7 +162,7 @@ class TcConfig
 {
 
 public:
-    TcConfig(int pulsDurationIn)
+    TcConfig(int pulsDurationIn, QString valOnIn, QString valOffIn)
         :SwDefSettings()
     {
         if(pulsDurationIn < getPulsDurationMin()
@@ -171,6 +171,8 @@ public:
             return;
         }
         pulsDuration = pulsDurationIn;
+        valOn = valOnIn;
+        valOff = valOffIn;
         result = true;
     }
 
@@ -183,10 +185,22 @@ public:
         return pulsDuration;
     }
 
+    QString getValOn()
+    {
+        return valOn;
+    }
+
+    QString getValOff()
+    {
+        return valOff;
+    }
+
 private:
 
     bool result = false;
     int pulsDuration;
+    QString valOn;
+    QString valOff;
 };
 
 class SwSettings: SwDefSettings
@@ -298,6 +312,24 @@ public:
         return value;
     }
 
+    QString getOnValue() {
+        QString value{""};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTc)->toObject().find(keyValueOn)->toString();
+        }
+        return value;
+    }
+
+    QString getOffValue() {
+        QString value{""};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTc)->toObject().find(keyValueOff)->toString();
+        }
+        return value;
+    }
+
     QVector<bool> getDoubleSign() {
         QVector<bool> value;
 
@@ -331,7 +363,6 @@ public:
         return value;
     }
 
-
 private:
 
     static inline::QString keyDate{"Date"};
@@ -349,6 +380,8 @@ private:
     static inline::QString keySwVersion{"Sw version"};
     static inline::QString keyTc{"TC"};
     static inline::QString keyPulsDuration{"Puls duration"};
+    static inline::QString keyValueOn{"Value On"};
+    static inline::QString keyValueOff{"Value Off"};
 
     static inline::QStringList parityValue{
         {"None"},
@@ -439,6 +472,13 @@ private:
         KEY_SWITCH_TIME_MISSING,
         KEY_SWITCH_TIME_FORMAT_ERROR,
         KEY_SWITCH_TIME_VALUE_ERROR,
+        KEY_ON_VALUE_MISSING_ERROR,
+        KEY_ON_VALUE_FORMAT_ERROR,
+        KEY_ON_VALUE_VALUE_ERROR,
+        KEY_OFF_VALUE_MISSING_ERROR,
+        KEY_OFF_VALUE_FORMAT_ERROR,
+        KEY_OFF_VALUE_VALUE_ERROR,
+        KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR,
     } SettingsError;
 
     static inline::QMap<SettingsError, QString> errorStrList{
@@ -488,7 +528,14 @@ private:
         {KEY_INVERSION_VALUE_ITEM_ERROR,  "Ключ <b>" + keyTs + "->" + keyInversion + "</b> має невірний формат.\nЕлемент масиву повинен бути рядок <b>Inverse</b> або <b>NoInverse</b>."},
         {KEY_SWITCH_TIME_MISSING, "Відсутній ключ <b>" + keyTs + "->" + keySwitchTime + "</b>"},
         {KEY_SWITCH_TIME_FORMAT_ERROR, "Ключ <b>" + keyTs + "->" + keySwitchTime + "</b> має невірний формат"},
-        {KEY_SWITCH_TIME_VALUE_ERROR, "Ключ <b>" + keyTs + "->" + keySwitchTime + "</b> має невірне значення"}
+        {KEY_SWITCH_TIME_VALUE_ERROR, "Ключ <b>" + keyTs + "->" + keySwitchTime + "</b> має невірне значення"},
+        {KEY_ON_VALUE_MISSING_ERROR, "Відсутній ключ <b>" + keyTc + "->" + keyValueOn + "</b>."},
+        {KEY_ON_VALUE_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOn + "</b> має невірний формат."},
+        {KEY_ON_VALUE_VALUE_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOn + "</b> має невірне значення.\n Очікується 4-розрядне шістнадцяткове число"},
+        {KEY_OFF_VALUE_MISSING_ERROR, "Відсутній ключ <b>" + keyTc + "->" + keyValueOff + "</b>."},
+        {KEY_OFF_VALUE_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірний формат."},
+        {KEY_OFF_VALUE_VALUE_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірне значення.\n Очікується 4-розрядне шістнадцяткове число"},
+        {KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR, "Ключі <b>" + keyTc + "->" + keyValueOn + " та " + keyTc + "->" + keyValueOff + "</b> повинні мати різні значення"},
     };
 
     static bool testRootKeys(QJsonObject jsonObj, QString &errorStr);

@@ -261,6 +261,7 @@ void Mdio::initCustomUi()
     QRegularExpressionValidator *numericValidator3D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,3}", this);
     QRegularExpressionValidator *numericValidator4D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,4}", this);
     QRegularExpressionValidator *numericValidator5D = new QRegularExpressionValidator((QRegularExpression)"^$|[\\d]{1,5}", this);
+    QRegularExpressionValidator *numericValidator4DHex = new QRegularExpressionValidator((QRegularExpression)"^$|[a-f,A-F,\\d]{1,4}", this);
 
     /*
      * Add validation to the numeric UI items
@@ -269,6 +270,8 @@ void Mdio::initCustomUi()
     ui->leReplyDelay->setValidator(numericValidator3D);
     ui->leDebounceInterval->setValidator(numericValidator3D);
     ui->lePulsDuration->setValidator(numericValidator4D);
+    ui->leOnVal->setValidator(numericValidator4DHex);
+    ui->leOffVal->setValidator(numericValidator4DHex);
     ui->leBinaryTsSwitchTime->setValidator(numericValidator5D);
 
     /*
@@ -503,6 +506,8 @@ bool Mdio::updateUiConfiguration(void)
                                              : TS_TEXT_SIMPLE);
     }
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
+    ui->leOnVal->setText(QString("%1").arg(connectDeviceConf.control.onVal, 2, 16, QChar('0')));
+    ui->leOffVal->setText(QString("%1").arg(connectDeviceConf.control.offVal, 2, 16, QChar('0')));
 
     lastConfigurationYear = connectDeviceConf.configurationYear;
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
@@ -615,6 +620,8 @@ void Mdio::setDefaultSettings()
     ui->leReplyDelay->setText(SwDefSettings::getTimeoutReplyDefaultString());
     ui->leDebounceInterval->setText(SwDefSettings::getDebounceDefaultString());
     ui->lePulsDuration->setText(SwDefSettings::getPulsDurationDefaultString());
+    ui->leOnVal->setText(SwDefSettings::getTcOnValDefaultString());
+    ui->leOffVal->setText(SwDefSettings::getTcOffValDefaultString());
     ui->leBinaryTsSwitchTime->setText(SwDefSettings::getBinaryTsSwitchTimeDefaultString());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
@@ -847,6 +854,8 @@ void Mdio::on_pbApplySettings_clicked()
      *  Tele Control settings
      */
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
+    configuration.control.onVal = ui->leOnVal->text().toUInt(NULL,16);
+    configuration.control.offVal = ui->leOffVal->text().toUInt(NULL,16);
 
     /*
      *  Configuration date
@@ -856,10 +865,8 @@ void Mdio::on_pbApplySettings_clicked()
     configuration.configurationDay = QDate::currentDate().day();
 
     emit writeConfiguration(CB_WRAP_1(Mdio, writeConfigurationResult), connectSlaveAddress, configuration);
-    if (processingCommunicatitonResult("Оновлення конфігурації",
-                                       "Помилка оновлення конфігурації", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Оновлення конфігурації",
+                                   "Помилка оновлення конфігурації", false);
 }
 
 void Mdio::on_pbDisconnect_clicked()
@@ -879,10 +886,8 @@ void Mdio::on_pbReload_clicked()
      */
     communicationSyncSem.tryAcquire(1);
     emit reload(CB_WRAP_1(Mdio,reloadResult), connectSlaveAddress);
-    if (processingCommunicatitonResult("Перезавантаження пристрою",
-                                       "Помилка перезавантаження", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Перезавантаження пристрою",
+                                   "Помилка перезавантаження", false);
 }
 
 void Mdio::readSettings()
@@ -970,22 +975,17 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
             /*
              * For the other TC we need set actual state
              */
+
             for (int k = 1; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-                switch (state.control[k]) {
-                case Communication::TELECONTROL_STATE_ON:
+                if (state.control[k] == ui->leOnVal->text().toUInt(NULL, 16)) {
                     tcMonitorList[k]->setOnButtonState(true);
                     tcMonitorList[k]->setOffButtonState(false);
-                    break;
-
-                case Communication::TELECONTROL_STATE_OFF:
+                } else if (state.control[k] == ui->leOffVal->text().toUInt(NULL, 16)) {
                     tcMonitorList[k]->setOnButtonState(false);
                     tcMonitorList[k]->setOffButtonState(true);
-                    break;
-
-                case Communication::TELECONTROL_STATE_UNDEFINED:
+                } else {
                     tcMonitorList[k]->setOnButtonState(false);
                     tcMonitorList[k]->setOffButtonState(false);
-                    break;
                 }
             }
 
@@ -1007,17 +1007,18 @@ void Mdio::tcSetTcSlot(int index, bool enable)
         tcMonitorList[1]->unchekAllButton();
         tcMonitorList[2]->unchekAllButton();
         emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                      enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
+                                      enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
+                                      tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     } else {
         tcMonitorList[0]->unchekAllButton();
         emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                  index - 1, enable, tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
+                                  index - 1,
+                                  enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
+                                  tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
     }
 
-    if (processingCommunicatitonResult("Телекерування",
-                                       "Помилка передачі команди\nдля статичного телекерування", false) == false) {
-        return;
-    }
+    processingCommunicatitonResult("Телекерування",
+                                   "Помилка передачі команди\nдля статичного телекерування", false);
 }
 
 void Mdio::on_pbSetDefaultSettings_clicked()
@@ -1065,7 +1066,7 @@ void Mdio::on_pbSaveSettingsFile_clicked()
                       ui->leDebounceInterval->text().toInt(),
                       QVector<bool>{tsSetingsList[0]->isInvert(), tsSetingsList[1]->isInvert(), tsSetingsList[2]->isInvert(), tsSetingsList[3]->isInvert()},
                       QVector<bool>{tsTypeConfigList[0]->currentText() == TS_TEXT_BINARY, tsTypeConfigList[1]->currentText() == TS_TEXT_BINARY});
-    TcConfig tcConfig(ui->lePulsDuration->text().toInt());
+    TcConfig tcConfig(ui->lePulsDuration->text().toInt(), ui->leOnVal->text(), ui->leOffVal->text());
 
     SwSettings settings;
     settings.addCommunicationSettings(comConfig);
@@ -1134,6 +1135,8 @@ void Mdio::on_pbOpenSettingsFile_clicked()
     ui->leDebounceInterval->setText(QString::number(newSettings.getDebounceTime()));
     ui->leSilentInterval->setText(QString::number(newSettings.getSilentInterval()));
     ui->lePulsDuration->setText(QString::number(newSettings.getPulsDuration()));
+    ui->leOnVal->setText(newSettings.getOnValue());
+    ui->leOffVal->setText(newSettings.getOffValue());
     ui->leReplyDelay->setText(QString::number(newSettings.getReplyDelay()));
 
     for (qsizetype i = 0; i < tsTypeConfigList.size(); i++) {
@@ -1228,5 +1231,47 @@ void Mdio::on_lePulsDuration_textEdited(const QString &arg1)
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getPulsDurationMin(),
                  SwDefSettings::getPulsDurationMax());
+}
+
+
+void Mdio::on_leOnVal_editingFinished()
+{
+    if (ui->leOnVal->text().isEmpty()) {
+        ui->leOnVal->setText(SwDefSettings::getTcOnValDefaultString());
+    }
+
+    if (ui->leOnVal->text().toUInt(NULL, 16) == ui->leOffVal->text().toUInt(NULL, 16)) {
+        ui->leOnVal->setStyleSheet("background-color: rgb(243, 193, 255);");
+        unsigned int val = ui->leOnVal->text().toUInt(NULL, 16);
+        if (val == 0xFFFF) {
+            val--;
+        } else {
+            val++;
+        }
+        ui->leOnVal->setText(QString::number(val, 16));
+    } else {
+        ui->leOnVal->setStyleSheet("background-color: rgb(255, 255, 255);");
+    }
+
+}
+
+void Mdio::on_leOffVal_editingFinished()
+{
+    if (ui->leOffVal->text().isEmpty()) {
+        ui->leOffVal->setText(SwDefSettings::getTcOnValDefaultString());
+    }
+
+    if (ui->leOnVal->text().toUInt(NULL, 16) == ui->leOffVal->text().toUInt(NULL, 16)) {
+        ui->leOffVal->setStyleSheet("background-color: rgb(243, 193, 255);");
+        unsigned int val = ui->leOffVal->text().toUInt(NULL, 16);
+        if (val == 0xFFFF) {
+            val--;
+        } else {
+            val++;
+        }
+        ui->leOffVal->setText(QString::number(val, 16));
+    } else {
+        ui->leOffVal->setStyleSheet("background-color: rgb(255, 255, 255);");
+    }
 }
 

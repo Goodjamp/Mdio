@@ -264,13 +264,10 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::forceSingleCoil(uint8_t slaveAddress, uint16_t coilAddress,
-                                                           bool coilState)
+                                                           uint16_t regValue)
 {
     return writeSlaveSingleRegister(slaveAddress, FORCE_SINGLE_COIL, coilAddress,
-                                    coilState == true
-                                    ? static_cast<uint16_t>(COIL_ON)
-                                    : static_cast<uint16_t>(COIL_OFF),
-                                    readTimeout);
+                                    regValue, readTimeout);
 }
 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,

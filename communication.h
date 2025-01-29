@@ -116,6 +116,8 @@ private:
          * Tele control settings
          */
         ADDR_REG_TC_PULS_DURATION = 0x03F2,
+        ADDR_REG_TC_ON_VALUE = 0x03F3,
+        ADDR_REG_TC_OFF_VALUE = 0x03F4,
 
         /*
          * Reset device control
@@ -164,6 +166,8 @@ public:
         } signalisation;
         struct {
             int pulsDuration;
+            int onVal;
+            int offVal;
         } control;
     } SlaveConfiguration;
 
@@ -173,7 +177,7 @@ public:
         bool errorEepromClear;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
-        TelecontrolState control[TELECONTROL_TOTAL_NUMBERS];
+        unsigned int control[TELECONTROL_TOTAL_NUMBERS];
     } SlaveState;
 
     typedef struct {
@@ -230,9 +234,9 @@ public slots:
     void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                        int slaveAddress);
     void setTeleControlSlot(std::function<void(bool result)> cb,
-                            int slaveAddress, int index, bool enable, bool fun5);
+                            int slaveAddress, int index, unsigned int val, bool fun5);
     void setTeleControlPulsSlot(std::function<void(bool result)> cb,
-                                int slaveAddress, bool enable, bool fun5);
+                                int slaveAddress, unsigned int val, bool fun5);
 };
 
 #endif // B_H

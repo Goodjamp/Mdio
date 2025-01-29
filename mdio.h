@@ -60,9 +60,9 @@ signals:
     void readState(std::function<void(bool result, Communication::SlaveState state)> cb,
                    int slaveAddress);
     void setTeleControlPuls(std::function<void(bool result)> cb,
-                            int slaveAddress, bool enable, bool fun5);
+                            int slaveAddress,  unsigned int val, bool fun5);
     void setTeleControl(std::function<void(bool result)> cb,
-                        int slaveAddress, int index, bool enable, bool fun5);
+                        int slaveAddress, int index, unsigned int val, bool fun5);
     void readMetaInformation(std::function<void(bool result, Communication::MetaInformation metaInformation)> cb,
                              int slaveAddress);
 
@@ -159,6 +159,10 @@ private slots:
     void on_lePulsDuration_editingFinished();
 
     void on_lePulsDuration_textEdited(const QString &arg1);
+
+    void on_leOnVal_editingFinished();
+
+    void on_leOffVal_editingFinished();
 
 private:
     signals:

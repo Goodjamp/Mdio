@@ -55,7 +55,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="lToogleOn">
+    <widget class="QLabel" name="lToogleOff">
      <property name="font">
       <font>
        <pointsize>11</pointsize>
@@ -90,7 +90,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="lToogleOff">
+    <widget class="QLabel" name="lToogleOn">
      <property name="font">
       <font>
        <pointsize>11</pointsize>

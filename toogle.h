@@ -26,7 +26,6 @@ public:
     void addToolTip(QString onToolTip, QString offTooTip);
 
 private slots:
-
     void on_pbToogle_toggled(bool checked);
 
 private:

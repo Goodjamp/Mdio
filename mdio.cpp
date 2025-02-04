@@ -127,7 +127,7 @@ void Mdio::addTsConfigBinaryGroupUi(void)
 
 void Mdio::addTsStatusBinaryGroupUi(void)
 {
-    tsPollingSwitcher = new Toogle(SwDefSettings::getMonitroTsNamePollBinary(), SwDefSettings::getMonitroTsNamePollRegister());
+    tsPollingSwitcher = new Toogle(SwDefSettings::getMonitroTsNamePollRegister(), SwDefSettings::getMonitroTsNamePollBinary());
     ui->vlTeleSignalStatus->addWidget(tsPollingSwitcher);
 
     for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
@@ -239,13 +239,13 @@ void Mdio::addToolTip()
     ui->cbStopBits->setToolTip("За умовчуванням " + SwDefSettings::getStopBitsDefaultStr());
     ui->lStopBits->setToolTip(ui->cbStopBits->toolTip());
 
-    tsPollingSwitcher->addToolTip("Зріз ТС без буфера по функції 3 ModBus,\n"
-                                  "початкова адреса даних 535, кількість регістрів - 1",
-                                  "Буферізований зріз ТС по функції 2 ModBus,\n"
-                                  "початкова адреса даних 506, кількість ТС - 4");
+    tsPollingSwitcher->addToolTip("Буферізований зріз ТС по функції 2 ModBus,\n"
+                                  "початкова адреса даних 506, кількість ТС - 4",
+                                  "Зріз ТС без буфера по функції 3 ModBus,\n"
+                                  "початкова адреса даних 535, кількість регістрів - 1");
 
-    tkControlSwitcher->addToolTip("Функція ModBus для ТК 6",
-                                  "Функція ModBus для ТК 5");
+    tkControlSwitcher->addToolTip("Функція ModBus для ТК 5",
+                                  "Функція ModBus для ТК 6");
 }
 
 void Mdio::initCustomUi()
@@ -282,7 +282,7 @@ void Mdio::initCustomUi()
                                       + "-"
                                       + SwDefSettings::getPulsDurationMaxString()
                                       + ")");
-    tkControlSwitcher = new Toogle(SwDefSettings::getMonitroTcNameFun6(), SwDefSettings::getMonitroTcNameFun5());
+    tkControlSwitcher = new Toogle(SwDefSettings::getMonitroTcNameFun5(), SwDefSettings::getMonitroTcNameFun6());
     ui->vlTcControlMonitorInternal->addWidget(tkControlSwitcher);
     for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
         tcMonitorList.append(new TcControl("", k, this));
@@ -1018,7 +1018,7 @@ void Mdio::tcSetTcSlot(int index, bool enable)
     }
 
     processingCommunicatitonResult("Телекерування",
-                                   "Помилка передачі команди\nдля статичного телекерування", false);
+                                   "Помилка передачі команди\nтелекерування", false);
 }
 
 void Mdio::on_pbSetDefaultSettings_clicked()

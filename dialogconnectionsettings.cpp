@@ -51,14 +51,14 @@ DialogConnectionSettings::DialogConnectionSettings(UiFilingList uiFillingList,
 
 void DialogConnectionSettings::leAddressEditFinish()
 {
-    Mdio::verifyAndModifyNumber(ui->leAddress, 1, 255, 1);
+    Mdio::verifyAndModifyNumber(ui->leAddress, 1, 255, 1, 1);
 }
 
 void DialogConnectionSettings::leAddressEdited(const QString &text)
 {
     (void)text;
 
-    Mdio::verifyNumber(ui->leAddress, 1, 255);
+    Mdio::verifyNumber(ui->leAddress, 1, 255, 1);
 }
 
 DialogConnectionSettings::~DialogConnectionSettings()

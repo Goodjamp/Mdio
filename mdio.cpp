@@ -784,26 +784,35 @@ void Mdio::on_pbConnectionSettings_clicked()
     }
 }
 
-void Mdio::verifyAndModifyNumber(QLineEdit *item, int min, int max, int def)
+void Mdio::verifyAndModifyNumber(QLineEdit *item, int min, int max, int def, int discret)
 {
-    QString text = item->text();
+    QString textOrigin = item->text();
 
-    if (text.isEmpty()) {
+    if (textOrigin.isEmpty()) {
         item->setText(QString::number(def));
-    } else if(text.toInt() < min) {
-        item->setText(QString::number(min));
-    } else if(text.toInt() > max) {
-        item->setText(QString::number(max));
+    } else {
+        QString textModify = QString::number(((textOrigin.toInt() + discret / 2) / discret) * discret);
+
+        if(textModify.toInt() < min) {
+            textModify = QString::number(min);
+        } else if(textModify.toInt() > max) {
+            textModify = QString::number(max);
+        }
+
+        if (QString::compare(textOrigin, textModify)) {
+            item->setText(textModify);
+        }
     }
 }
 
-void Mdio::verifyNumber(QLineEdit *item, int min, int max)
+void Mdio::verifyNumber(QLineEdit *item, int min, int max, int discret)
 {
     QString text = item->text();
 
     if (text.isEmpty()
         || text.toInt() < min
-        || text.toInt() > max) {
+        || text.toInt() > max
+        || text.toInt() % discret) {
         item->setStyleSheet("background-color: rgb(243, 193, 255);");
     } else {
         item->setStyleSheet("background-color: rgb(255, 255, 255);");
@@ -1154,7 +1163,8 @@ void Mdio::on_leSilentInterval_editingFinished()
     verifyAndModifyNumber((QLineEdit *)this->sender(),
                           SwDefSettings::getSilentIntervalMinList().at(brIndex),
                           SwDefSettings::getSilentIntervalMaxList().at(brIndex),
-                          SwDefSettings::getSilentIntervalDefaultList().at(brIndex));
+                          SwDefSettings::getSilentIntervalDefaultList().at(brIndex),
+                          1);
 }
 
 void Mdio::on_leSilentInterval_textEdited(const QString &arg1)
@@ -1164,7 +1174,8 @@ void Mdio::on_leSilentInterval_textEdited(const QString &arg1)
 
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getSilentIntervalMinList().at(brIndex),
-                 SwDefSettings::getSilentIntervalMaxList().at(brIndex));
+                 SwDefSettings::getSilentIntervalMaxList().at(brIndex),
+                 1);
 }
 
 void Mdio::on_leReplyDelay_editingFinished()
@@ -1172,7 +1183,8 @@ void Mdio::on_leReplyDelay_editingFinished()
     verifyAndModifyNumber((QLineEdit *)this->sender(),
                           SwDefSettings::getTimeoutReplyMin(),
                           SwDefSettings::getTimeoutReplyMax(),
-                          SwDefSettings::getTimeoutReplyDefault());
+                          SwDefSettings::getTimeoutReplyDefault(),
+                          1);
 }
 
 void Mdio::on_leReplyDelay_textEdited(const QString &arg1)
@@ -1180,7 +1192,8 @@ void Mdio::on_leReplyDelay_textEdited(const QString &arg1)
     (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getTimeoutReplyMin(),
-                 SwDefSettings::getTimeoutReplyMax());
+                 SwDefSettings::getTimeoutReplyMax(),
+                 1);
 }
 
 void Mdio::on_leDebounceInterval_editingFinished()
@@ -1188,7 +1201,8 @@ void Mdio::on_leDebounceInterval_editingFinished()
     verifyAndModifyNumber((QLineEdit *)this->sender(),
                           SwDefSettings::getDebounceMin(),
                           SwDefSettings::getDebounceMax(),
-                          SwDefSettings::getDebounceDefault());
+                          SwDefSettings::getDebounceDefault(),
+                          1);
 }
 
 void Mdio::on_leDebounceInterval_textEdited(const QString &arg1)
@@ -1197,7 +1211,8 @@ void Mdio::on_leDebounceInterval_textEdited(const QString &arg1)
 
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getDebounceMin(),
-                 SwDefSettings::getDebounceMax());
+                 SwDefSettings::getDebounceMax(),
+                 1);
 }
 
 void Mdio::on_leBinaryTsSwitchTime_editingFinished()
@@ -1205,7 +1220,8 @@ void Mdio::on_leBinaryTsSwitchTime_editingFinished()
     verifyAndModifyNumber((QLineEdit *)this->sender(),
                           SwDefSettings::getSwitchTimeMin(),
                           SwDefSettings::getSwitchTimeMax(),
-                          SwDefSettings::getBinaryTsSwitchTimeDefault());
+                          SwDefSettings::getBinaryTsSwitchTimeDefault(),
+                          100);
 }
 
 
@@ -1214,7 +1230,8 @@ void Mdio::on_leBinaryTsSwitchTime_textEdited(const QString &arg1)
     (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getSwitchTimeMin(),
-                 SwDefSettings::getSwitchTimeMax());
+                 SwDefSettings::getSwitchTimeMax(),
+                 100);
 }
 
 void Mdio::on_lePulsDuration_editingFinished()
@@ -1222,7 +1239,8 @@ void Mdio::on_lePulsDuration_editingFinished()
     verifyAndModifyNumber((QLineEdit *)this->sender(),
                           SwDefSettings::getPulsDurationMin(),
                           SwDefSettings::getPulsDurationMax(),
-                          SwDefSettings::getPulsDurationDefault());
+                          SwDefSettings::getPulsDurationDefault(),
+                          100);
 }
 
 void Mdio::on_lePulsDuration_textEdited(const QString &arg1)
@@ -1230,7 +1248,8 @@ void Mdio::on_lePulsDuration_textEdited(const QString &arg1)
     (void)arg1;
     verifyNumber((QLineEdit *)this->sender(),
                  SwDefSettings::getPulsDurationMin(),
-                 SwDefSettings::getPulsDurationMax());
+                 SwDefSettings::getPulsDurationMax(),
+                 100);
 }
 
 
@@ -1273,5 +1292,17 @@ void Mdio::on_leOffVal_editingFinished()
     } else {
         ui->leOffVal->setStyleSheet("background-color: rgb(255, 255, 255);");
     }
+}
+
+
+void Mdio::on_leOnVal_textChanged(const QString &arg1)
+{
+    ui->leOnVal->setText(arg1.toUpper());
+}
+
+
+void Mdio::on_leOffVal_textChanged(const QString &arg1)
+{
+    ui->leOffVal->setText(arg1.toUpper());
 }
 

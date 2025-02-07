@@ -41,8 +41,8 @@ class Mdio : public QMainWindow
 public:
     Mdio(QWidget *parent = nullptr);
     ~Mdio();
-    static void verifyAndModifyNumber(QLineEdit *item, int min, int max, int def);
-    static void verifyNumber(QLineEdit *item, int min, int max);
+    static void verifyAndModifyNumber(QLineEdit *item, int min, int max, int def, int discret);
+    static void verifyNumber(QLineEdit *item, int min, int max, int discret);
 
 signals:
     void connectSlave(std::function<void(bool result)> cb,
@@ -161,6 +161,10 @@ private slots:
     void on_leOnVal_editingFinished();
 
     void on_leOffVal_editingFinished();
+
+    void on_leOnVal_textChanged(const QString &arg1);
+
+    void on_leOffVal_textChanged(const QString &arg1);
 
 private:
     signals:

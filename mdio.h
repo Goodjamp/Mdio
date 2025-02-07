@@ -109,8 +109,6 @@ private slots:
 
     void tcSetTcSlot(int index, bool enable);
 
-private slots:
-
     void on_pbConnectionSettings_clicked();
 
     void on_pbApplySettings_clicked();

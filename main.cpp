@@ -27,19 +27,19 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    /*
+    /*S
      * Initilisation default settings
      * It is important to initiate the default settings before it will be used.
      */
     QFile settingsFile(SwDefSettings::settingsFilePath);
-    settingsFile.open(QIODevice::ReadOnly);
+    (void)settingsFile.open(QIODevice::ReadOnly);
     SwDefSettings::init(settingsFile.readAll());
 
     /*
      * Open and apply style file
      */
     QFile styleF(":/style.css");
-    styleF.open(QFile::ReadOnly | QIODevice::Text);
+    (void)styleF.open(QFile::ReadOnly | QIODevice::Text);
     QString qssStr = styleF.readAll();
     qApp->setStyleSheet(qssStr);
 

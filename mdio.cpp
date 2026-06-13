@@ -1095,7 +1095,7 @@ void Mdio::on_pbSaveSettingsFile_clicked()
     QByteArray settingsBuff{settings.getJsonFile()};
     QFile fw{fileName};
 
-    fw.open(QIODevice::WriteOnly);
+    (void)fw.open(QIODevice::WriteOnly);
     fw.write(settingsBuff);
     fw.close();
 }
@@ -1114,7 +1114,7 @@ void Mdio::on_pbOpenSettingsFile_clicked()
 
     QFile settings(fileName);
 
-    settings.open(QIODeviceBase::ReadOnly);
+    (void)settings.open(QIODeviceBase::ReadOnly);
     QByteArray settingJson = settings.readAll();
     settings.close();
     QString errorStr;

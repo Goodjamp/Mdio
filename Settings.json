@@ -74,6 +74,7 @@
         "PulsDurationMin": 100,
         "PulsDurationMax": 4000,
         "OnVal": "FF00",
-        "OffVal": "0000"
+        "OffVal": "0000",
+        "UsePowerRelay": false
     }
 }

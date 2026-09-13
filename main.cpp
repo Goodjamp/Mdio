@@ -12,6 +12,7 @@
 #include "dialogconnectionsettings.h"
 #include "QDateTime"
 #include "SwDefSettings.h"
+#include "uidescription.h"
 
 Q_DECLARE_METATYPE(uint8_t);
 Q_DECLARE_METATYPE(uint16_t);
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
     QFile settingsFile(SwDefSettings::settingsFilePath);
     (void)settingsFile.open(QIODevice::ReadOnly);
     SwDefSettings::init(settingsFile.readAll());
-
+    UiDescription::init();
     /*
      * Open and apply style file
      */

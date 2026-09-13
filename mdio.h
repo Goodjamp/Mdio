@@ -23,6 +23,7 @@
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
 #include "toogle.h"
+#include "errorpanel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -67,6 +68,8 @@ signals:
                              int slaveAddress);
 
 private:
+    ErrorPanel *errorPanel;
+
     bool connectWithSettings();
     void enableSettingsControl();
     void disableSettingsControl();

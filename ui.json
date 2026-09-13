@@ -1,0 +1,18 @@
+{
+    "StatusList":
+    [
+                {"Name": "220 В\nланцюгах\nТС",
+		 "Address": 4,
+		 "M_fun": 2
+		},
+		{"Name": "Збій\nEEPROM",
+		 "Address": 6
+		},
+		{"Name": "EEPROM\nчистий",
+		 "Address": 7
+		},
+		{"Name": "Відмова\nТК",
+		 "Address": 8
+		}
+    ]
+}

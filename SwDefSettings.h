@@ -300,6 +300,11 @@ public:
         return rootObj.find(keyTc)->toObject().find(keyTcPulsDurationDefault)->toInt();
     }
 
+    static int getUsePowerRelayDefault()
+    {
+        return rootObj.find(keyTc)->toObject().find(keyUsePowerRelayDefault)->toInt();
+    }
+
     static QString getPulsDurationDefaultString()
     {
         return QString::number(getPulsDurationDefault());
@@ -413,6 +418,7 @@ private:
     inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
     inline static const QString keyTcOnValDefault = "OnVal";
     inline static const QString keyTcOffValDefault = "OffVal";
+    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
 
     inline static const QString keyTsSingleNumber = "TsSingleNumber";
     inline static const QString keyTsDoubleNumber = "TsDoubleNumber";

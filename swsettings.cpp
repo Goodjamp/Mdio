@@ -71,6 +71,7 @@ bool SwSettings::addTcSettings(TcConfig config)
     tcObj.insert(keyPulsDuration, (QJsonValue)config.getPulsDuration());
     tcObj.insert(keyValueOn, (QJsonValue)config.getValOn());
     tcObj.insert(keyValueOff, (QJsonValue)config.getValOff());
+    tcObj.insert(keyUsePowerRelay, (QJsonValue)config.getUsePowerRelay());
 
     return true;
 }
@@ -182,6 +183,24 @@ bool SwSettings::test(QJsonObject rootObj, QString key, SettingsError errorBase,
     return result;
 }
 
+bool SwSettings::test(QJsonObject rootObj, QString key, SettingsError errorBase, QString &errorStr, std::function<bool(bool)> testVal)
+{
+    bool result = false;
+
+    if (rootObj.contains(key) == true) {
+        if (rootObj.find(key)->isBool()) {
+            result = testVal(rootObj.find(key)->toBool());
+        } else {
+            errorStr = errorStrList.value((SettingsError)(errorBase + 1));
+        }
+    } else {
+        errorStr = errorStrList.value(errorBase);
+    }
+
+    return result;
+}
+
+
 bool SwSettings::test(QJsonObject rootObj, QString key, SettingsError errorBase, QString &errorStr, std::function<bool(QJsonArray)> testVal)
 {
     bool result = false;
@@ -244,12 +263,12 @@ bool SwSettings::testTc(QJsonObject jsonObj, QString &errorStr)
     if (jsonObj.find(keyTc)->isObject() == true) {
         QJsonObject tcObj = jsonObj.find(keyTc)->toObject();
         result = test(tcObj, keyPulsDuration, KEY_PULS_DURATION_MISSING, errorStr,
-                      [&errorStr](int value)->bool{
+                      std::function<bool(int)>([&errorStr](int value)->bool{
                           bool result =(value >= getPulsDurationMin() && value <= getPulsDurationMax());
                           if (result == false)
                               errorStr = errorStrList.value(KEY_PULS_DURATION_VALUE_ERROR);
                           return result;
-                      });
+                      }));
 
         if (result == true) {
             result = test(tcObj, keyValueOn, KEY_ON_VALUE_MISSING_ERROR, errorStr,
@@ -275,6 +294,12 @@ bool SwSettings::testTc(QJsonObject jsonObj, QString &errorStr)
                               return false;
                           });
         }
+        if (result == true) {
+            result = test(tcObj, keyUsePowerRelay, KEY_USE_POWER_RELAY_MISSING_ERROR, errorStr,
+                          std::function<bool(bool)>([&errorStr](bool value)->bool{
+                              return true;
+                          }));
+        }
         if (tcObj.find(keyValueOn)->toString().toUInt(NULL, 16) == tcObj.find(keyValueOff)->toString().toUInt(NULL, 16)) {
              errorStr = errorStrList.value(KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR);
             result = false;
@@ -296,7 +321,7 @@ bool SwSettings::testCommunication(QJsonObject jsonObj, QString &errorStr)
         QJsonObject communicationObj = jsonObj.find(keyCommunication)->toObject();
 
         result = test(communicationObj, keyBoadRate, KEY_BOAD_RATE_MISSING, errorStr,
-                      [&errorStr, &brIndex](int value)->bool{
+                      std::function<bool(int)>([&errorStr, &brIndex](int value)->bool{
             bool result = getBrList().contains(value);
             if (result == true) {
                 QVector<int> brList = getBrList();
@@ -305,7 +330,7 @@ bool SwSettings::testCommunication(QJsonObject jsonObj, QString &errorStr)
                 errorStr = errorStrList.value(KEY_BOAD_RATE_VALUE_ERROR);
             }
             return result;
-        });
+        }));
 
         if (result == true) {
             result = test(communicationObj, keyParity, KEY_PARITY_MISSING, errorStr,
@@ -319,33 +344,33 @@ bool SwSettings::testCommunication(QJsonObject jsonObj, QString &errorStr)
 
         if (result == true) {
             result = test(communicationObj, keyReplyDelay, KEY_REPLY_DELAY_MISSING, errorStr,
-                          [&errorStr](int value)->bool{
+                          std::function<bool(int)>([&errorStr](int value)->bool{
                 bool result =(value >= getTimeoutReplyMin()) && (value <= getTimeoutReplyMax());
                 if (result == false)
                     errorStr = errorStrList.value(KEY_REPLY_DELAY_VALUE_ERROR);
                 return result;
-            });
+            }));
         }
 
         if (result == true) {
             result = test(communicationObj, keySilentInterval, KEY_SILENT_INTERVAL_MISSING, errorStr,
-                          [&errorStr, &brIndex](int value)->bool{
+                        std::function<bool(int)>([&errorStr, &brIndex](int value)->bool{
                 bool result = (value >= getSilentIntervalMinList().at(brIndex))
                               && (value <= getSilentIntervalMaxList().at(brIndex));
                 if (result == false)
                     errorStr = errorStrList.value(KEY_SILENT_INTERVAL_VALUE_ERROR);
                 return result;
-            });
+            }));
         }
 
         if (result == true) {
             result = test(communicationObj, keyStopBits, KEY_STOP_BITS_MISSING, errorStr,
-                          [&errorStr](int value)->bool{
+                          std::function<bool(int)>([&errorStr](int value)->bool{
                 bool result = getStopBitList().contains(value);
                 if (result == false)
                   errorStr = errorStrList.value(KEY_STOP_BITS_VALUE_ERROR);
                 return result;
-          });
+          }));
         }
 
     } else {
@@ -363,21 +388,21 @@ bool SwSettings::testTs(QJsonObject jsonObj, QString &errorStr)
         QJsonObject tsObj = jsonObj.find(keyTs)->toObject();
 
         result = test(tsObj, keySwitchTime, KEY_SWITCH_TIME_MISSING, errorStr,
-                      [&errorStr](int value)->bool{
+                      std::function<bool(int)>([&errorStr](int value)->bool{
                           bool result = (value >= getSwitchTimeMin() && value <= getSwitchTimeMax());
                           if (result == false)
                               errorStr = errorStrList.value(KEY_SWITCH_TIME_VALUE_ERROR);
                           return result;
-                      });
+                      }));
 
         if (result == true) {
             result = test(tsObj, keyDebounceTime, KEY_DEBONCE_TIME_MISSING, errorStr,
-                        [&errorStr](int value)->bool{
+                        (std::function<bool(int)>)([&errorStr](int value)->bool{
                             bool result = (value >= getDebounceMin() && value <= getDebounceMax());
                             if (result == false)
                                 errorStr = errorStrList.value(KEY_DEBONCE_TIME_VALUE_ERROR);
                             return result;
-                        });
+                        }));
         }
 
         if (result == true) {

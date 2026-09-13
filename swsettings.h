@@ -162,7 +162,7 @@ class TcConfig
 {
 
 public:
-    TcConfig(int pulsDurationIn, QString valOnIn, QString valOffIn)
+    TcConfig(int pulsDurationIn, QString valOnIn, QString valOffIn, bool usePowerRelayIn)
         :SwDefSettings()
     {
         if(pulsDurationIn < getPulsDurationMin()
@@ -174,6 +174,7 @@ public:
         valOn = valOnIn;
         valOff = valOffIn;
         result = true;
+        usePowerRelay = usePowerRelayIn;
     }
 
     bool isInit() {
@@ -195,12 +196,16 @@ public:
         return valOff;
     }
 
+    bool getUsePowerRelay() {
+        return usePowerRelay;
+    }
 private:
 
     bool result = false;
     int pulsDuration;
     QString valOn;
     QString valOff;
+    bool usePowerRelay;
 };
 
 class SwSettings: SwDefSettings
@@ -303,6 +308,15 @@ public:
         return value;
     }
 
+    bool getUsePowerRelay() {
+        bool value{false};
+
+        if (isFileSettingsValid) {
+            value = rootObj.find(keyTc)->toObject().find(keyUsePowerRelay)->toBool();
+        }
+        return value;
+    }
+
     int getDebounceTime() {
         int value{0};
 
@@ -382,6 +396,7 @@ private:
     static inline::QString keyPulsDuration{"Puls duration"};
     static inline::QString keyValueOn{"Value On"};
     static inline::QString keyValueOff{"Value Off"};
+    static inline::QString keyUsePowerRelay{"Use power relay"};
 
     static inline::QStringList parityValue{
         {"None"},
@@ -479,6 +494,8 @@ private:
         KEY_OFF_VALUE_FORMAT_ERROR,
         KEY_OFF_VALUE_VALUE_ERROR,
         KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR,
+        KEY_USE_POWER_RELAY_MISSING_ERROR,
+        KEY_USE_POWER_RELAY_FORMAT_ERROR,
     } SettingsError;
 
     static inline::QMap<SettingsError, QString> errorStrList{
@@ -536,6 +553,8 @@ private:
         {KEY_OFF_VALUE_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірний формат."},
         {KEY_OFF_VALUE_VALUE_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірне значення.\n Очікується 4-розрядне шістнадцяткове число"},
         {KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR, "Ключі <b>" + keyTc + "->" + keyValueOn + " та " + keyTc + "->" + keyValueOff + "</b> повинні мати різні значення"},
+        {KEY_USE_POWER_RELAY_MISSING_ERROR, "Відсутній ключ <b>" + keyTc + "->" + keyUsePowerRelay + "</b>."},
+        {KEY_USE_POWER_RELAY_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyUsePowerRelay + "</b> має невірний формат."},
     };
 
     static bool testRootKeys(QJsonObject jsonObj, QString &errorStr);
@@ -548,5 +567,6 @@ private:
     static bool test(QJsonObject rootObj, QString key, SettingsError error, QString &errorStr, std::function<bool(QString)> testVal);
     static bool test(QJsonObject rootObj, QString key, SettingsError error, QString &errorStr, std::function<bool(int)> testVal);
     static bool test(QJsonObject rootObj, QString key, SettingsError error, QString &errorStr, std::function<bool(QJsonArray)> testVal);
+    static bool test(QJsonObject rootObj, QString key, SettingsError error, QString &errorStr, std::function<bool(bool)> testVal);
 };
 #endif // SWSETTINGS_H

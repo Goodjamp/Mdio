@@ -12,5 +12,8 @@
         <file>Resources/Toogle_background_on.png</file>
         <file>Resources/Toogle_background_off.png</file>
         <file>Settings.json</file>
+        <file>Resources/StatusErr.png</file>
+        <file>Resources/StatusNorma.png</file>
+        <file>ui.json</file>
     </qresource>
 </RCC>

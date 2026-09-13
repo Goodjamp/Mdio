@@ -19,6 +19,8 @@ SOURCES += \
     SwDefSettings.cpp \
     communication.cpp \
     dialogconnectionsettings.cpp \
+    errorindicator.cpp \
+    errorpanel.cpp \
     main.cpp \
     mdio.cpp \
     modbusrtumaster.cpp \
@@ -27,12 +29,16 @@ SOURCES += \
     tccontrol.cpp \
     toogle.cpp \
     tssettings.cpp \
-    tsstatus.cpp
+    tsstatus.cpp \
+    uidescription.cpp \
+    uiregister.cpp
 
 HEADERS += \
     SwDefSettings.h \
     communication.h \
     dialogconnectionsettings.h \
+    errorindicator.h \
+    errorpanel.h \
     mdio.h \
     modbusrtumaster.h \
     serialcommunication.h \
@@ -41,7 +47,9 @@ HEADERS += \
     toogle.h \
     tssettings.h \
     tsstatus.h \
-    Version.h
+    Version.h \
+    uidescription.h \
+    uiregister.h
 
 FORMS += \
     dialogconnectionsettings.ui \
@@ -58,3 +66,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES += \
+    ui.json

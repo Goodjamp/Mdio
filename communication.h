@@ -53,6 +53,7 @@
 #define INVERS_SETTINGS_TI3_POS         2
 #define INVERS_SETTINGS_TI4_POS         3
 
+#define USE_POWER_RELAY_CONF_OFFSET     2
 
 /*
  * Class B is a wrapper for the Modbus class + Communication class (A) implementation.
@@ -70,13 +71,16 @@ class Communication : public SerialCommunication
 {
     Q_OBJECT
 private:
+    /*
+     * Added:
+     * - Reg 0..3 state TC1-4 (4 valaue for each TS)
+     * - reg 4 220 on the TS cirk
+     * - reg 5 rezerv
+     * - reg 6 flash error
+     * - reg 7 flash clear
+     * - reg 8 TC (telecontrol) demage: 1 - Relay coil fault, 2 - relay or key fault
+     */
     typedef enum {
-        /*
-         * Generyc registers
-         */
-        ADDR_REG_TS = 0x0000,
-        ADDR_REG_GLOBAL_STATUS = 0x0004,
-
         /*
          * Tele control registers
          */
@@ -132,12 +136,14 @@ private:
         ADDR_COIL_TC_4 = 509,
 
         ADDR_COIL_220_V_ERROR = 4,
+        // <----reserv
         ADDR_COIL_EEPROM_ERROR = 6,
-        ADDR_COIL_EEPROM_CLEAR_ERROR = 7
+        ADDR_COIL_EEPROM_CLEAR_ERROR = 7,
+        ADDR_COIL_RELAY_ERROR = 8
     } AddrCoil;
 
 public:
-    Communication(){}
+    Communication(){};
     ~Communication(){}
 
 public:
@@ -168,6 +174,7 @@ public:
             int pulsDuration;
             int onVal;
             int offVal;
+            bool usePowerRelay;
         } control;
     } SlaveConfiguration;
 
@@ -175,6 +182,7 @@ public:
         bool error220;
         bool errorEeprom;
         bool errorEepromClear;
+        bool errorRelayError;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
         unsigned int control[TELECONTROL_TOTAL_NUMBERS];

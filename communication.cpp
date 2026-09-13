@@ -1,5 +1,6 @@
 #include <QVector>
 #include "communication.h"
+#include "uidescription.h"
 
 
 void Communication::startCommunication(void)
@@ -84,6 +85,9 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
                 configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |= static_cast<uint16_t>(1) << k;
             }
         }
+        // Put TC Power Relay settings
+        configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |=
+            configuration.control.usePowerRelay ? 1 : 0 << USE_POWER_RELAY_CONF_OFFSET;
 
         /*
          * Serialiase tele control settings
@@ -165,6 +169,12 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
             configuration.control.pulsDuration = configReg[ADDR_REG_TC_PULS_DURATION - baseConfReg];
             configuration.control.onVal = configReg[ADDR_REG_TC_ON_VALUE - baseConfReg];
             configuration.control.offVal = configReg[ADDR_REG_TC_OFF_VALUE - baseConfReg];
+
+            /*
+             * Deserialiase Power Relay settings
+             */
+            configuration.control.usePowerRelay =
+                (1 & (configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] >> USE_POWER_RELAY_CONF_OFFSET)) == 1;
             resulReadConfiguration = true;
         } else {
             qDebug()<<"Error readConfigurationSlot parity or stop bits error:";
@@ -236,6 +246,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Read 220V in circuit
      */
+    QVector<int> errorCoilAddress = UiDescription::getErrorAddressList();
     baseCoilAddress = ADDR_COIL_220_V_ERROR;
     readCoilsNumber = ADDR_COIL_220_V_ERROR - baseCoilAddress + 1;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
@@ -249,16 +260,18 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      *  Read EEPROM_ERROR and EEPROM_CLEAR status
      */
-    baseCoilAddress = ADDR_COIL_EEPROM_ERROR;
-    readCoilsNumber = ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress + 1;
+    baseCoilAddress = ADDR_COIL_220_V_ERROR;
+    readCoilsNumber = ADDR_COIL_RELAY_ERROR - baseCoilAddress + 1;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"Error readStateSlot read globalStatusReg: "<<modbus->getStatusString(result);
         return;
     }
+    state.error220 = status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
     state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
+    state.errorRelayError =  status[ADDR_COIL_RELAY_ERROR - baseCoilAddress];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with

@@ -21,6 +21,7 @@
 #include "Version.h"
 #include "SwDefSettings.h"
 #include "SwSettings.h"
+#include "uidescription.h"
 
 #define SETTINGS_FILE_EXTANTION    ".json"
 #define SETTINGS_FILE_NAME         "MBB"
@@ -327,10 +328,6 @@ void Mdio::initCustomUi()
     ui->cbStopBits->addItems(stopBitsStrList);
     ui->cbParity->addItems(parityStr);
 
-    ui->pbVoltageOnTcStatus->setEnabled(false);
-    ui->pbEepromStatus->setEnabled(false);
-    ui->pbEepromClearStatus->setEnabled(false);
-
     /*
      * Add all UI element to control enabling
      */
@@ -358,6 +355,8 @@ Mdio::Mdio(QWidget *parent)
 {
     ui->setupUi(this);
 
+    errorPanel = new ErrorPanel(this);
+    ui->horizontalLayout->addWidget(errorPanel);
 
     commmunicationThread = new QThread();
     communicaiton = new Communication();
@@ -508,6 +507,7 @@ bool Mdio::updateUiConfiguration(void)
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
     ui->leOnVal->setText(QString("%1").arg(connectDeviceConf.control.onVal, 4, 16, QChar('0')));
     ui->leOffVal->setText(QString("%1").arg(connectDeviceConf.control.offVal, 4, 16, QChar('0')));
+    ui->cbUsePoweRelay->setChecked(connectDeviceConf.control.usePowerRelay);
 
     lastConfigurationYear = connectDeviceConf.configurationYear;
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
@@ -856,6 +856,7 @@ void Mdio::on_pbApplySettings_clicked()
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
     configuration.control.onVal = ui->leOnVal->text().toUInt(NULL,16);
     configuration.control.offVal = ui->leOffVal->text().toUInt(NULL,16);
+    configuration.control.usePowerRelay = ui->cbUsePoweRelay->isChecked();
 
     /*
      *  Configuration date
@@ -941,9 +942,10 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 
         }
 
-        ui->pbVoltageOnTcStatus->setChecked(state.error220);
-        ui->pbEepromStatus->setChecked(state.errorEeprom);
-        ui->pbEepromClearStatus->setChecked(state.errorEepromClear);
+        errorPanel->setErrorState(0, state.error220);
+        errorPanel->setErrorState(1, state.errorEeprom);
+        errorPanel->setErrorState(2, state.errorEepromClear);
+        errorPanel->setErrorState(3, state.errorRelayError);
 
         /*
          * Update Tele control indication
@@ -1066,7 +1068,7 @@ void Mdio::on_pbSaveSettingsFile_clicked()
                       ui->leDebounceInterval->text().toInt(),
                       QVector<bool>{tsSetingsList[0]->isInvert(), tsSetingsList[1]->isInvert(), tsSetingsList[2]->isInvert(), tsSetingsList[3]->isInvert()},
                       QVector<bool>{tsTypeConfigList[0]->currentText() == TS_TEXT_BINARY, tsTypeConfigList[1]->currentText() == TS_TEXT_BINARY});
-    TcConfig tcConfig(ui->lePulsDuration->text().toInt(), ui->leOnVal->text(), ui->leOffVal->text());
+    TcConfig tcConfig(ui->lePulsDuration->text().toInt(), ui->leOnVal->text(), ui->leOffVal->text(), ui->cbUsePoweRelay->isChecked());
 
     SwSettings settings;
     settings.addCommunicationSettings(comConfig);
@@ -1138,6 +1140,7 @@ void Mdio::on_pbOpenSettingsFile_clicked()
     ui->leOnVal->setText(newSettings.getOnValue());
     ui->leOffVal->setText(newSettings.getOffValue());
     ui->leReplyDelay->setText(QString::number(newSettings.getReplyDelay()));
+    ui->cbUsePoweRelay->setChecked(newSettings.getUsePowerRelay());
 
     for (qsizetype i = 0; i < tsTypeConfigList.size(); i++) {
         tsTypeConfigList.at(i)->setCurrentIndex(newSettings.getDoubleSign().at(i) ? 1 : 0);

@@ -3,7 +3,7 @@
 
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    4
-#define VERSION_BUILD    108
+#define VERSION_BUILD    109
 
 #define DEF_TO_STR_(X)    #X
 #define DEF_TO_STR(X)     DEF_TO_STR_(X)

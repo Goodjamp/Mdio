@@ -127,6 +127,12 @@ private:
          * Reset device control
          */
         ADDR_REG_RESET = 0x03F5,
+
+        /*
+         * RC ADC res
+         */
+        ADDR_RC_ADC_OFF = 0x03F5,
+        ADDR_RC_ADC_ON = 0x03F6,
     } AddrReg;
 
     typedef enum {
@@ -186,6 +192,8 @@ public:
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
         unsigned int control[TELECONTROL_TOTAL_NUMBERS];
+        unsigned int resRcAdcOn;
+        unsigned int resRcAdcOff;
     } SlaveState;
 
     typedef struct {

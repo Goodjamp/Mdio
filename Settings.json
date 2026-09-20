@@ -23,8 +23,8 @@
     },
     "monitorTS":
     {
-        "NamePollBinary": "Регістровий зріз",
-        "NamePollRegister": "Бінарний зріз"
+        "NamePollBinary": "Регістровий\nзріз",
+        "NamePollRegister": "Бінарний\nзріз"
     },
     "Port":
     {

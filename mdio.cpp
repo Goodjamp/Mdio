@@ -167,7 +167,6 @@ void Mdio::addTsStatusBinaryGroupUi(void)
     ui->vlTeleSignalStatus->addItem(tsStatusLayoutSpacer);
 }
 
-
 void Mdio::on_cbTsType_currentIndexChanged(int index)
 {
     QObject *senderObj = sender();
@@ -454,12 +453,13 @@ void Mdio::updateUiDeviceMetaInfStr(void)
     QString metaInfStr;
 
     metaInfStr = "v"
-                 + QString::number(connectDeviceVersion)
+                 + QString::number(connectDeviceVersion / 100)
+                 + "."
+                 + QString::number(connectDeviceVersion % 100)
                  + "  Дата:"
                  + QString::number(lastConfigurationDay) + "."
                  + QString::number(lastConfigurationMonth) + "."
                  + QString::number(lastConfigurationYear);
-
 
     ui->lDeviceMetaInfo->setText(metaInfStr);
 }
@@ -942,6 +942,8 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 
         }
 
+        ui->lRcAdcOffVal->setText(QString::number(state.resRcAdcOff));
+        ui->lRcAdcOnVal->setText(QString::number(state.resRcAdcOff));
         errorPanel->setErrorState(0, state.error220);
         errorPanel->setErrorState(1, state.errorEeprom);
         errorPanel->setErrorState(2, state.errorEepromClear);

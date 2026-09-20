@@ -6,8 +6,8 @@
 #include <QGraphicsItem>
 
 #define DEFINE_SWITCHER_SIZE    40
-#define DEFINE_TEXT_WIDTH       160
-#define DEFINE_TEXT_HEIGHT      30
+#define DEFINE_TEXT_WIDTH       120
+#define DEFINE_TEXT_HEIGHT      50
 
 Toogle::Toogle(QString onLable, QString offLable, QWidget *parent)
     : QWidget(parent)

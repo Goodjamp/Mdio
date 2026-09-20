@@ -85,14 +85,14 @@ private:
          * Tele control registers
          */
         ADDR_REG_TELE_CONTROL_1 = 519,
-        ADDR_REG_TELE_CONTROL_2 = 521,
-        ADDR_REG_TELE_CONTROL_3 = 522,
+        ADDR_REG_TELE_CONTROL_2 = 523,
+        ADDR_REG_TELE_CONTROL_3 = 524,
 
         /*
          * TS_BINARY_STAT containe the state of all Tele Signalisation on the one register.
          * Use function 3 or 4 to read this register.
          */
-        ADDR_REG_TS_BINARY_STATE = 535,
+        ADDR_REG_TS_BINARY_STATE = 506,
 
         /*
          * settings registers
@@ -127,6 +127,12 @@ private:
          * Reset device control
          */
         ADDR_REG_RESET = 0x03F5,
+
+        /*
+         * RC ADC res
+         */
+        ADDR_RC_ADC_OFF = 0x03F5,
+        ADDR_RC_ADC_ON = 0x03F6,
     } AddrReg;
 
     typedef enum {
@@ -186,6 +192,8 @@ public:
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
         unsigned int control[TELECONTROL_TOTAL_NUMBERS];
+        unsigned int resRcAdcOn;
+        unsigned int resRcAdcOff;
     } SlaveState;
 
     typedef struct {

@@ -86,8 +86,9 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
             }
         }
         // Put TC Power Relay settings
-        configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |=
-            configuration.control.usePowerRelay ? 1 : 0 << USE_POWER_RELAY_CONF_OFFSET;
+        if (configuration.control.usePowerRelay) {
+            configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |= 1 << USE_POWER_RELAY_CONF_OFFSET;
+        }
 
         /*
          * Serialiase tele control settings
@@ -348,6 +349,19 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         state.control[k + 1] = teleControl[k];
     }
     CALL_CB(cb, true, state);
+
+    /*
+     * Read RC ADC results
+     */
+    baseTcAddress = ADDR_RC_ADC_OFF;
+    result = modbus->readInputRegisters(slaveAddress, baseTcAddress, 2, teleControl);
+    if (result != ModbusRtuMaster::MB_OK) {
+        CALL_CB(cb, false, state);
+        qDebug()<<"Error readStateSlot read RC ADC resultsl: "<<modbus->getStatusString(result);
+        return;
+    }
+    state.resRcAdcOff = teleControl[0];
+    state.resRcAdcOn = teleControl[1];
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb,

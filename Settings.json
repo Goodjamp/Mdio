@@ -38,8 +38,8 @@
     "Modbus":
     {
         "SilentIntervaDefaultList": [50, 40, 30, 10, 5, 3],
-        "SilentIntervaMinList": [15, 8, 6, 4, 3, 2],
-        "SilentIntervaMaxList": [200, 200, 100, 100, 100, 100],
+        "SilentIntervaMinList": [16, 8, 4, 2, 2, 2],
+        "SilentIntervaMaxList": [100, 100, 100, 100, 100, 100],
         "SilentIntervalDefault": 10,
         "SilentIntervalMin": 0,
         "SilentIntervalMax": 100,

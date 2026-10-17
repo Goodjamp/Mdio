@@ -131,8 +131,8 @@ private:
         /*
          * RC ADC res
          */
-        ADDR_RC_ADC_OFF = 0x03F5,
-        ADDR_RC_ADC_ON = 0x03F6,
+        ADDR_RC_ADC_OFF = 0x03F6,
+        ADDR_RC_ADC_ON = 0x03F7,
     } AddrReg;
 
     typedef enum {
@@ -142,10 +142,12 @@ private:
         ADDR_COIL_TC_4 = 509,
 
         ADDR_COIL_220_V_ERROR = 4,
-        // <----reserv
+        ADDR_COIL_NO_24_TC_ERROR = 5,
         ADDR_COIL_EEPROM_ERROR = 6,
         ADDR_COIL_EEPROM_CLEAR_ERROR = 7,
-        ADDR_COIL_RELAY_ERROR = 8
+        ADDR_COIL_RELAY_ERROR = 8,
+        ADDR_COIL_RC_AUX_ERROR = 9,
+        ADDR_COIL_RC_AUX_SHORT_ERROR = 10,
     } AddrCoil;
 
 public:
@@ -186,9 +188,12 @@ public:
 
     typedef struct {
         bool error220;
+        bool error24V;
         bool errorEeprom;
         bool errorEepromClear;
         bool errorRelayError;
+        bool errorRcAux;
+        bool errorRcAuxShort;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
         unsigned int control[TELECONTROL_TOTAL_NUMBERS];

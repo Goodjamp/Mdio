@@ -1,9 +1,11 @@
 {
     "StatusList":
     [
-                {"Name": "220 В\nланцюгах\nТС",
-		 "Address": 4,
-		 "M_fun": 2
+                {"Name": "220 В у\nколах ТС",
+		 "Address": 4
+		},
+		{"Name": "Відсутні\n24В у\nколах ТС",
+		 "Address": 5
 		},
 		{"Name": "Збій\nEEPROM",
 		 "Address": 6
@@ -13,6 +15,13 @@
 		},
 		{"Name": "Відмова\nТК",
 		 "Address": 8
+		},
+		{"Name": "Відмова\nRC AUX",
+		 "Address": 9
+		},
+		{"Name": "Кор. зам.\nRC AUX",
+		 "Address": 10
 		}
+
     ]
 }

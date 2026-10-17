@@ -262,7 +262,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
      *  Read EEPROM_ERROR and EEPROM_CLEAR status
      */
     baseCoilAddress = ADDR_COIL_220_V_ERROR;
-    readCoilsNumber = ADDR_COIL_RELAY_ERROR - baseCoilAddress + 1;
+    readCoilsNumber = ADDR_COIL_RC_AUX_SHORT_ERROR - baseCoilAddress + 1;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
@@ -270,9 +270,12 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         return;
     }
     state.error220 = status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
+    state.error24V = status[ADDR_COIL_NO_24_TC_ERROR - baseCoilAddress];
     state.errorEeprom = status[ADDR_COIL_EEPROM_ERROR - baseCoilAddress];
     state.errorEepromClear =  status[ADDR_COIL_EEPROM_CLEAR_ERROR - baseCoilAddress];
     state.errorRelayError =  status[ADDR_COIL_RELAY_ERROR - baseCoilAddress];
+    state.errorRcAux =  status[ADDR_COIL_RC_AUX_ERROR - baseCoilAddress];
+    state.errorRcAuxShort =  status[ADDR_COIL_RC_AUX_SHORT_ERROR - baseCoilAddress];
 
     /*
      * According to the documentation, if STATUS_220 is set, the device replay with
@@ -348,7 +351,6 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     for (uint32_t k = 0; k < TELECONTRO_STATIC_NUMBERS; k++) {
         state.control[k + 1] = teleControl[k];
     }
-    CALL_CB(cb, true, state);
 
     /*
      * Read RC ADC results
@@ -362,6 +364,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     }
     state.resRcAdcOff = teleControl[0];
     state.resRcAdcOn = teleControl[1];
+
+    CALL_CB(cb, true, state);
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb,

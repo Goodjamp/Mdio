@@ -23,7 +23,7 @@ public:
     void setUndefined();
 
 private:
-    QPushButton *pbIndicator;
+    QLabel *lIndicator;
     QLabel *lName;
     QFrame *fBackground;
     bool state;

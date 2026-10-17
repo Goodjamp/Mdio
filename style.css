@@ -276,6 +276,7 @@ QFrame#fCommunicationInd
     border-color: rgb(120, 120, 250);
 }
 
+/*
 QPushButton#ErrIndicator
 {
     border: 0px;
@@ -289,6 +290,20 @@ QPushButton#ErrIndicator:checked
 {
     border-image: url(:/Resources/StatusErr.png);
 }
+*/
+
+QLabel#ErrIndicator {
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+    background-color: transparent;
+    border-image: url(:/Resources/StatusNorma.png);
+}
+
+QLabel#ErrIndicator[error="true"] {
+    border-image: url(:/Resources/StatusErr.png);
+}
+
 
 QFrame#ErrorPanelBackground
 {

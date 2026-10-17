@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSizePolicy>
+#include <QStyle>
 
 ErrorIndicator::ErrorIndicator(QWidget *parent, QString errName, QSize indSize)
     : QWidget{parent}
@@ -13,20 +14,23 @@ ErrorIndicator::ErrorIndicator(QWidget *parent, QString errName, QSize indSize)
     this->layout()->addWidget(fBackground);
     this->layout()->setContentsMargins(0,0,0,0);
 
-    pbIndicator = new QPushButton(this);
-    pbIndicator->setObjectName("ErrIndicator");
-    pbIndicator->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
-    pbIndicator->setFixedSize(indSize);
-    fBackground->layout()->addWidget(pbIndicator);
+    lIndicator = new QLabel(this);
+    lIndicator->setObjectName("ErrIndicator");
+    lIndicator->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+    lIndicator->setFixedSize(indSize);
+    fBackground->layout()->addWidget(lIndicator);
     lName = new QLabel(errName, this);
     fBackground->layout()->addWidget(lName);
-    pbIndicator->setCheckable(false);
-    pbIndicator->setChecked(false);
     lName->setFixedSize(60,45);
     lName->setAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
     lName->setObjectName("lName");
 }
 
 void ErrorIndicator::setState(bool isError) {
-    pbIndicator->setChecked(isError);
+    lIndicator->setProperty("error", isError);
+
+    lIndicator->style()->unpolish(lIndicator);
+    lIndicator->style()->polish(lIndicator);
+    lIndicator->update();
+
 }

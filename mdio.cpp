@@ -943,11 +943,14 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
         }
 
         ui->lRcAdcOffVal->setText(QString::number(state.resRcAdcOff));
-        ui->lRcAdcOnVal->setText(QString::number(state.resRcAdcOff));
+        ui->lRcAdcOnVal->setText(QString::number(state.resRcAdcOn));
         errorPanel->setErrorState(0, state.error220);
-        errorPanel->setErrorState(1, state.errorEeprom);
-        errorPanel->setErrorState(2, state.errorEepromClear);
-        errorPanel->setErrorState(3, state.errorRelayError);
+        errorPanel->setErrorState(1, state.error24V);
+        errorPanel->setErrorState(2, state.errorEeprom);
+        errorPanel->setErrorState(3, state.errorEepromClear);
+        errorPanel->setErrorState(4, state.errorRelayError);
+        errorPanel->setErrorState(5, state.errorRcAux);
+        errorPanel->setErrorState(6, state.errorRcAuxShort);
 
         /*
          * Update Tele control indication

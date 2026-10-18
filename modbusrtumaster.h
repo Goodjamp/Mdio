@@ -160,13 +160,14 @@ public:
                              uint16_t regValue);  // F_5  0xFF00 - ON, 0x0000- OFF
     MbStatus presetSingleRegister(uint8_t slaveAddress, uint16_t regAddress,
                                   uint16_t regValue); // F_6
+    MbStatus  presetMultipleRegister(uint8_t slaveAddress, uint16_t regStartAddress,
+                                    QVector<uint16_t> regValue); // F_16
+
     /*
      * Not implemented yet
      */
     MbStatus forceMultipleCoils(uint8_t slaveAddress, uint16_t coilAddress,
                                 uint16_t coilsNumber, QVector<bool> &coilState); // F_15
-    MbStatus  presetMultipleRegister(uint8_t slaveAddress, uint16_t regStartAddress,
-                                     QVector<uint16_t> regValue); // F_16
 };
 
 #endif // MODBUSRTUMASTER_H

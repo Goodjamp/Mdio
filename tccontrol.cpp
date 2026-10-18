@@ -58,7 +58,8 @@ TcControl::~TcControl()
 void TcControl::setStateTextIndication(int targetStateIndex)
 {   
     if (targetStateIndex >= stateTextListStr1.size()
-        || targetStateIndex >= stateTextListStr2.size()) {
+        || targetStateIndex >= stateTextListStr2.size()
+        || targetStateIndex < 0) {
         qDebug()<<"Error TcControl targetStateIndex: "<<targetStateIndex;
         return;
     }

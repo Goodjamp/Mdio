@@ -408,7 +408,7 @@ Mdio::Mdio(QWidget *parent)
     commmunicationThread->start();
 
     /*
-     * Take semaphjre.
+     * Take semaphore.
      * Remove this string on the future
      */
     communicationSyncSem.acquire();
@@ -562,7 +562,7 @@ bool Mdio::processingCommunicatitonResult(QString headr, QString detailed, bool 
         == false) {
         errorMessage(headr, "Апаратний збій");
         return false;
-    };
+    }
     if (communicationResult == false) {
         errorMessage(headr, detailed);
         return false;

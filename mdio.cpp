@@ -19,7 +19,6 @@
 #include <dialogconnectionsettings.h>
 #include <modbusrtumaster.h>
 #include "Version.h"
-#include "SwDefSettings.h"
 #include "SwSettings.h"
 #include "uidescription.h"
 
@@ -284,19 +283,13 @@ void Mdio::initCustomUi()
                                       + ")");
     tkControlSwitcher = new Toogle(SwDefSettings::getMonitroTcNameFun5(), SwDefSettings::getMonitroTcNameFun6());
     ui->vlTcControlMonitorInternal->addWidget(tkControlSwitcher);
-    for (uint32_t k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-        tcMonitorList.append(new TcControl("", k, this));
+    for (const auto& item: tcDescrList) {
+        tcMonitorList.append(new TcControl(item.name, item.id, this));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList.last());
+        tcMonitorList.last()->setTextStateList(item.rel1State, item.rel2State);
     }
-
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
-
-    QVector<SwDefSettings::MonitorDesr> monitorDescriptor = SwDefSettings::getMonitorDescr();
-    for (int k = 0; k < SwDefSettings::getMonitorDescr().size(); k++) {
-        tcMonitorList[k]->setName(monitorDescriptor[k].name);
-        tcMonitorList[k]->setTextStateList(monitorDescriptor[k].rel1State, monitorDescriptor[k].rel2State);
-    }
 
     /*
      * Add TeleSignalisation configuration items
@@ -347,7 +340,6 @@ void Mdio::initCustomUi()
     disableSettingsControl();
 }
 
-
 Mdio::Mdio(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Mdio)
@@ -361,6 +353,7 @@ Mdio::Mdio(QWidget *parent)
     communicaiton = new Communication();
     readStateTimer = new QTimer();
     readStateTimer->setInterval(READ_SLAVE_STATE_PERIOD_MS);
+    tcDescrList = SwDefSettings::getTcDescr();
 
     connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
 
@@ -957,10 +950,14 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
          *
          * The communicaiotn return 3 registers (1 puls and 2 static)
          */
-        for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-            tcMonitorList[k]->setStateTextIndication(state.control[k]);
+        for (auto item = state.control.cbegin(); item != state.control.cend(); item++) {
+            auto tcMonItem = std::find_if(tcMonitorList.begin(), tcMonitorList.end(), [item](auto ){return true})
         }
-
+        /*
+        for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
+            tcMonitorList[k]->setStateTextIndication(state.control.);
+        }
+*/
         /*
          * Update blinker
          */
@@ -1008,21 +1005,17 @@ void Mdio::readSlaveState(void)
     ui->pbConnectionStatus->setChecked(false);
 }
 
-void Mdio::tcSetTcSlot(int index, bool enable)
+void Mdio::tcSetTcSlot(int id, bool enable)
 {
-    if (index == 0) {
-        tcMonitorList[1]->unchekAllButton();
-        tcMonitorList[2]->unchekAllButton();
-        emit this->setTeleControlPuls(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                      enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
-                                      tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
-    } else {
-        tcMonitorList[0]->unchekAllButton();
-        emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), connectSlaveAddress,
-                                  index - 1,
-                                  enable ? ui->leOnVal->text().toUInt(NULL, 16) : ui->leOffVal->text().toUInt(NULL, 16),
-                                  tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF);
+    unsigned int val = enable ? ui->leOnVal->text().toUInt(NULL, 16)
+                              : ui->leOffVal->text().toUInt(NULL, 16);
+    bool isBinary = tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF;
+
+    for(auto item: tcMonitorList) {
+        item->unchekAllButton();
     }
+    emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), id, connectSlaveAddress,
+                              val, enable, isBinary);
 
     processingCommunicatitonResult("Телекерування",
                                    "Помилка передачі команди\nтелекерування", false);

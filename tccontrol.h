@@ -15,7 +15,7 @@ class TcControl : public QWidget
     Q_OBJECT
 
 public:
-    explicit TcControl(QString name, int index, QWidget *parent);
+    explicit TcControl(QString name, int itemId, QWidget *parent);
     ~TcControl();
 
     void setStateTextIndication(int stateIndex);
@@ -26,9 +26,10 @@ public:
     void setOnButtonState(bool state);
     void setOffButtonState(bool state);
     void unchekAllButton();
+    int getId()const {return id;};
 
 signals:
-    void setState(int index, bool enable);
+    void setState(int id, bool enable);
 
 private slots:
     void on_pbOn_clicked();
@@ -36,7 +37,7 @@ private slots:
 
 private:
     Ui::TcControl *ui;
-    int userIndex;
+    int id;
     QStringList stateTextListStr1;
     QStringList stateTextListStr2;
     QButtonGroup *bgRelayControl;// = new QButtonGroup();

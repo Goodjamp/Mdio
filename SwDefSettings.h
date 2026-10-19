@@ -22,10 +22,13 @@ public:
     }
 
     typedef struct {
+        int id;
+        int addressOn;
+        int addressOff;
         QString name;
         QStringList rel1State;
         QStringList rel2State;
-    } MonitorDesr;
+    } TcDesr;
 
     static void init(QByteArray jsonFileContent)
     {
@@ -33,23 +36,26 @@ public:
         rootObj = jsonDoc.object();
     }
 
-    static QVector<MonitorDesr> getMonitorDescr()
+    static QVector<TcDesr> getTcDescr()
     {
-        QVector<MonitorDesr> argOut;
-        MonitorDesr tempDesr;
-        QJsonArray arr = rootObj.find(monTc)->toObject().find(monTcList)->toArray();
+        QVector<TcDesr> argOut;
+        TcDesr temp;
+        QJsonArray arr = rootObj.find(keyTc)->toObject().find(keyTcList)->toArray();
 
         for (auto item: arr) {
-            tempDesr.name = item.toObject().find(monTcName)->toString();
-            tempDesr.rel1State.clear();
-            for (auto item: item.toObject().find(monTcRelayStr1)->toArray()) {
-                tempDesr.rel1State.push_back(item.toString());
+            temp.name = item.toObject().find(keyTcName)->toString();
+            temp.rel1State.clear();
+            for (auto item: item.toObject().find(keyTcRelayStr1)->toArray()) {
+                temp.rel1State.push_back(item.toString());
             }
-            tempDesr.rel2State.clear();
-            for (auto item: item.toObject().find(monTcRelayStr2)->toArray()) {
-                tempDesr.rel2State.push_back(item.toString());
+            temp.rel2State.clear();
+            for (auto item: item.toObject().find(keyTcRelayStr2)->toArray()) {
+                temp.rel2State.push_back(item.toString());
             }
-            argOut.push_back(tempDesr);
+            temp.addressOn = item.toObject().find(keyTcAddressOn)->toInt();
+            temp.addressOff = item.toObject().find(keyTcAddressOff)->toInt();
+            temp.id = item.toObject().find(keyTcId)->toInt();
+            argOut.push_back(temp);
         }
 
         return argOut;
@@ -342,12 +348,12 @@ public:
 
     static QString getMonitroTcNameFun5()
     {
-        return rootObj.find(monTc)->toObject().find(monTcNameFun5)->toString();
+        return rootObj.find(keyTc)->toObject().find(keyTcNameFun5)->toString();
     }
 
     static QString getMonitroTcNameFun6()
     {
-        return rootObj.find(monTc)->toObject().find(monTcNameFun6)->toString();
+        return rootObj.find(keyTc)->toObject().find(keyTcNameFun6)->toString();
     }
 
     static QString getTcOnValDefaultString()
@@ -364,13 +370,23 @@ public:
 
 private:
 
-    inline static const QString monTc = "monitorTC";
-    inline static const QString monTcNameFun5 = "NameFun5";
-    inline static const QString monTcNameFun6 = "NameFun6";
-    inline static const QString monTcList = "List";
-    inline static const QString monTcName = "Name";
-    inline static const QString monTcRelayStr1 = "RelayStr1";
-    inline static const QString monTcRelayStr2 = "RelayStr2";
+    inline static const QString keyTc = "TC";
+    inline static const QString keyTcNameFun5 = "NameFun5";
+    inline static const QString keyTcNameFun6 = "NameFun6";
+    inline static const QString keyTcList = "List";
+    inline static const QString keyTcName = "Name";
+    inline static const QString keyTcRelayStr1 = "RelayStr1";
+    inline static const QString keyTcRelayStr2 = "RelayStr2";
+    inline static const QString keyTcAddressOn = "AddressOn";
+    inline static const QString keyTcAddressOff = "AddressOff";
+    inline static const QString keyTcId = "Id";
+
+    inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
+    inline static const QString keyTcPulsDurationMin = "PulsDurationMin";
+    inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
+    inline static const QString keyTcOnValDefault = "OnVal";
+    inline static const QString keyTcOffValDefault = "OffVal";
+    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
 
     inline static const QString keyMonTs = "monitorTS";
     inline static const QString keyMonTsNamePollBinary = "NamePollBinary";
@@ -411,14 +427,6 @@ private:
     inline static const QString keyBinaryTsSwitchTimeDefault = "SwitchTimeDefault";
     inline static const QString keyBinaryTsSwitchTimeMin = "SwitchTimeMin";
     inline static const QString keyBinaryTsSwitchTimeMax = "SwitchTimeMax";
-
-    inline static const QString keyTc = "TC";
-    inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
-    inline static const QString keyTcPulsDurationMin = "PulsDurationMin";
-    inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
-    inline static const QString keyTcOnValDefault = "OnVal";
-    inline static const QString keyTcOffValDefault = "OffVal";
-    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
 
     inline static const QString keyTsSingleNumber = "TsSingleNumber";
     inline static const QString keyTsDoubleNumber = "TsDoubleNumber";

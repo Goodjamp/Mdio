@@ -4,12 +4,12 @@
 #include "tccontrol.h"
 #include "ui_tccontrol.h"
 
-TcControl::TcControl(QString name, int index, QWidget *parent) :
+TcControl::TcControl(QString name, int itemId, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TcControl)
 {
     ui->setupUi(this);
-    userIndex = index;
+    id = itemId;
 
     ui->lTcName->setText(name);
     bgRelayControl = new QButtonGroup();
@@ -70,12 +70,12 @@ void TcControl::setStateTextIndication(int targetStateIndex)
 
 void TcControl::on_pbOn_clicked()
 {
-    emit setState(userIndex, true);
+    emit setState(itemId, true);
 }
 
 void TcControl::on_pbOff_clicked()
 {
-    emit setState(userIndex, false);
+    emit setState(itemId, false);
 }
 
 

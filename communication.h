@@ -7,6 +7,7 @@
 #include <QMap>
 #include "serialcommunication.h"
 #include "modbusrtumaster.h"
+#include "SwDefSettings.h"
 
 #define CB_WRAP_1(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1)
 #define CB_WRAP_2(CLASS,FUN)    std::bind(&CLASS::FUN, this, std::placeholders::_1, \
@@ -22,7 +23,7 @@
 #define TELESIGNAL_BINARY_NUMBERS       2
 #define TELECONTRO_STATIC_NUMBERS       2
 #define TELECONTROL_PULS_NUMBERS        1
-#define TELECONTROL_TOTAL_NUMBERS       (TELECONTROL_PULS_NUMBERS + TELECONTRO_STATIC_NUMBERS)
+#define TELECONTROL_TOTAL_NUMBERS       2
 #define RESET_MAGIC_NUMBER              0X55FF
 #define TELECONTROL_UNDEFINED           0xFFFF
 
@@ -151,7 +152,9 @@ private:
     } AddrCoil;
 
 public:
-    Communication(){};
+    Communication(){
+        tcDescrList = SwDefSettings::getTcDescr();
+    };
     ~Communication(){}
 
 public:
@@ -196,7 +199,7 @@ public:
         bool errorRcAuxShort;
         bool signalisation[TELESIGNAL_NUMBERS];
         bool signalisationBinary[TELESIGNAL_NUMBERS];
-        unsigned int control[TELECONTROL_TOTAL_NUMBERS];
+        QMap<int, int> control;
         unsigned int resRcAdcOn;
         unsigned int resRcAdcOff;
     } SlaveState;
@@ -211,6 +214,7 @@ public:
 private:
     QThread *communicationThread;
     ModbusRtuMaster *modbus;
+    QVector<SwDefSettings::TcDesr> tcDescrList;
 
     /*
      * The constructor of const non-POD members called
@@ -254,8 +258,8 @@ public slots:
                     int slaveAddress);
     void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                        int slaveAddress);
-    void setTeleControlSlot(std::function<void(bool result)> cb,
-                            int slaveAddress, int index, unsigned int val, bool fun5);
+    void setTeleControlSlot(std::function<void(bool result)> cb, int id,
+                            int slaveAddress, unsigned int val, bool enable, bool fun5);
     void setTeleControlPulsSlot(std::function<void(bool result)> cb,
                                 int slaveAddress, unsigned int val, bool fun5);
 };

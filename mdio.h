@@ -24,6 +24,7 @@
 #include "dialogconnectionsettings.h"
 #include "toogle.h"
 #include "errorpanel.h"
+#include "SwDefSettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Mdio; }
@@ -62,8 +63,8 @@ signals:
                    int slaveAddress);
     void setTeleControlPuls(std::function<void(bool result)> cb,
                             int slaveAddress,  unsigned int val, bool fun5);
-    void setTeleControl(std::function<void(bool result)> cb,
-                        int slaveAddress, int index, unsigned int val, bool fun5);
+    void setTeleControl(std::function<void(bool result)> cb, int id,
+                        int slaveAddress, unsigned int val, bool enable, bool fun5);
     void readMetaInformation(std::function<void(bool result, Communication::MetaInformation metaInformation)> cb,
                              int slaveAddress);
 
@@ -191,6 +192,7 @@ private:
     QVector<QComboBox *> tsTypeConfigList;
     QVector<QFrame *> teleSignalStatusBinaryFrameList;
     QVector<QVBoxLayout *> teleSignalStatusBinaryLayoutList;
+    QVector<SwDefSettings::TcDesr> tcDescrList;
     QToolTip *debounceToolTip;
     int stateRequestCnt;
     int stateReplyCnt;

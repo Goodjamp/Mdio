@@ -1,25 +1,32 @@
 {
-    "monitorTC":
+    "TC":
     {
         "NameFun5": "ТК функція 5",
         "NameFun6": "ТК функція 6",
         "List": [
             {
-                "Name": "ТК1\nІмпульсне",
+                "Id": 1,
+                "AddressOn": 519,
+                "AddressOff": 519,
+                "Name": "ТК1\nІмпульсна\nдвопозиційна",
                 "RelayStr1": ["", "", ""],
                 "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
             },
             {
-                "Name": "ТК2\nСтатичне",
-                "RelayStr1": ["Реле 1", "Реле 1", "Реле 1"],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
-            },
-            {
-                "Name": "ТК3\nСтатичне",
-                "RelayStr1": ["Реле 2", "Реле 2", "Реле 2"],
+                "Id": 2,
+                "AddressOn": 523,
+                "AddressOff": 524,
+                "Name": "ТК4   TK5\nІмпульсна\nоднопозиційна",
+                "RelayStr1": ["", "", ""],
                 "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
             }
-        ]
+        ],
+        "PulsDurationDefault": 1000,
+        "PulsDurationMin": 100,
+        "PulsDurationMax": 4000,
+        "OnVal": "FF00",
+        "OffVal": "0000",
+        "UsePowerRelay": false
     },
     "monitorTS":
     {
@@ -67,14 +74,5 @@
         "SwitchTimeDefault": 500,
         "SwitchTimeMin": 100,
         "SwitchTimeMax": 10000
-    },
-    "TC":
-    {
-        "PulsDurationDefault": 1000,
-        "PulsDurationMin": 100,
-        "PulsDurationMax": 4000,
-        "OnVal": "FF00",
-        "OffVal": "0000",
-        "UsePowerRelay": false
     }
 }

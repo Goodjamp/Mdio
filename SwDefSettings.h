@@ -22,10 +22,16 @@ public:
     }
 
     typedef struct {
+        int id;
+        int address;
+        bool isOn;
         QString name;
-        QStringList rel1State;
-        QStringList rel2State;
-    } MonitorDesr;
+    } TcItemDescriptor;
+
+    typedef struct {
+        QVector<TcItemDescriptor> items;
+        QString name;
+    } TcDesriptor;
 
     static void init(QByteArray jsonFileContent)
     {
@@ -33,23 +39,27 @@ public:
         rootObj = jsonDoc.object();
     }
 
-    static QVector<MonitorDesr> getMonitorDescr()
+    static QVector<TcDesriptor> getTcDescriptor()
     {
-        QVector<MonitorDesr> argOut;
-        MonitorDesr tempDesr;
-        QJsonArray arr = rootObj.find(monTc)->toObject().find(monTcList)->toArray();
+        QVector<TcDesriptor> argOut;
+        TcDesriptor descriptor;
+        QJsonArray arr = rootObj.find(keyTc)->toObject().find(keyTcDescriptor)->toArray();
 
-        for (auto item: arr) {
-            tempDesr.name = item.toObject().find(monTcName)->toString();
-            tempDesr.rel1State.clear();
-            for (auto item: item.toObject().find(monTcRelayStr1)->toArray()) {
-                tempDesr.rel1State.push_back(item.toString());
+        for (const auto &item: arr) {
+            descriptor.name = item.toObject().find(keyTcName)->toString();
+
+            descriptor.items.clear();
+            auto controls = item.toObject().find(keyTcControls)->toArray();
+            for(const auto &controlItem: controls) {
+                descriptor.items.append(TcItemDescriptor{});
+                auto controlObj = controlItem.toObject();
+
+                descriptor.items.last().id = controlObj.find(keyTcId)->toInt();
+                descriptor.items.last().address = controlObj.find(keyTcAddress)->toInt();
+                descriptor.items.last().isOn = controlObj.find(keyTcControlType)->toString() == "On";
+                descriptor.items.last().name = controlObj.find(keyTcName)->toString();
             }
-            tempDesr.rel2State.clear();
-            for (auto item: item.toObject().find(monTcRelayStr2)->toArray()) {
-                tempDesr.rel2State.push_back(item.toString());
-            }
-            argOut.push_back(tempDesr);
+            argOut.push_back(descriptor);
         }
 
         return argOut;
@@ -342,12 +352,12 @@ public:
 
     static QString getMonitroTcNameFun5()
     {
-        return rootObj.find(monTc)->toObject().find(monTcNameFun5)->toString();
+        return rootObj.find(keyTc)->toObject().find(keyTcNameFun5)->toString();
     }
 
     static QString getMonitroTcNameFun6()
     {
-        return rootObj.find(monTc)->toObject().find(monTcNameFun6)->toString();
+        return rootObj.find(keyTc)->toObject().find(keyTcNameFun6)->toString();
     }
 
     static QString getTcOnValDefaultString()
@@ -364,13 +374,22 @@ public:
 
 private:
 
-    inline static const QString monTc = "monitorTC";
-    inline static const QString monTcNameFun5 = "NameFun5";
-    inline static const QString monTcNameFun6 = "NameFun6";
-    inline static const QString monTcList = "List";
-    inline static const QString monTcName = "Name";
-    inline static const QString monTcRelayStr1 = "RelayStr1";
-    inline static const QString monTcRelayStr2 = "RelayStr2";
+    inline static const QString keyTc = "TC";
+    inline static const QString keyTcNameFun5 = "NameFun5";
+    inline static const QString keyTcNameFun6 = "NameFun6";
+    inline static const QString keyTcName = "Name";
+    inline static const QString keyTcControls = "Controls";
+    inline static const QString keyTcId = "Id";
+    inline static const QString keyTcDescriptor = "Descriptor";
+    inline static const QString keyTcControlType = "ControlType";
+    inline static const QString keyTcAddress = "Address";
+
+    inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
+    inline static const QString keyTcPulsDurationMin = "PulsDurationMin";
+    inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
+    inline static const QString keyTcOnValDefault = "OnVal";
+    inline static const QString keyTcOffValDefault = "OffVal";
+    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
 
     inline static const QString keyMonTs = "monitorTS";
     inline static const QString keyMonTsNamePollBinary = "NamePollBinary";
@@ -411,14 +430,6 @@ private:
     inline static const QString keyBinaryTsSwitchTimeDefault = "SwitchTimeDefault";
     inline static const QString keyBinaryTsSwitchTimeMin = "SwitchTimeMin";
     inline static const QString keyBinaryTsSwitchTimeMax = "SwitchTimeMax";
-
-    inline static const QString keyTc = "TC";
-    inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
-    inline static const QString keyTcPulsDurationMin = "PulsDurationMin";
-    inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
-    inline static const QString keyTcOnValDefault = "OnVal";
-    inline static const QString keyTcOffValDefault = "OffVal";
-    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
 
     inline static const QString keyTsSingleNumber = "TsSingleNumber";
     inline static const QString keyTsDoubleNumber = "TsDoubleNumber";

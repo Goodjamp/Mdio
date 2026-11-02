@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     SwDefSettings.cpp \
+    TeleControl.cpp \
     communication.cpp \
     dialogconnectionsettings.cpp \
     errorindicator.cpp \
@@ -26,7 +27,6 @@ SOURCES += \
     modbusrtumaster.cpp \
     serialcommunication.cpp \
     swsettings.cpp \
-    tccontrol.cpp \
     toogle.cpp \
     tssettings.cpp \
     tsstatus.cpp \
@@ -35,6 +35,7 @@ SOURCES += \
 
 HEADERS += \
     SwDefSettings.h \
+    TeleControl.h \
     communication.h \
     dialogconnectionsettings.h \
     errorindicator.h \
@@ -43,7 +44,6 @@ HEADERS += \
     modbusrtumaster.h \
     serialcommunication.h \
     swsettings.h \
-    tccontrol.h \
     toogle.h \
     tssettings.h \
     tsstatus.h \
@@ -54,7 +54,6 @@ HEADERS += \
 FORMS += \
     dialogconnectionsettings.ui \
     mdio.ui \
-    tccontrol.ui \
     toogle.ui \
     tssettings.ui \
     tsstatus.ui

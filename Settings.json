@@ -1,23 +1,53 @@
 {
-    "monitorTC":
+    "TC":
     {
         "NameFun5": "ТК функція 5",
         "NameFun6": "ТК функція 6",
-        "List": [
+        "PulsDurationDefault": 1000,
+        "PulsDurationMin": 100,
+        "PulsDurationMax": 4000,
+        "OnVal": "FF00",
+        "OffVal": "0000",
+        "UsePowerRelay": false,
+        "Descriptor": [
             {
-                "Name": "ТК1\nІмпульсне",
-                "RelayStr1": ["", "", ""],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
+                "Controls": [
+                    {
+                        "Id": 1,
+                        "Address": 519,
+                        "ControlType": "On",
+                        "Name": "Вкл"
+                    },
+                    {
+                        "Id": 2,
+                        "Address": 519,
+                        "ControlType": "Off",
+                        "Name": "Викл"
+                    }
+                ],
+                "Name": "ТК1\nІмпульсна\nдвопозиційна"
             },
             {
-                "Name": "ТК2\nСтатичне",
-                "RelayStr1": ["Реле 1", "Реле 1", "Реле 1"],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
+                "Controls": [
+                    {
+                        "Id": 3,
+                        "Address": 523,
+                        "ControlType": "On",
+                        "Name": "Вкл"
+                    }
+                ],
+                "Name": "ТК4\nІмпульсна\nоднопозиційна"
             },
             {
-                "Name": "ТК3\nСтатичне",
-                "RelayStr1": ["Реле 2", "Реле 2", "Реле 2"],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
+                "Controls": [
+                    {
+                        "Id": 4,
+                        "Address": 524,
+                        "ControlType": "Off",
+                        "Name": "Викл"
+                    }
+                ],
+                "Name": "ТК5\nІмпульсна\nоднопозиційна"
             }
         ]
     },
@@ -67,14 +97,5 @@
         "SwitchTimeDefault": 500,
         "SwitchTimeMin": 100,
         "SwitchTimeMax": 10000
-    },
-    "TC":
-    {
-        "PulsDurationDefault": 1000,
-        "PulsDurationMin": 100,
-        "PulsDurationMax": 4000,
-        "OnVal": "FF00",
-        "OffVal": "0000",
-        "UsePowerRelay": false
     }
 }

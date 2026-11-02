@@ -153,7 +153,14 @@ private:
 
 public:
     Communication(){
-        tcDescrList = SwDefSettings::getTcDescr();
+        TcDescriptor descriptor;
+        for(const auto &tcGroup: SwDefSettings::getTcDescriptor()) {
+            for (const auto &tcItem: tcGroup.items) {
+                descriptor.address = tcItem.address;
+                descriptor.isTcOn =  tcItem.isOn;
+                tcDescription.insert(tcItem.id, descriptor);
+            }
+        }
     };
     ~Communication(){}
 
@@ -214,7 +221,13 @@ public:
 private:
     QThread *communicationThread;
     ModbusRtuMaster *modbus;
-    QVector<SwDefSettings::TcDesr> tcDescrList;
+    struct TcDescriptor {
+        int address;
+        bool isTcOn;
+    };
+    QMap<int, TcDescriptor> tcDescription;
+    unsigned int valOn;
+    unsigned int valOff;
 
     /*
      * The constructor of const non-POD members called
@@ -258,10 +271,10 @@ public slots:
                     int slaveAddress);
     void readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                        int slaveAddress);
-    void setTeleControlSlot(std::function<void(bool result)> cb, int id,
-                            int slaveAddress, unsigned int val, bool enable, bool fun5);
+    void setTeleControlSlot(std::function<void(bool result)> cb, int id, int slaveAddress, bool fun5);
     void setTeleControlPulsSlot(std::function<void(bool result)> cb,
                                 int slaveAddress, unsigned int val, bool fun5);
+    void setTeleControlValues(unsigned int valOnIn, unsigned int valOffIn);
 };
 
 #endif // B_H

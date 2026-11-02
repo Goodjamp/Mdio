@@ -51,6 +51,9 @@ void Mdio::enableSettingsControl()
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(true);
     }
+    foreach(const auto &item, tcMonitorList) {
+        item->enable();
+    }
     ui->leBinaryTsSwitchTime->setEnabled(false);
     ui->pbConnect->setEnabled(false);
     ui->pbConnectionSettings->setEnabled(false);
@@ -61,6 +64,10 @@ void Mdio::disableSettingsControl()
     foreach(auto item,  settingsItemsList) {
         item->setEnabled(false);
     }
+    foreach(const auto &item, tcMonitorList) {
+        item->disable();
+    }
+
     ui->pbConnect->setEnabled(true);
     ui->pbConnectionSettings->setEnabled(true);
 }
@@ -283,10 +290,22 @@ void Mdio::initCustomUi()
                                       + ")");
     tkControlSwitcher = new Toogle(SwDefSettings::getMonitroTcNameFun5(), SwDefSettings::getMonitroTcNameFun6());
     ui->vlTcControlMonitorInternal->addWidget(tkControlSwitcher);
-    for (const auto& item: tcDescrList) {
-        tcMonitorList.append(new TcControl(item.name, item.id, this));
+
+    auto tcDescriptor = SwDefSettings::getTcDescriptor();
+    for (const auto &item: tcDescriptor) {
+        TeleControl::Descriptor descriptor;
+        descriptor.items.clear();
+        descriptor.name = item.name;
+        for(const auto &teleControlItem: item.items){
+            descriptor.items.append(TeleControlItem::Descriptor{});
+
+            descriptor.items.last().controlType  = teleControlItem.isOn ? TeleControlItem::ControlType::ON
+                                                                : TeleControlItem::ControlType::OFF;
+            descriptor.items.last().id = teleControlItem.id;
+            descriptor.items.last().name = teleControlItem.name;
+        }
+        tcMonitorList.append(new TeleControl(this, descriptor));
         ui->vlTcControlMonitorInternal->addWidget(tcMonitorList.last());
-        tcMonitorList.last()->setTextStateList(item.rel1State, item.rel2State);
     }
     tcLayoutSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->vlTcControlMonitorInternal->addItem(tcLayoutSpacer);
@@ -328,14 +347,8 @@ void Mdio::initCustomUi()
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbReload));              // Reload
     settingsItemsList.push_back(static_cast<QWidget *>(ui->pbDisconnect));          //
 
-    foreach(auto item, tcMonitorList) {
-        settingsItemsList.push_back(static_cast<QWidget *>(item->getOnButtonPointer()));
-        settingsItemsList.push_back(static_cast<QWidget *>(item->getOffButtonPointer()));
-    }
-
     addToolTip();
 
-    setDefaultSettings();
     ui->tabWidget->setCurrentIndex(0);
     disableSettingsControl();
 }
@@ -346,6 +359,8 @@ Mdio::Mdio(QWidget *parent)
 {
     ui->setupUi(this);
 
+    auto tcDescriptor = SwDefSettings::getTcDescriptor();
+
     errorPanel = new ErrorPanel(this);
     ui->horizontalLayout->addWidget(errorPanel);
 
@@ -353,7 +368,6 @@ Mdio::Mdio(QWidget *parent)
     communicaiton = new Communication();
     readStateTimer = new QTimer();
     readStateTimer->setInterval(READ_SLAVE_STATE_PERIOD_MS);
-    tcDescrList = SwDefSettings::getTcDescr();
 
     connect(readStateTimer, &QTimer::timeout, this, &Mdio::readSlaveState);
 
@@ -375,13 +389,14 @@ Mdio::Mdio(QWidget *parent)
     connect(this, &Mdio::readMetaInformation, communicaiton, &Communication::readMetaInformationSlot);
     connect(this, &Mdio::setTeleControl, communicaiton, &Communication::setTeleControlSlot);
     connect(this, &Mdio::setTeleControlPuls, communicaiton, &Communication::setTeleControlPulsSlot);
+    connect(this, &Mdio::tcOnOffUpdated, communicaiton, &Communication::setTeleControlValues);
 
     /*
      * Add slots to processing tele control commands
      */
     foreach(auto tcControlItem, tcMonitorList)
     {
-        connect(tcControlItem, &TcControl::setState, this, &Mdio::tcSetTcSlot);
+        connect(tcControlItem, &TeleControl::updateState, this, &Mdio::tcSetTcSlot);
     }
 
     /*
@@ -412,6 +427,8 @@ Mdio::Mdio(QWidget *parent)
      * function, called from the external thread to the Mdio thread.
      */
     connect(this, &Mdio::updateUiStateSignal, this, &Mdio::updateUiStateSlot);
+
+    setDefaultSettings();
 }
 
 Mdio::~Mdio()
@@ -473,7 +490,7 @@ bool Mdio::updateUiConfiguration(void)
     }
 
     /*
-     * Show configuration on the UI
+     * Show configuration on UI
      */
     ui->cbBaudRate->setCurrentText(QString::number(connectDeviceConf.communication.baudRate));
     ui->cbParity->setCurrentText(parityUiToSerilaLUT.key(connectDeviceConf.communication.parity, "Error"));
@@ -506,6 +523,9 @@ bool Mdio::updateUiConfiguration(void)
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
     lastConfigurationDay = connectDeviceConf.configurationDay;
 
+    unsigned int valOn = ui->leOnVal->text().toInt(NULL,16);
+    unsigned int valOff = ui->leOffVal->text().toInt(NULL,16);
+    emit tcOnOffUpdated(valOn, valOff);
     return true;
 }
 
@@ -622,6 +642,10 @@ void Mdio::setDefaultSettings()
     foreach(auto item, tsTypeConfigList) {
         item->setCurrentIndex(0);
     }
+
+    unsigned int valOn = ui->leOnVal->text().toInt(NULL,16);
+    unsigned int valOff = ui->leOffVal->text().toInt(NULL,16);
+    emit tcOnOffUpdated(valOn, valOff);
 }
 
 
@@ -871,6 +895,7 @@ void Mdio::on_pbDisconnect_clicked()
     updateUiConnectionStatusStr();
     updateUiDeviceMetaInfStr();
     disableSettingsControl();
+    allowMonitoring = false;
 }
 
 void Mdio::on_pbReload_clicked()
@@ -911,13 +936,12 @@ void Mdio::updateUiCommunicationStatisticStr(void)
 
 void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 {
-    if (result == true) {
+    if (result == true && allowMonitoring) {
         /*
          * Update communicaiotn statistic indication
          */
         stateReplyCnt++;
         updateUiCommunicationStatisticStr();
-
 
         /*
          * Update Tele signalisation and status indication
@@ -947,53 +971,39 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 
         /*
          * Update Tele control indication
-         *
-         * The communicaiotn return 3 registers (1 puls and 2 static)
          */
-        for (auto item = state.control.cbegin(); item != state.control.cend(); item++) {
-            auto tcMonItem = std::find_if(tcMonitorList.begin(), tcMonitorList.end(), [item](auto ){return true})
+        const uint16_t tcOnVal = ui->leOnVal->text().toUInt(nullptr, 16);
+        const uint16_t tcOffVal = ui->leOffVal->text().toUInt(nullptr, 16);
+
+        for (auto controlState = state.control.cbegin();
+             controlState != state.control.cend(); ++controlState) {
+            const auto id = controlState.key();
+
+            const auto controlItem = std::find_if(
+                tcMonitorList.cbegin(), tcMonitorList.cend(),
+                [id](const auto &tcItem) {
+                    return tcItem->containId(id);
+                });
+
+            if (controlItem == tcMonitorList.cend()) {
+                continue;
+            }
+
+            TeleControlItem::ControlState state = TeleControlItem::STATE_UNDEFINED;
+            const auto value = controlState.value();
+            if (value == tcOnVal) {
+                state = TeleControlItem::STATE_ON;
+            } else if (value == tcOffVal) {
+                state = TeleControlItem::STATE_OFF;
+            } else if (value == 0xFFFF) {
+                state = TeleControlItem::STATE_RELEASED;
+            }
+            (*controlItem)->setState(id, state);
         }
-        /*
-        for (int k = 0; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-            tcMonitorList[k]->setStateTextIndication(state.control.);
-        }
-*/
         /*
          * Update blinker
          */
         ui->pbConnectionStatus->setChecked(true);
-
-        /*
-         * If this function call first time after connection, we need update the state of the
-         * button on the pannel of the TC control
-         */
-        if (updateTcButtonState == true) {
-            updateTcButtonState = false;
-
-            /*
-             * For the puls TC type (TC0) we skip current state all the time
-             */
-            tcMonitorList[0]->setOnButtonState(false);
-            tcMonitorList[0]->setOffButtonState(false);
-
-            /*
-             * For the other TC we need set actual state
-             */
-
-            for (int k = 1; k < TELECONTROL_TOTAL_NUMBERS; k++) {
-                if (state.control[k] == ui->leOnVal->text().toUInt(NULL, 16)) {
-                    tcMonitorList[k]->setOnButtonState(true);
-                    tcMonitorList[k]->setOffButtonState(false);
-                } else if (state.control[k] == ui->leOffVal->text().toUInt(NULL, 16)) {
-                    tcMonitorList[k]->setOnButtonState(false);
-                    tcMonitorList[k]->setOffButtonState(true);
-                } else {
-                    tcMonitorList[k]->setOnButtonState(false);
-                    tcMonitorList[k]->setOffButtonState(false);
-                }
-            }
-
-        }
     }
 }
 
@@ -1005,17 +1015,11 @@ void Mdio::readSlaveState(void)
     ui->pbConnectionStatus->setChecked(false);
 }
 
-void Mdio::tcSetTcSlot(int id, bool enable)
+void Mdio::tcSetTcSlot(int id)
 {
-    unsigned int val = enable ? ui->leOnVal->text().toUInt(NULL, 16)
-                              : ui->leOffVal->text().toUInt(NULL, 16);
     bool isBinary = tkControlSwitcher->getState() == Toogle::TOOGLE_STATE_OFF;
 
-    for(auto item: tcMonitorList) {
-        item->unchekAllButton();
-    }
-    emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), id, connectSlaveAddress,
-                              val, enable, isBinary);
+    emit this->setTeleControl(CB_WRAP_1(Mdio, setTeleControlResult), id, connectSlaveAddress, isBinary);
 
     processingCommunicatitonResult("Телекерування",
                                    "Помилка передачі команди\nтелекерування", false);
@@ -1029,6 +1033,7 @@ void Mdio::on_pbSetDefaultSettings_clicked()
 void Mdio::on_pbConnect_clicked()
 {
     if (connectWithSettings()) {
+        allowMonitoring = true;;
         readSettings();
     }
 }
@@ -1146,6 +1151,10 @@ void Mdio::on_pbOpenSettingsFile_clicked()
     for (qsizetype i = 0; i < tsSetingsList.size(); i++) {
         tsSetingsList.at(i)->setInvert(newSettings.getInversionSign().at(i));
     }
+
+    unsigned int valOn = ui->leOnVal->text().toInt(NULL,16);
+    unsigned int valOff = ui->leOffVal->text().toInt(NULL,16);
+    emit tcOnOffUpdated(valOn, valOff);
 }
 
 void Mdio::on_leSilentInterval_editingFinished()
@@ -1240,20 +1249,20 @@ void Mdio::on_leOnVal_editingFinished()
     if (ui->leOnVal->text().isEmpty()) {
         ui->leOnVal->setText(SwDefSettings::getTcOnValDefaultString());
     }
-
-    if (ui->leOnVal->text().toUInt(NULL, 16) == ui->leOffVal->text().toUInt(NULL, 16)) {
+    unsigned int valOn = ui->leOnVal->text().toUInt(NULL, 16);
+    unsigned int valOff = ui->leOffVal->text().toUInt(NULL, 16);
+    if (valOn == valOff) {
         ui->leOnVal->setStyleSheet("background-color: rgb(243, 193, 255);");
-        unsigned int val = ui->leOnVal->text().toUInt(NULL, 16);
-        if (val == 0xFFFF) {
-            val--;
+        if (valOn == 0xFFFF) {
+            valOn--;
         } else {
-            val++;
+            valOn++;
         }
-        ui->leOnVal->setText(QString::number(val, 16));
+        ui->leOnVal->setText(QString::number(valOn, 16));
     } else {
         ui->leOnVal->setStyleSheet("background-color: rgb(255, 255, 255);");
     }
-
+    emit tcOnOffUpdated(valOn, valOff);
 }
 
 void Mdio::on_leOffVal_editingFinished()
@@ -1261,18 +1270,19 @@ void Mdio::on_leOffVal_editingFinished()
     if (ui->leOffVal->text().isEmpty()) {
         ui->leOffVal->setText(SwDefSettings::getTcOnValDefaultString());
     }
-
-    if (ui->leOnVal->text().toUInt(NULL, 16) == ui->leOffVal->text().toUInt(NULL, 16)) {
+    unsigned int valOn = ui->leOnVal->text().toUInt(NULL, 16);
+    unsigned int valOff = ui->leOffVal->text().toUInt(NULL, 16);
+    if (valOn == valOff) {
         ui->leOffVal->setStyleSheet("background-color: rgb(243, 193, 255);");
-        unsigned int val = ui->leOffVal->text().toUInt(NULL, 16);
-        if (val == 0xFFFF) {
-            val--;
+        if (valOff == 0xFFFF) {
+            valOff--;
         } else {
-            val++;
+            valOff++;
         }
-        ui->leOffVal->setText(QString::number(val, 16));
+        ui->leOffVal->setText(QString::number(valOff, 16));
     } else {
         ui->leOffVal->setStyleSheet("background-color: rgb(255, 255, 255);");
     }
+    emit tcOnOffUpdated(valOn, valOff);
 }
 

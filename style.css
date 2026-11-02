@@ -245,6 +245,42 @@ QPushButton[tsState = Error]
     image: url(:/Resources/Off_resize_v2.png);
 }
 
+
+
+QPushButton#contButton {
+    font-family: "Segoe UI";
+    font-size: 11pt;
+    font-weight: bold;
+
+    border-style: outset;
+    border-radius: 25px;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+    color: white;
+}
+
+QPushButton#contButton[tcState="Tc_On"] {
+    background-color: #D96B6B;
+}
+
+QPushButton#contButton[tcState="Tc_Off"] {
+    background-color: #68B987;
+}
+
+QPushButton#contButton[tcState="Tc_Inactive"] {
+    background-color: #E5E7EB;
+    color: #555555;
+}
+
+QPushButton#contButton[tcState="Tc_Released"] {
+    background-color: #7796C7;
+}
+
+QPushButton#contButton[tcState="Tc_Undefined"] {
+    background-color: #F4D774;
+    color: #5C4B16;
+}
+
 QFrame[tsBinary = false]
 {
     border-radius: 4px;
@@ -276,22 +312,6 @@ QFrame#fCommunicationInd
     border-color: rgb(120, 120, 250);
 }
 
-/*
-QPushButton#ErrIndicator
-{
-    border: 0px;
-    padding: 0px;
-    margin: 0px;
-    background-color: transparent;
-    border-image: url(:/Resources/StatusNorma.png);
-}
-
-QPushButton#ErrIndicator:checked
-{
-    border-image: url(:/Resources/StatusErr.png);
-}
-*/
-
 QLabel#ErrIndicator {
     border: 0px;
     padding: 0px;
@@ -303,7 +323,6 @@ QLabel#ErrIndicator {
 QLabel#ErrIndicator[error="true"] {
     border-image: url(:/Resources/StatusErr.png);
 }
-
 
 QFrame#ErrorPanelBackground
 {

@@ -23,12 +23,15 @@ public:
 
     typedef struct {
         int id;
-        int addressOn;
-        int addressOff;
+        int address;
+        bool isOn;
         QString name;
-        QStringList rel1State;
-        QStringList rel2State;
-    } TcDesr;
+    } TcItemDescriptor;
+
+    typedef struct {
+        QVector<TcItemDescriptor> items;
+        QString name;
+    } TcDesriptor;
 
     static void init(QByteArray jsonFileContent)
     {
@@ -36,26 +39,27 @@ public:
         rootObj = jsonDoc.object();
     }
 
-    static QVector<TcDesr> getTcDescr()
+    static QVector<TcDesriptor> getTcDescriptor()
     {
-        QVector<TcDesr> argOut;
-        TcDesr temp;
-        QJsonArray arr = rootObj.find(keyTc)->toObject().find(keyTcList)->toArray();
+        QVector<TcDesriptor> argOut;
+        TcDesriptor descriptor;
+        QJsonArray arr = rootObj.find(keyTc)->toObject().find(keyTcDescriptor)->toArray();
 
-        for (auto item: arr) {
-            temp.name = item.toObject().find(keyTcName)->toString();
-            temp.rel1State.clear();
-            for (auto item: item.toObject().find(keyTcRelayStr1)->toArray()) {
-                temp.rel1State.push_back(item.toString());
+        for (const auto &item: arr) {
+            descriptor.name = item.toObject().find(keyTcName)->toString();
+
+            descriptor.items.clear();
+            auto controls = item.toObject().find(keyTcControls)->toArray();
+            for(const auto &controlItem: controls) {
+                descriptor.items.append(TcItemDescriptor{});
+                auto controlObj = controlItem.toObject();
+
+                descriptor.items.last().id = controlObj.find(keyTcId)->toInt();
+                descriptor.items.last().address = controlObj.find(keyTcAddress)->toInt();
+                descriptor.items.last().isOn = controlObj.find(keyTcControlType)->toString() == "On";
+                descriptor.items.last().name = controlObj.find(keyTcName)->toString();
             }
-            temp.rel2State.clear();
-            for (auto item: item.toObject().find(keyTcRelayStr2)->toArray()) {
-                temp.rel2State.push_back(item.toString());
-            }
-            temp.addressOn = item.toObject().find(keyTcAddressOn)->toInt();
-            temp.addressOff = item.toObject().find(keyTcAddressOff)->toInt();
-            temp.id = item.toObject().find(keyTcId)->toInt();
-            argOut.push_back(temp);
+            argOut.push_back(descriptor);
         }
 
         return argOut;
@@ -373,13 +377,12 @@ private:
     inline static const QString keyTc = "TC";
     inline static const QString keyTcNameFun5 = "NameFun5";
     inline static const QString keyTcNameFun6 = "NameFun6";
-    inline static const QString keyTcList = "List";
     inline static const QString keyTcName = "Name";
-    inline static const QString keyTcRelayStr1 = "RelayStr1";
-    inline static const QString keyTcRelayStr2 = "RelayStr2";
-    inline static const QString keyTcAddressOn = "AddressOn";
-    inline static const QString keyTcAddressOff = "AddressOff";
+    inline static const QString keyTcControls = "Controls";
     inline static const QString keyTcId = "Id";
+    inline static const QString keyTcDescriptor = "Descriptor";
+    inline static const QString keyTcControlType = "ControlType";
+    inline static const QString keyTcAddress = "Address";
 
     inline static const QString keyTcPulsDurationDefault = "PulsDurationDefault";
     inline static const QString keyTcPulsDurationMin = "PulsDurationMin";

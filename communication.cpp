@@ -2,7 +2,6 @@
 #include "communication.h"
 #include "uidescription.h"
 
-
 void Communication::startCommunication(void)
 {
     modbus = new ModbusRtuMaster();
@@ -237,26 +236,13 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
                                   int slaveAddress)
 {
     QVector<bool> status;
-    QVector<uint16_t> teleControl;
     ModbusRtuMaster::MbStatus result;
     SlaveState state;
     uint16_t baseCoilAddress;
     uint16_t readCoilsNumber;
     uint16_t baseTcAddress;
 
-    /*
-     * Read 220V in circuit
-     */
     QVector<int> errorCoilAddress = UiDescription::getErrorAddressList();
-    baseCoilAddress = ADDR_COIL_220_V_ERROR;
-    readCoilsNumber = ADDR_COIL_220_V_ERROR - baseCoilAddress + 1;
-    result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
-    if (result != ModbusRtuMaster::MB_OK) {
-        CALL_CB(cb, false, state);
-        qDebug()<<"Error readStateSlot read 220_V: "<<modbus->getStatusString(result);
-        return;
-    }
-    state.error220 =  status[ADDR_COIL_220_V_ERROR - baseCoilAddress];
 
     /*
      *  Read EEPROM_ERROR and EEPROM_CLEAR status
@@ -301,6 +287,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         /*
          * Read tele signal status from binary register
          */
+        /*
         QVector<uint16_t> teleSignalStatusRegister;
         result = modbus->readHoldingRegisters(slaveAddress, ADDR_REG_TS_BINARY_STATE, 1, teleSignalStatusRegister);
         if (result != ModbusRtuMaster::MB_OK) {
@@ -312,6 +299,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             state.signalisationBinary[k] = teleSignalStatusRegister[0] & (1 << k);
         }
+*/
     } else {
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             state.signalisation[k] = false;
@@ -319,58 +307,69 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     }
 
     /*
-     * Read the puls tele control state.
+     * Read tele control state.
      */
-    for(auto item: tcDescrList) {
-        result = modbus->readInputRegisters(slaveAddress, item.addressOn, 1, teleControl);
-        if (result != ModbusRtuMaster::MB_OK) {
-            CALL_CB(cb, false, state);
-            qDebug()<<"Error readStateSlot read tele control: "<<modbus->getStatusString(result);
-            return;
-        }
-        if (item.addressOn != item.addressOff) {
-            state.control.insert(item.id, teleControl[0]);
-            result = modbus->readInputRegisters(slaveAddress, item.addressOff, 1, teleControl);
-            if (result != ModbusRtuMaster::MB_OK) {
-                CALL_CB(cb, false, state);
-                qDebug()<<"Error readStateSlot read tele control: "<<modbus->getStatusString(result);
-                return;
+
+    auto tcStartAddress = tcDescription.first().address;
+    auto tcStopAddress = tcStartAddress;
+
+    for (const auto &item : tcDescription) {
+        tcStartAddress = qMin(tcStartAddress, item.address);
+        tcStopAddress = qMax(tcStopAddress, item.address);
+    }
+
+    QVector<uint16_t> teleControlVal;
+
+    result = modbus->readInputRegisters(
+        slaveAddress,
+        tcStartAddress,
+        tcStopAddress - tcStartAddress + 1,
+        teleControlVal);
+
+    if (result != ModbusRtuMaster::MB_OK) {
+        CALL_CB(cb, false, state);
+        qDebug() << "Error readStateSlot read tele control:"
+                 << modbus->getStatusString(result);
+        return;
+    }
+
+    state.control.clear();
+    for (const auto tcVal : teleControlVal) {
+        for (auto tcItem = tcDescription.cbegin();
+             tcItem != tcDescription.cend(); ++tcItem) {
+            if (tcItem->address == tcStartAddress) {
+                state.control.insert(tcItem.key(), tcVal);
             }
-            state.control.insert(item.id, teleControl[0]);
         }
+
+        ++tcStartAddress;
     }
 
     /*
      * Read RC ADC results
      */
+/*
     baseTcAddress = ADDR_RC_ADC_OFF;
-    result = modbus->readInputRegisters(slaveAddress, baseTcAddress, 2, teleControl);
+    QVector<uint16_t> resAdc;
+    result = modbus->readInputRegisters(slaveAddress, baseTcAddress, 2, resAdc);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"Error readStateSlot read RC ADC resultsl: "<<modbus->getStatusString(result);
         return;
     }
-    state.resRcAdcOff = teleControl[0];
-    state.resRcAdcOn = teleControl[1];
-
+    state.resRcAdcOff = resAdc[0];
+    state.resRcAdcOn = resAdc[1];
+*/
     CALL_CB(cb, true, state);
 }
 
 void Communication::setTeleControlSlot(std::function<void(bool result)> cb, int id,
-                                       int slaveAddress, unsigned int val, bool enable, bool fun5)
+                                       int slaveAddress, bool fun5)
 {
-    ModbusRtuMaster::MbStatus result;
-    auto tcItem = std::find_if(tcDescrList.begin(), tcDescrList.end(), [&id](const auto& tcItem){return  tcItem.id == id;});
-
-    if (tcItem == tcDescrList.end()) {
-        qDebug()<<"Error setTeleControlSlot index value error: "<<id;
-        CALL_CB(cb, false);
-        return;
-    }
-    int address = enable ? tcItem->addressOn : tcItem->addressOff;
-    int regVal = (uint16_t)(0xFFFF & val);
-    result = fun5 ? modbus->forceSingleCoil(slaveAddress, address, regVal)
-                 : modbus->presetSingleRegister(slaveAddress, address, regVal);
+    int address = tcDescription.value(id).address;
+    int val = tcDescription.value(id).isTcOn ? valOn : valOff;
+    ModbusRtuMaster::MbStatus result = fun5 ? modbus->forceSingleCoil(slaveAddress, address, val)
+                 : modbus->presetSingleRegister(slaveAddress, address, val);
     if (result != ModbusRtuMaster::MB_OK) {
         qDebug()<<"Error setTeleControlSlot reply: "<<modbus->getStatusString(result);
     }
@@ -390,4 +389,10 @@ void Communication::setTeleControlPulsSlot(std::function<void(bool result)> cb,
         qDebug()<<"Error setTeleControlPulsSlot reply: "<<modbus->getStatusString(result);
     }
     CALL_CB(cb, result == ModbusRtuMaster::MB_OK);
+}
+
+void Communication::setTeleControlValues(unsigned int valOnIn, unsigned int valOffIn)
+{
+    valOn = valOnIn;
+    valOff = valOffIn;
 }

@@ -18,7 +18,7 @@
 #include <QToolTip>
 
 #include "communication.h"
-#include "tccontrol.h"
+#include "TeleControl.h"
 #include "tssettings.h"
 #include "tsstatus.h"
 #include "dialogconnectionsettings.h"
@@ -63,10 +63,10 @@ signals:
                    int slaveAddress);
     void setTeleControlPuls(std::function<void(bool result)> cb,
                             int slaveAddress,  unsigned int val, bool fun5);
-    void setTeleControl(std::function<void(bool result)> cb, int id,
-                        int slaveAddress, unsigned int val, bool enable, bool fun5);
+    void setTeleControl(std::function<void(bool result)> cb, int id, int slaveAddress, bool fun5);
     void readMetaInformation(std::function<void(bool result, Communication::MetaInformation metaInformation)> cb,
                              int slaveAddress);
+    void tcOnOffUpdated(unsigned int onVal, unsigned int offVal);
 
 private:
     ErrorPanel *errorPanel;
@@ -111,7 +111,7 @@ private slots:
 
     void readSlaveState(void);
 
-    void tcSetTcSlot(int index, bool enable);
+    void tcSetTcSlot(int index);
 
     void on_pbConnectionSettings_clicked();
 
@@ -173,12 +173,11 @@ private:
 private:
     Ui::Mdio *ui;
     Communication *communicaiton;
-    QVector<TcControl *> tcMonitorList;
+    QVector<TeleControl *> tcMonitorList;
     Toogle *tsPollingSwitcher;
     Toogle *tkControlSwitcher;
     QVector<TsSettings *> tsSetingsList;
     QVector<TsStatus *> tsStatus;
-    QRandomGenerator rand;
     QSpacerItem *tcLayoutSpacer;
     QSpacerItem *tsLayoutSpacer;
     QSpacerItem *tsStatusLayoutSpacer;
@@ -192,14 +191,14 @@ private:
     QVector<QComboBox *> tsTypeConfigList;
     QVector<QFrame *> teleSignalStatusBinaryFrameList;
     QVector<QVBoxLayout *> teleSignalStatusBinaryLayoutList;
-    QVector<SwDefSettings::TcDesr> tcDescrList;
     QToolTip *debounceToolTip;
+    QMap<int, bool> teleControlType;
     int stateRequestCnt;
     int stateReplyCnt;
-
     bool needConnectSlave;
     bool isSlaveConnect;
     bool updateTcButtonState;
+    bool allowMonitoring;
 
     /*
      * Connect to slave port (COM port) settings

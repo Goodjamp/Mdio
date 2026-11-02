@@ -3,30 +3,53 @@
     {
         "NameFun5": "ТК функція 5",
         "NameFun6": "ТК функція 6",
-        "List": [
-            {
-                "Id": 1,
-                "AddressOn": 519,
-                "AddressOff": 519,
-                "Name": "ТК1\nІмпульсна\nдвопозиційна",
-                "RelayStr1": ["", "", ""],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
-            },
-            {
-                "Id": 2,
-                "AddressOn": 523,
-                "AddressOff": 524,
-                "Name": "ТК4   TK5\nІмпульсна\nоднопозиційна",
-                "RelayStr1": ["", "", ""],
-                "RelayStr2": ["ВВІМ", "ВИМК", "НЕ ЗАДІЯН"]
-            }
-        ],
         "PulsDurationDefault": 1000,
         "PulsDurationMin": 100,
         "PulsDurationMax": 4000,
         "OnVal": "FF00",
         "OffVal": "0000",
-        "UsePowerRelay": false
+        "UsePowerRelay": false,
+        "Descriptor": [
+            {
+                "Controls": [
+                    {
+                        "Id": 1,
+                        "Address": 519,
+                        "ControlType": "On",
+                        "Name": "Вкл"
+                    },
+                    {
+                        "Id": 2,
+                        "Address": 519,
+                        "ControlType": "Off",
+                        "Name": "Викл"
+                    }
+                ],
+                "Name": "ТК1\nІмпульсна\nдвопозиційна"
+            },
+            {
+                "Controls": [
+                    {
+                        "Id": 3,
+                        "Address": 523,
+                        "ControlType": "On",
+                        "Name": "Вкл"
+                    }
+                ],
+                "Name": "ТК4\nІмпульсна\nоднопозиційна"
+            },
+            {
+                "Controls": [
+                    {
+                        "Id": 4,
+                        "Address": 524,
+                        "ControlType": "Off",
+                        "Name": "Викл"
+                    }
+                ],
+                "Name": "ТК5\nІмпульсна\nоднопозиційна"
+            }
+        ]
     },
     "monitorTS":
     {

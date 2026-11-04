@@ -54,7 +54,8 @@
 #define INVERS_SETTINGS_TI3_POS         2
 #define INVERS_SETTINGS_TI4_POS         3
 
-#define USE_POWER_RELAY_CONF_OFFSET     2
+#define POWER_RELAY_MODE_OFFSET         2u
+#define POWER_RELAY_MODE_MASK           3u
 
 /*
  * Class B is a wrapper for the Modbus class + Communication class (A) implementation.
@@ -192,7 +193,7 @@ public:
             int pulsDuration;
             int onVal;
             int offVal;
-            bool usePowerRelay;
+            int rcAuxMode;
         } control;
     } SlaveConfiguration;
 

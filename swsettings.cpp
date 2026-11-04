@@ -71,7 +71,7 @@ bool SwSettings::addTcSettings(TcConfig config)
     tcObj.insert(keyPulsDuration, (QJsonValue)config.getPulsDuration());
     tcObj.insert(keyValueOn, (QJsonValue)config.getValOn());
     tcObj.insert(keyValueOff, (QJsonValue)config.getValOff());
-    tcObj.insert(keyUsePowerRelay, (QJsonValue)config.getUsePowerRelay());
+    tcObj.insert(keyRcAuxMode, (QJsonValue)rcAuxModeValue[config.getRcAuxMode()]);
 
     return true;
 }
@@ -295,10 +295,13 @@ bool SwSettings::testTc(QJsonObject jsonObj, QString &errorStr)
                           });
         }
         if (result == true) {
-            result = test(tcObj, keyUsePowerRelay, KEY_USE_POWER_RELAY_MISSING_ERROR, errorStr,
-                          std::function<bool(bool)>([&errorStr](bool value)->bool{
-                              return true;
-                          }));
+            result = test(tcObj, keyRcAuxMode, KEY_RC_AUX_MODE_MISSING_ERROR, errorStr,
+                          [&errorStr](QString value)->bool{
+                              bool result = rcAuxModeValue.contains(value);
+                              if (result == false)
+                                  errorStr = errorStrList.value(KEY_RC_AUX_MODE_VALUE_ERROR);
+                              return result;
+                          });
         }
         if (tcObj.find(keyValueOn)->toString().toUInt(NULL, 16) == tcObj.find(keyValueOff)->toString().toUInt(NULL, 16)) {
              errorStr = errorStrList.value(KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR);

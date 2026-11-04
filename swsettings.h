@@ -162,7 +162,7 @@ class TcConfig
 {
 
 public:
-    TcConfig(int pulsDurationIn, QString valOnIn, QString valOffIn, bool usePowerRelayIn)
+    TcConfig(int pulsDurationIn, QString valOnIn, QString valOffIn, int rcAuxModeIn)
         :SwDefSettings()
     {
         if(pulsDurationIn < getPulsDurationMin()
@@ -174,7 +174,7 @@ public:
         valOn = valOnIn;
         valOff = valOffIn;
         result = true;
-        usePowerRelay = usePowerRelayIn;
+        rcAuxMode = rcAuxModeIn;
     }
 
     bool isInit() {
@@ -196,8 +196,8 @@ public:
         return valOff;
     }
 
-    bool getUsePowerRelay() {
-        return usePowerRelay;
+    int getRcAuxMode() {
+        return rcAuxMode;
     }
 private:
 
@@ -205,7 +205,7 @@ private:
     int pulsDuration;
     QString valOn;
     QString valOff;
-    bool usePowerRelay;
+    int rcAuxMode;
 };
 
 class SwSettings: SwDefSettings
@@ -308,11 +308,11 @@ public:
         return value;
     }
 
-    bool getUsePowerRelay() {
+    bool getRcAuxMode() {
         bool value{false};
 
         if (isFileSettingsValid) {
-            value = rootObj.find(keyTc)->toObject().find(keyUsePowerRelay)->toBool();
+            value = rootObj.find(keyTc)->toObject().find(keyRcAuxMode)->toInt();
         }
         return value;
     }
@@ -396,12 +396,19 @@ private:
     static inline::QString keyPulsDuration{"Puls duration"};
     static inline::QString keyValueOn{"Value On"};
     static inline::QString keyValueOff{"Value Off"};
-    static inline::QString keyUsePowerRelay{"Use power relay"};
+    static inline::QString keyRcAuxMode{"RC AUX Mode"};
 
     static inline::QStringList parityValue{
         {"None"},
         {"Even"},
         {"Odd"},
+    };
+
+
+    static inline::QStringList rcAuxModeValue{
+        {"Unused"},
+        {"Block"},
+        {"AmpRelay"},
     };
 
     static inline::QStringList tsTypeStrList{
@@ -494,8 +501,9 @@ private:
         KEY_OFF_VALUE_FORMAT_ERROR,
         KEY_OFF_VALUE_VALUE_ERROR,
         KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR,
-        KEY_USE_POWER_RELAY_MISSING_ERROR,
-        KEY_USE_POWER_RELAY_FORMAT_ERROR,
+        KEY_RC_AUX_MODE_MISSING_ERROR,
+        KEY_RC_AUX_MODE_FORMAT_ERROR,
+        KEY_RC_AUX_MODE_VALUE_ERROR,
     } SettingsError;
 
     static inline::QMap<SettingsError, QString> errorStrList{
@@ -553,8 +561,9 @@ private:
         {KEY_OFF_VALUE_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірний формат."},
         {KEY_OFF_VALUE_VALUE_ERROR, "Ключ <b>" + keyTc + "->" + keyValueOff + "</b> має невірне значення.\n Очікується 4-розрядне шістнадцяткове число"},
         {KEY_OFF_VALUE_OFF_VALUE_COLISION_ERROR, "Ключі <b>" + keyTc + "->" + keyValueOn + " та " + keyTc + "->" + keyValueOff + "</b> повинні мати різні значення"},
-        {KEY_USE_POWER_RELAY_MISSING_ERROR, "Відсутній ключ <b>" + keyTc + "->" + keyUsePowerRelay + "</b>."},
-        {KEY_USE_POWER_RELAY_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyUsePowerRelay + "</b> має невірний формат."},
+        {KEY_RC_AUX_MODE_MISSING_ERROR, "Відсутній ключ <b>" + keyTc + "->" + keyRcAuxMode + "</b>."},
+        {KEY_RC_AUX_MODE_FORMAT_ERROR, "Ключ <b>" + keyTc + "->" + keyRcAuxMode + "</b> має невірний формат."},
+        {KEY_RC_AUX_MODE_VALUE_ERROR, "Ключ <b>" + keyTc + "->" + keyRcAuxMode + "</b> має невірне значення."},
     };
 
     static bool testRootKeys(QJsonObject jsonObj, QString &errorStr);

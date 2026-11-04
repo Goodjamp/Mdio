@@ -8,7 +8,7 @@
         "PulsDurationMax": 4000,
         "OnVal": "FF00",
         "OffVal": "0000",
-        "UsePowerRelay": false,
+        "RcAuxMode": 0,
         "Descriptor": [
             {
                 "Controls": [
@@ -16,13 +16,13 @@
                         "Id": 1,
                         "Address": 519,
                         "ControlType": "On",
-                        "Name": "Вкл"
+                        "Name": "Ввім"
                     },
                     {
                         "Id": 2,
                         "Address": 519,
                         "ControlType": "Off",
-                        "Name": "Викл"
+                        "Name": "Вимк"
                     }
                 ],
                 "Name": "ТК1\nІмпульсна\nдвопозиційна"
@@ -33,7 +33,7 @@
                         "Id": 3,
                         "Address": 523,
                         "ControlType": "On",
-                        "Name": "Вкл"
+                        "Name": "Ввім"
                     }
                 ],
                 "Name": "ТК4\nІмпульсна\nоднопозиційна"
@@ -44,7 +44,7 @@
                         "Id": 4,
                         "Address": 524,
                         "ControlType": "Off",
-                        "Name": "Викл"
+                        "Name": "Вимк"
                     }
                 ],
                 "Name": "ТК5\nІмпульсна\nоднопозиційна"

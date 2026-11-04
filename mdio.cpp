@@ -517,7 +517,7 @@ bool Mdio::updateUiConfiguration(void)
     ui->lePulsDuration->setText(QString::number(connectDeviceConf.control.pulsDuration));
     ui->leOnVal->setText(QString("%1").arg(connectDeviceConf.control.onVal, 4, 16, QChar('0')));
     ui->leOffVal->setText(QString("%1").arg(connectDeviceConf.control.offVal, 4, 16, QChar('0')));
-    ui->cbUsePoweRelay->setChecked(connectDeviceConf.control.usePowerRelay);
+    ui->cbRcAuxMode->setCurrentIndex(connectDeviceConf.control.rcAuxMode);
 
     lastConfigurationYear = connectDeviceConf.configurationYear;
     lastConfigurationMonth = connectDeviceConf.configurationMonth;
@@ -636,6 +636,7 @@ void Mdio::setDefaultSettings()
     ui->leOnVal->setText(SwDefSettings::getTcOnValDefaultString());
     ui->leOffVal->setText(SwDefSettings::getTcOffValDefaultString());
     ui->leBinaryTsSwitchTime->setText(SwDefSettings::getBinaryTsSwitchTimeDefaultString());
+    ui->cbRcAuxMode->setCurrentIndex(SwDefSettings::getRcAuxModeDefault());
     foreach(auto item, tsSetingsList) {
         item->setInvert(false);
     }
@@ -873,7 +874,7 @@ void Mdio::on_pbApplySettings_clicked()
     configuration.control.pulsDuration = ui->lePulsDuration->text().toInt();
     configuration.control.onVal = ui->leOnVal->text().toUInt(NULL,16);
     configuration.control.offVal = ui->leOffVal->text().toUInt(NULL,16);
-    configuration.control.usePowerRelay = ui->cbUsePoweRelay->isChecked();
+    configuration.control.rcAuxMode = ui->cbRcAuxMode->currentIndex();
 
     /*
      *  Configuration date
@@ -1071,7 +1072,7 @@ void Mdio::on_pbSaveSettingsFile_clicked()
                       ui->leDebounceInterval->text().toInt(),
                       QVector<bool>{tsSetingsList[0]->isInvert(), tsSetingsList[1]->isInvert(), tsSetingsList[2]->isInvert(), tsSetingsList[3]->isInvert()},
                       QVector<bool>{tsTypeConfigList[0]->currentText() == TS_TEXT_BINARY, tsTypeConfigList[1]->currentText() == TS_TEXT_BINARY});
-    TcConfig tcConfig(ui->lePulsDuration->text().toInt(), ui->leOnVal->text(), ui->leOffVal->text(), ui->cbUsePoweRelay->isChecked());
+    TcConfig tcConfig(ui->lePulsDuration->text().toInt(), ui->leOnVal->text(), ui->leOffVal->text(), ui->cbRcAuxMode->currentIndex());
 
     SwSettings settings;
     settings.addCommunicationSettings(comConfig);
@@ -1143,7 +1144,7 @@ void Mdio::on_pbOpenSettingsFile_clicked()
     ui->leOnVal->setText(newSettings.getOnValue());
     ui->leOffVal->setText(newSettings.getOffValue());
     ui->leReplyDelay->setText(QString::number(newSettings.getReplyDelay()));
-    ui->cbUsePoweRelay->setChecked(newSettings.getUsePowerRelay());
+    ui->cbRcAuxMode->setCurrentIndex(newSettings.getRcAuxMode());
 
     for (qsizetype i = 0; i < tsTypeConfigList.size(); i++) {
         tsTypeConfigList.at(i)->setCurrentIndex(newSettings.getDoubleSign().at(i) ? 1 : 0);

@@ -85,9 +85,7 @@ void Communication::writeConfigurationSlot(std::function<void(bool result)> cb,
             }
         }
         // Put TC Power Relay settings
-        if (configuration.control.usePowerRelay) {
-            configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |= 1 << USE_POWER_RELAY_CONF_OFFSET;
-        }
+        configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] |= configuration.control.rcAuxMode << POWER_RELAY_MODE_OFFSET;
 
         /*
          * Serialiase tele control settings
@@ -173,8 +171,8 @@ void Communication::readConfigurationSlot(std::function<void(bool result, SlaveC
             /*
              * Deserialiase Power Relay settings
              */
-            configuration.control.usePowerRelay =
-                (1 & (configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] >> USE_POWER_RELAY_CONF_OFFSET)) == 1;
+            configuration.control.rcAuxMode =
+                (configReg[ADDR_REG_TS_BINATY_SWITCHING_SETTINGS - baseConfReg] >> POWER_RELAY_MODE_OFFSET) & POWER_RELAY_MODE_MASK;
             resulReadConfiguration = true;
         } else {
             qDebug()<<"Error readConfigurationSlot parity or stop bits error:";
@@ -240,7 +238,6 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     SlaveState state;
     uint16_t baseCoilAddress;
     uint16_t readCoilsNumber;
-    uint16_t baseTcAddress;
 
     QVector<int> errorCoilAddress = UiDescription::getErrorAddressList();
 

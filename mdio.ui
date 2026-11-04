@@ -967,7 +967,7 @@
                  </size>
                 </property>
                 <property name="title">
-                 <string>Режи RC AUX</string>
+                 <string>RC AUX</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
@@ -979,15 +979,33 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Задіяти силове реле</string>
+                    <string>Режим</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="cbUsePoweRelay">
-                   <property name="text">
-                    <string/>
+                  <widget class="QComboBox" name="cbRcAuxMode">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>true</bold>
+                    </font>
                    </property>
+                   <item>
+                    <property name="text">
+                     <string>Не задіяний</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Блокувати АПВ</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Підсилений вихід реле</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                  <item>

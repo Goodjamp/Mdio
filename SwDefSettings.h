@@ -49,7 +49,7 @@ public:
             descriptor.name = item.toObject().find(keyTcName)->toString();
 
             descriptor.items.clear();
-            auto controls = item.toObject().find(keyTcControls)->toArray();
+            const auto controls = item.toObject().find(keyTcControls)->toArray();
             for(const auto &controlItem: controls) {
                 descriptor.items.append(TcItemDescriptor{});
                 auto controlObj = controlItem.toObject();
@@ -310,9 +310,9 @@ public:
         return rootObj.find(keyTc)->toObject().find(keyTcPulsDurationDefault)->toInt();
     }
 
-    static int getUsePowerRelayDefault()
+    static int getRcAuxModeDefault()
     {
-        return rootObj.find(keyTc)->toObject().find(keyUsePowerRelayDefault)->toInt();
+        return rootObj.find(keyTc)->toObject().find(keyRcAuxModeDefault)->toInt();
     }
 
     static QString getPulsDurationDefaultString()
@@ -389,7 +389,7 @@ private:
     inline static const QString keyTcPulsDurationMax = "PulsDurationMax";
     inline static const QString keyTcOnValDefault = "OnVal";
     inline static const QString keyTcOffValDefault = "OffVal";
-    inline static const QString keyUsePowerRelayDefault = "UsePowerRelay";
+    inline static const QString keyRcAuxModeDefault = "RcAuxMode";
 
     inline static const QString keyMonTs = "monitorTS";
     inline static const QString keyMonTsNamePollBinary = "NamePollBinary";

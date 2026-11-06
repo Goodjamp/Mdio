@@ -233,19 +233,15 @@ void Communication::reloadSlot(std::function<void(bool result)> cb,
 void Communication::readStateSlot(std::function<void(bool result, SlaveState state)> cb,
                                   int slaveAddress)
 {
-    QVector<bool> status;
     ModbusRtuMaster::MbStatus result;
     SlaveState state;
-    uint16_t baseCoilAddress;
-    uint16_t readCoilsNumber;
-
-    QVector<int> errorCoilAddress = UiDescription::getErrorAddressList();
 
     /*
-     *  Read EEPROM_ERROR and EEPROM_CLEAR status
+     * Read status
      */
-    baseCoilAddress = ADDR_COIL_220_V_ERROR;
-    readCoilsNumber = ADDR_COIL_RC_AUX_SHORT_ERROR - baseCoilAddress + 1;
+    uint16_t baseCoilAddress = ADDR_COIL_220_V_ERROR;
+    uint16_t readCoilsNumber = ADDR_COIL_RC_AUX_SHORT_ERROR - baseCoilAddress + 1;
+    QVector<bool> status;
     result = modbus->readDiscreteInputs(slaveAddress, baseCoilAddress, readCoilsNumber, status);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
@@ -284,7 +280,6 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         /*
          * Read tele signal status from binary register
          */
-        /*
         QVector<uint16_t> teleSignalStatusRegister;
         result = modbus->readHoldingRegisters(slaveAddress, ADDR_REG_TS_BINARY_STATE, 1, teleSignalStatusRegister);
         if (result != ModbusRtuMaster::MB_OK) {
@@ -296,7 +291,6 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             state.signalisationBinary[k] = teleSignalStatusRegister[0] & (1 << k);
         }
-*/
     } else {
         for (uint32_t k = 0; k < TELESIGNAL_NUMBERS; k++) {
             state.signalisation[k] = false;
@@ -306,10 +300,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Read tele control state.
      */
-
     auto tcStartAddress = tcDescription.first().address;
     auto tcStopAddress = tcStartAddress;
-
     for (const auto &item : tcDescription) {
         tcStartAddress = qMin(tcStartAddress, item.address);
         tcStopAddress = qMax(tcStopAddress, item.address);
@@ -345,10 +337,8 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     /*
      * Read RC ADC results
      */
-/*
-    baseTcAddress = ADDR_RC_ADC_OFF;
     QVector<uint16_t> resAdc;
-    result = modbus->readInputRegisters(slaveAddress, baseTcAddress, 2, resAdc);
+    result = modbus->readInputRegisters(slaveAddress, ADDR_RC_ADC_OFF, 2, resAdc);
     if (result != ModbusRtuMaster::MB_OK) {
         CALL_CB(cb, false, state);
         qDebug()<<"Error readStateSlot read RC ADC resultsl: "<<modbus->getStatusString(result);
@@ -356,7 +346,7 @@ void Communication::readStateSlot(std::function<void(bool result, SlaveState sta
     }
     state.resRcAdcOff = resAdc[0];
     state.resRcAdcOn = resAdc[1];
-*/
+
     CALL_CB(cb, true, state);
 }
 

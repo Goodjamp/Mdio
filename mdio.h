@@ -197,7 +197,6 @@ private:
     int stateReplyCnt;
     bool needConnectSlave;
     bool isSlaveConnect;
-    bool updateTcButtonState;
     bool allowMonitoring;
 
     /*
@@ -214,7 +213,8 @@ private:
     /*
      * Slave meta information
      */
-    uint connectDeviceVersion;
+    uint connectDeviceVersionMajor;
+    uint connectDeviceVersionMinor;
     uint lastConfigurationYear;
     uint lastConfigurationMonth;
     uint lastConfigurationDay;

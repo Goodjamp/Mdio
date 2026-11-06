@@ -152,20 +152,15 @@ QPushButton#pbPuls:checked
 }
 
 QPushButton#pbConnectionStatus,
-QPushButton#pbEepromClearStatus,
-QPushButton#pbEepromStatus,
-QPushButton#pbConfigurationError,
-QPushButton#pbVoltageOnTcStatus
+QPushButton#pbRxExeptionStatus
 {
     border-radius: 12px;
     background-color:rgb(50, 250, 50);
 }
 
 QPushButton#pbConnectionStatus:checked,
-QPushButton#pbEepromClearStatus:checked,
-QPushButton#pbConfigurationError:checked,
-QPushButton#pbEepromStatus:checked,
-QPushButton#pbVoltageOnTcStatus:checked{
+QPushButton#pbRxExeptionStatus:checked
+{
     background-color:rgb(250, 50, 50);
 }
 
@@ -355,4 +350,11 @@ QGroupBox::title {
     top: -1px;
     padding: 0px 5px;
 
+}
+
+QGroupBox#gbCommunicationInd,
+QGroupBox#gbExExeprion
+{
+    border: 2px solid #000000;
+    border-radius: 5px;
 }

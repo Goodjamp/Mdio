@@ -28,6 +28,7 @@
 #define SW_NAME                    STR_CAST("МВВ-4-2 конфігуратор")
 #define TS_TEXT_SIMPLE             "Одинарні"
 #define TS_TEXT_BINARY             "Подвійні"
+#define DEV_MAJOR_VER_MIN          4U
 
 void Mdio::getDefaultPcConnectionSettings()
 {
@@ -463,10 +464,10 @@ void Mdio::updateUiDeviceMetaInfStr(void)
     QString metaInfStr;
 
     metaInfStr = "v"
-                 + QString::number(connectDeviceVersion / 100)
+                 + QString::number(connectDeviceVersionMajor)
                  + "."
-                 + QString::number(connectDeviceVersion % 100)
-                 + "  Дата:"
+                 + QString::number(connectDeviceVersionMinor)
+                 + "  Дата: "
                  + QString::number(lastConfigurationDay) + "."
                  + QString::number(lastConfigurationMonth) + "."
                  + QString::number(lastConfigurationYear);
@@ -542,7 +543,8 @@ void Mdio::errorMessage(QString headr, QString detailed)
 
 void Mdio::resetSlaveInformation(void)
 {
-    connectDeviceVersion = 0;
+    connectDeviceVersionMajor = 0;
+    connectDeviceVersionMinor = 0;
     lastConfigurationYear = 0;
     lastConfigurationMonth = 0;
     lastConfigurationDay = 0;
@@ -657,7 +659,8 @@ void Mdio::readMetaInformationResult(bool result, Communication::MetaInformation
      */
     communicationResult = result;
     if (result == true) {
-        connectDeviceVersion = metaInformation.fwVersion;
+        connectDeviceVersionMajor = metaInformation.fwVersion / 100;
+        connectDeviceVersionMinor = metaInformation.fwVersion % 100;
         lastConfigurationDay = metaInformation.configurationDay;
         lastConfigurationMonth = metaInformation.configurationMonth;
         lastConfigurationYear = metaInformation.configurationYear;
@@ -740,14 +743,11 @@ bool Mdio::connectWithSettings()
         emit disconnectSlave();
         return false;
     }
-
-    /*
-     * Read state only for update TC button state
-     */
-    updateTcButtonState = true;
-    emit readState(CB_WRAP_2(Mdio, readStateResult), connectSlaveAddress);
-
-
+    updateUiCommunicationStatisticStr();
+    if (connectDeviceVersionMajor < DEV_MAJOR_VER_MIN) {
+        errorMessage("", "Версія ПЗ пристрою не підтримується.\n");
+        return false;
+    }
     /*
      * Start timer to read the slave state
      */
@@ -767,7 +767,7 @@ bool Mdio::connectWithSettings()
      * Enable UI items
      */
     enableSettingsControl();
-
+    allowMonitoring = true;
     return true;
 }
 
@@ -1034,7 +1034,6 @@ void Mdio::on_pbSetDefaultSettings_clicked()
 void Mdio::on_pbConnect_clicked()
 {
     if (connectWithSettings()) {
-        allowMonitoring = true;;
         readSettings();
     }
 }

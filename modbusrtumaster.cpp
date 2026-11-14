@@ -104,6 +104,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
          * If function wrong, it could be exeption reply, lets test it
          */
         if (rxData->at(MB_FUNCTION_CODE_POS) == static_cast<char>(MB_EXCEPTION_CODE(function))) {
+            rxExeptionCnt++;
             return MB_RX_EXEPTION;
         } else {
             return MB_FUNCTION_ERROR;
@@ -116,7 +117,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::receiveReply(QByteArray *rxData, int 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readCoilStatus(uint8_t slaveAddress, uint16_t coilAddress,
                                                           uint16_t coilsNumber, QVector<bool> &coilState)
 {
-    return readSlaveGeneral<bool>(slaveAddress, READ_COIL_STATUS,
+    return readSlaveCommon<bool>(slaveAddress, READ_COIL_STATUS,
                                   coilAddress, coilsNumber, coilState,
                                   readTimeout);
 }
@@ -124,7 +125,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readCoilStatus(uint8_t slaveAddress, 
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readDiscreteInputs(uint8_t slaveAddress, uint16_t coilAddress,
                             uint16_t coilsNumber, QVector<bool> &coilState)
 {
-    return readSlaveGeneral<bool>(slaveAddress, READ_DISCRET_INPUTS,
+    return readSlaveCommon<bool>(slaveAddress, READ_DISCRET_INPUTS,
                                   coilAddress, coilsNumber, coilState,
                                   readTimeout);
 }
@@ -132,7 +133,7 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readDiscreteInputs(uint8_t slaveAddre
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readHoldingRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
                                                                 uint16_t registersNumber, QVector<uint16_t> &regValue)
 {
-    return readSlaveGeneral<uint16_t>(slaveAddress, READ_HOLDING_REGISTERS,
+    return readSlaveCommon<uint16_t>(slaveAddress, READ_HOLDING_REGISTERS,
                                       regStartAddress, registersNumber, regValue,
                                       readTimeout);
 }
@@ -140,15 +141,15 @@ ModbusRtuMaster::MbStatus ModbusRtuMaster::readHoldingRegisters(uint8_t slaveAdd
 ModbusRtuMaster::MbStatus ModbusRtuMaster::readInputRegisters(uint8_t slaveAddress, uint16_t regStartAddress,
                                                               uint16_t registersNumber, QVector<uint16_t> &regValue)
 {
-    return readSlaveGeneral<uint16_t>(slaveAddress, READ_INPUT_REGISTERS,
+    return readSlaveCommon<uint16_t>(slaveAddress, READ_INPUT_REGISTERS,
                                       regStartAddress, registersNumber, regValue,
                                       readTimeout);
 }
 
 template <typename T>
-ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
-                                                            uint16_t address, uint16_t number, QVector<T> &state,
-                                                            uint32_t timeout)
+ModbusRtuMaster::MbStatus ModbusRtuMaster::readSlaveCommon(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+                                                           uint16_t address, uint16_t number, QVector<T> &state,
+                                                           uint32_t timeout)
 {
     QByteArray commandBuff;
     uint16_t crcCalc;

@@ -21,7 +21,7 @@ ErrorIndicator::ErrorIndicator(QWidget *parent, QString errName, QSize indSize)
     fBackground->layout()->addWidget(lIndicator);
     lName = new QLabel(errName, this);
     fBackground->layout()->addWidget(lName);
-    lName->setFixedSize(60,45);
+    lName->setFixedSize(75,45);
     lName->setAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
     lName->setObjectName("lName");
 }

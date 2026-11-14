@@ -20,7 +20,7 @@ ErrorPanel::ErrorPanel(QWidget *parent)
     name->setAlignment(Qt::AlignCenter);
     fBackground->layout()->addWidget(name);
     foreach (auto item, UiDescription::getErrorNameList()) {
-        indicatoList.append(new ErrorIndicator(this, item, QSize(40,40)));
+        indicatoList.append(new ErrorIndicator(this, item, QSize(25,25)));
         fBackground->layout()->addWidget(indicatoList.last());
     }
     fBackground->layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));

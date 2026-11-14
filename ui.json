@@ -1,16 +1,16 @@
 {
     "StatusList":
     [
-                {"Name": "220 В у\nколах ТС",
+                {"Name": "220 В\nу колах ТС",
 		 "Address": 4
 		},
 		{"Name": "Відсутні\n24 В у\nколах ТС",
 		 "Address": 5
 		},
-		{"Name": "Збій\nEEPROM",
+		{"Name": "Збій\nFlash",
 		 "Address": 6
 		},
-		{"Name": "EEPROM\nчистий",
+		{"Name": "Flash\nчистий",
 		 "Address": 7
 		},
 		{"Name": "Відмова\nТК",
@@ -19,7 +19,7 @@
 		{"Name": "Відмова\nRC AUX",
 		 "Address": 9
 		},
-		{"Name": "Кор. зам.\nRC AUX",
+		{"Name": "Коротке\nзамикання\nRC AUX",
 		 "Address": 10
 		}
 

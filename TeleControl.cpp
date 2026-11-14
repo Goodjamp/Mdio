@@ -55,7 +55,7 @@ TeleControl::TeleControl(QWidget *parent, const Descriptor &descriptorIn)
         controlaLayouts->addWidget(control);
         controlaLayouts->addStretch();
     }
-
+/*
     auto *lastActionLayouts = new QHBoxLayout();
     leftLayout->addLayout(lastActionLayouts);
     lastActionLayouts->addStretch();
@@ -64,7 +64,7 @@ TeleControl::TeleControl(QWidget *parent, const Descriptor &descriptorIn)
     lLastAction = new QLabel("-", fBackground);
     lastActionLayouts->addWidget(lLastAction);
     lastActionLayouts->addStretch();
-
+*/
     // Right part: name
     auto *lName = new QLabel(descriptorIn.name, fBackground);
     QFont font("Segoe UI", 12, QFont::Bold);

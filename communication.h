@@ -165,6 +165,8 @@ public:
     };
     ~Communication(){}
 
+    int getRxExeptionCnt() {return modbus->getRxExeptionCnt();};
+    void clearRxExeptionCnt() {modbus->clearRxExeptionCnt();};
 public:
     typedef enum {
         TELECONTROL_STATE_ON,

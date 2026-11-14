@@ -1,3 +1,4 @@
+
 #ifndef MODBUSRTUMASTER_H
 #define MODBUSRTUMASTER_H
 
@@ -79,6 +80,7 @@ private:
 
     uint16_t crc(QByteArray *buff);
     int readTimeout;
+    int rxExeptionCnt = 0;
 
     /*
      * Hight level read function:
@@ -100,7 +102,7 @@ private:
      * - READ_INPUT_REGISTERS
      */
     template <typename T>
-    MbStatus readSlaveGeneral(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
+    MbStatus readSlaveCommon(uint8_t slaveAddress, ModbusRtuMaster::FunList function,
                              uint16_t address, uint16_t number, QVector<T> &state,
                              uint32_t timeout);
 
@@ -168,6 +170,9 @@ public:
      */
     MbStatus forceMultipleCoils(uint8_t slaveAddress, uint16_t coilAddress,
                                 uint16_t coilsNumber, QVector<bool> &coilState); // F_15
+
+    int getRxExeptionCnt() {return rxExeptionCnt;};
+    void clearRxExeptionCnt() {rxExeptionCnt = 0;};
 };
 
 #endif // MODBUSRTUMASTER_H

@@ -133,14 +133,14 @@ signals:
 
 private slots:
     void clickedSlot(int id) {
-        lLastAction->setText(controlsList.value(id)->getName());
+        //lLastAction->setText(controlsList.value(id)->getName());
         emit updateState(id);
     }
 
 private:
     QMap<int, TeleControlItem*> controlsList;
     QFrame *fBackground;
-    QLabel *lLastAction;
+    //QLabel *lLastAction;
 };
 
 #endif // TELECONTROL_H

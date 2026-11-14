@@ -743,6 +743,8 @@ bool Mdio::connectWithSettings()
         emit disconnectSlave();
         return false;
     }
+    communicaiton->clearRxExeptionCnt();
+    updateUiRxExeptionCnt();
     updateUiCommunicationStatisticStr();
     if (connectDeviceVersionMajor < DEV_MAJOR_VER_MIN) {
         errorMessage("", "Версія ПЗ пристрою не підтримується.\n");
@@ -935,14 +937,14 @@ void Mdio::updateUiCommunicationStatisticStr(void)
     ui->lCommunicationStatistic->setText(QString::number(stateRequestCnt) + "/" + QString::number(stateReplyCnt));
 }
 
+void Mdio::updateUiRxExeptionCnt(void)
+{
+    ui->lRxExeptionStatistic->setText(QString::number(communicaiton->getRxExeptionCnt()));
+}
+
 void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
 {
     if (result == true && allowMonitoring) {
-        /*
-         * Update communicaiotn statistic indication
-         */
-        stateReplyCnt++;
-        updateUiCommunicationStatisticStr();
 
         /*
          * Update Tele signalisation and status indication
@@ -1001,10 +1003,19 @@ void Mdio::updateUiStateSlot(bool result, Communication::SlaveState state)
             }
             (*controlItem)->setState(id, state);
         }
+
         /*
          * Update blinker
          */
         ui->pbConnectionStatus->setChecked(true);
+
+        /*
+         * Update communicaiotn statistic indication
+         */
+        stateReplyCnt++;
+        updateUiCommunicationStatisticStr();
+
+
     }
 }
 

@@ -81,6 +81,7 @@ private:
     void updateUiConnectionStatusStr(void);
     void updateUiDeviceMetaInfStr(void);
     void updateUiCommunicationStatisticStr(void);
+    void updateUiRxExeptionCnt(void);
     bool updateUiConfiguration(void);
     void errorMessage(QString headr, QString detailed);
     bool processingCommunicatitonResult(QString headr, QString detailed, bool openPort);

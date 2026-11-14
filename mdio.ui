@@ -1608,13 +1608,13 @@
        <widget class="QPushButton" name="pbConnectionSettings">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>160</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>180</width>
+          <width>160</width>
           <height>30</height>
          </size>
         </property>
@@ -1633,13 +1633,13 @@
        <widget class="QLabel" name="lConnectionSettings">
         <property name="minimumSize">
          <size>
-          <width>230</width>
+          <width>180</width>
           <height>25</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>230</width>
+          <width>180</width>
           <height>25</height>
          </size>
         </property>
@@ -1661,13 +1661,13 @@
        <widget class="QPushButton" name="pbConnect">
         <property name="minimumSize">
          <size>
-          <width>105</width>
+          <width>95</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>105</width>
+          <width>95</width>
           <height>30</height>
          </size>
         </property>
@@ -1686,13 +1686,13 @@
        <widget class="QPushButton" name="pbDisconnect">
         <property name="minimumSize">
          <size>
-          <width>105</width>
+          <width>95</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>105</width>
+          <width>95</width>
           <height>30</height>
          </size>
         </property>
@@ -1709,6 +1709,18 @@
       </item>
       <item>
        <widget class="QLabel" name="lDeviceMetaInfo">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>9</pointsize>
@@ -1717,6 +1729,9 @@
         </property>
         <property name="text">
          <string>v0  Дата 00.00.0000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
